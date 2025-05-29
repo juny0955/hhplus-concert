@@ -21,6 +21,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import kr.hhplus.be.server.domain.concert.model.SeatClass;
+import kr.hhplus.be.server.domain.concert.model.SeatStatus;
+import kr.hhplus.be.server.domain.reservation.model.ReservationStatus;
 import kr.hhplus.be.server.interfaces.dto.request.QueueTokenRequest;
 import kr.hhplus.be.server.interfaces.dto.request.ReservationRequest;
 import kr.hhplus.be.server.interfaces.dto.response.ConcertDateResponse;
@@ -100,7 +103,7 @@ public class ConcertController {
 	public ResponseEntity<ReservationResponse> reservationConcert(
 		@PathVariable UUID concertId,
 		@RequestBody ReservationRequest request,
-		@RequestHeader(value = "Authorization", required = true) String queueToken
+		@RequestHeader(value = "Authorization") String queueToken
 	) {
 		ReservationResponse response = new ReservationResponse(
 			UUID.randomUUID(),
@@ -108,7 +111,7 @@ public class ConcertController {
 			UUID.randomUUID(),
 			10,
 			BigDecimal.valueOf(50000),
-			"PENDING",
+			ReservationStatus.PENDING,
 			LocalDateTime.now()
 		);
 		return ResponseEntity.ok(response);
@@ -170,8 +173,8 @@ public class ConcertController {
 			UUID.randomUUID(),
 			1,
 			BigDecimal.valueOf(50000),
-			"VIP",
-			"AVAILABLE"
+			SeatClass.VIP,
+			SeatStatus.AVAILABLE
 		);
 		return ResponseEntity.ok(List.of(response));
 	}

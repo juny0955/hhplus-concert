@@ -10,7 +10,7 @@ public record ConcertDateResponse(
 	UUID id,
 	@Schema(description = "공연 일시")
 	LocalDateTime date,
-	@Schema(description = "예약 마감일시")
+	@Schema(description = "예약 마감 일시")
 	LocalDateTime deadline,
 	@Schema(description = "잔여 좌석 수")
 	Integer remainingSeatCount

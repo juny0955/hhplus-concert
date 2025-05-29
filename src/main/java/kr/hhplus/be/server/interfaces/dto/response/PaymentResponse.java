@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import kr.hhplus.be.server.domain.payment.model.PaymentStatus;
 
 public record PaymentResponse(
 	@Schema(description = "결제 ID")
@@ -14,7 +15,7 @@ public record PaymentResponse(
 	@Schema(description = "결제 금액")
 	BigDecimal amount,
 	@Schema(description = "결제 상태")
-	String status,
+	PaymentStatus status,
 	@Schema(description = "결제 시간")
 	LocalDateTime createdAt
 ) {

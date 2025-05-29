@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import kr.hhplus.be.server.domain.concert.model.SeatClass;
+import kr.hhplus.be.server.domain.concert.model.SeatStatus;
 
 public record SeatResponse(
 	@Schema(description = "좌석 ID")
@@ -13,8 +15,8 @@ public record SeatResponse(
 	@Schema(description = "좌석 가격")
 	BigDecimal price,
 	@Schema(description = "좌석 등급")
-	String seatClass,
+	SeatClass seatClass,
 	@Schema(description = "좌석 상태")
-	String status
+	SeatStatus status
 ) {
 }

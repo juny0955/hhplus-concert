@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import kr.hhplus.be.server.domain.payment.model.PaymentStatus;
 import kr.hhplus.be.server.interfaces.dto.response.PaymentResponse;
 
 @RestController
@@ -54,13 +55,13 @@ public class PaymentController {
 	@PostMapping("/{reservationId}")
 	public ResponseEntity<PaymentResponse> payReservation(
 		@PathVariable UUID reservationId,
-		@RequestHeader(value = "Authorization", required = true) String queueToken
+		@RequestHeader(value = "Authorization") String queueToken
 	) {
 		PaymentResponse response = new PaymentResponse(
 			UUID.randomUUID(),
 			UUID.randomUUID(),
 			BigDecimal.valueOf(100000),
-			"SUCCESS",
+			PaymentStatus.SUCCESS,
 			LocalDateTime.now()
 		);
 		return ResponseEntity.ok(response);
