@@ -1,10 +1,12 @@
 package kr.hhplus.be.server.interfaces.api.concert;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -103,7 +105,8 @@ public class ConcertController {
 			UUID.randomUUID(),
 			10,
 			BigDecimal.valueOf(50000),
-			"PENDING"
+			"PENDING",
+			LocalDateTime.now()
 		);
 		return ResponseEntity.ok(response);
 	}
