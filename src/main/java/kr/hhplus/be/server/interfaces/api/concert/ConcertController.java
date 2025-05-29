@@ -2,6 +2,7 @@ package kr.hhplus.be.server.interfaces.api.concert;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
@@ -22,8 +23,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.hhplus.be.server.interfaces.dto.request.QueueTokenRequest;
 import kr.hhplus.be.server.interfaces.dto.request.ReservationRequest;
+import kr.hhplus.be.server.interfaces.dto.response.ConcertDateResponse;
 import kr.hhplus.be.server.interfaces.dto.response.QueueTokenResponse;
 import kr.hhplus.be.server.interfaces.dto.response.ReservationResponse;
+import kr.hhplus.be.server.interfaces.dto.response.SeatResponse;
 
 @RestController
 @RequestMapping("/api/v1/concerts")
@@ -109,5 +112,67 @@ public class ConcertController {
 			LocalDateTime.now()
 		);
 		return ResponseEntity.ok(response);
+	}
+
+	@Operation(
+		summary = "콘서트 좌석 예약 API",
+		description = "콘서트 좌석 예약"
+	)
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "200",
+			description = "조회 성공",
+			content = @Content(schema = @Schema(implementation = ConcertDateResponse.class))
+		),
+		@ApiResponse(
+			responseCode = "404 - Concert",
+			description = "콘서트 찾을 수 없음"
+		),
+	})
+	@GetMapping("/{concertId}/date")
+	public ResponseEntity<List<ConcertDateResponse>> getAvailableDates(
+		@PathVariable UUID concertId
+	) {
+		ConcertDateResponse response = new ConcertDateResponse(
+			UUID.randomUUID(),
+			LocalDateTime.now(),
+			LocalDateTime.now(),
+			50
+		);
+		return ResponseEntity.ok(List.of(response));
+	}
+
+	@Operation(
+		summary = "콘서트 좌석 예약 API",
+		description = "콘서트 좌석 예약"
+	)
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "200",
+			description = "조회 성공",
+			content = @Content(schema = @Schema(implementation = SeatResponse.class))
+		),
+		@ApiResponse(
+			responseCode = "404 - Concert",
+			description = "콘서트 찾을 수 없음"
+		),
+		@ApiResponse(
+			responseCode = "404 - ConcertDate",
+			description = "콘서트 날짜 찾을 수 없음"
+		),
+	})
+	@GetMapping("/{concertId}/date/{concertDateId}/seat")
+	public ResponseEntity<List<SeatResponse>> getAvailableSeats(
+		@PathVariable UUID concertId,
+		@PathVariable UUID concertDateId
+	) {
+		SeatResponse response = new SeatResponse(
+			UUID.randomUUID(),
+			1,
+			BigDecimal.valueOf(50000),
+			"VIP",
+			"AVAILABLE"
+		);
+		return ResponseEntity.ok(List.of(response));
 	}
 }

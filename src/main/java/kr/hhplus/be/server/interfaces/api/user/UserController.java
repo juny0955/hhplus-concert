@@ -55,7 +55,8 @@ public class UserController {
 	@ApiResponses(value = {
 		@ApiResponse(
 			responseCode = "200",
-			description = "충전 성공"
+			description = "충전 성공",
+			content = @Content(schema = @Schema(implementation = UserPointResponse.class))
 		),
 		@ApiResponse(
 			responseCode = "404",
@@ -67,11 +68,11 @@ public class UserController {
 		)
 	})
 	@PostMapping("/{userId}/point")
-	public ResponseEntity<Void> chargePoint(
+	public ResponseEntity<UserPointResponse> chargePoint(
 		@PathVariable UUID userId,
 		@RequestBody ChargePointRequest request
 	) {
 		UserPointResponse response = new UserPointResponse(UUID.randomUUID(), BigDecimal.valueOf(10000).add(request.point()));
-		return ResponseEntity.ok(null);
+		return ResponseEntity.ok(response);
 	}
 }

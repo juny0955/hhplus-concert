@@ -18,7 +18,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.hhplus.be.server.interfaces.dto.response.PaymentResponse;
-import kr.hhplus.be.server.interfaces.dto.response.ReservationResponse;
 
 @RestController
 @RequestMapping("/api/v1/payments")
@@ -33,7 +32,7 @@ public class PaymentController {
 		@ApiResponse(
 			responseCode = "200",
 			description = "결제 성공",
-			content = @Content(schema = @Schema(implementation = ReservationResponse.class))
+			content = @Content(schema = @Schema(implementation = PaymentResponse.class))
 		),
 		@ApiResponse(
 			responseCode = "404 - User",
