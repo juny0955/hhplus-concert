@@ -118,8 +118,8 @@ public class ConcertController {
 	}
 
 	@Operation(
-		summary = "콘서트 좌석 예약 API",
-		description = "콘서트 좌석 예약"
+		summary = "콘서트 예약 가능 날짜 조회 API",
+		description = "헤당 콘서트 예약 가능한 날짜 조회"
 	)
 	@ApiResponses(value = {
 		@ApiResponse(
@@ -146,8 +146,8 @@ public class ConcertController {
 	}
 
 	@Operation(
-		summary = "콘서트 좌석 예약 API",
-		description = "콘서트 좌석 예약"
+		summary = "콘서트 예약 가능 좌석 조회 API",
+		description = "해당 콘서트, 해당 날짜의 예약 가능한 좌석 조회"
 	)
 	@ApiResponses(value = {
 		@ApiResponse(
