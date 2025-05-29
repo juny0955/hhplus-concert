@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.interfaces.dto.response;
+package kr.hhplus.be.server.interfaces.api.payment.dto.response;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

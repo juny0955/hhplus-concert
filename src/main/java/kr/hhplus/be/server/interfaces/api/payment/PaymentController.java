@@ -18,7 +18,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.hhplus.be.server.domain.payment.model.PaymentStatus;
-import kr.hhplus.be.server.interfaces.dto.response.PaymentResponse;
+import kr.hhplus.be.server.interfaces.api.payment.dto.response.PaymentResponse;
 
 @RestController
 @RequestMapping("/api/v1/payments")

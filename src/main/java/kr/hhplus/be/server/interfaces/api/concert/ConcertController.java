@@ -24,12 +24,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.hhplus.be.server.domain.concert.model.SeatClass;
 import kr.hhplus.be.server.domain.concert.model.SeatStatus;
 import kr.hhplus.be.server.domain.reservation.model.ReservationStatus;
-import kr.hhplus.be.server.interfaces.dto.request.QueueTokenRequest;
-import kr.hhplus.be.server.interfaces.dto.request.ReservationRequest;
-import kr.hhplus.be.server.interfaces.dto.response.ConcertDateResponse;
-import kr.hhplus.be.server.interfaces.dto.response.QueueTokenResponse;
-import kr.hhplus.be.server.interfaces.dto.response.ReservationResponse;
-import kr.hhplus.be.server.interfaces.dto.response.SeatResponse;
+import kr.hhplus.be.server.interfaces.api.concert.dto.request.QueueTokenRequest;
+import kr.hhplus.be.server.interfaces.api.concert.dto.request.ReservationRequest;
+import kr.hhplus.be.server.interfaces.api.concert.dto.response.ConcertDateResponse;
+import kr.hhplus.be.server.interfaces.api.concert.dto.response.QueueTokenResponse;
+import kr.hhplus.be.server.interfaces.api.concert.dto.response.ReservationResponse;
+import kr.hhplus.be.server.interfaces.api.concert.dto.response.SeatResponse;
 
 @RestController
 @RequestMapping("/api/v1/concerts")
