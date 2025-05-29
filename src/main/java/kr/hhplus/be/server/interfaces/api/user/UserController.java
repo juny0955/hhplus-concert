@@ -40,7 +40,7 @@ public class UserController {
 			description = "유저 찾을 수 없음"
 		)
 	})
-	@GetMapping("/{userId}/point")
+	@GetMapping("/{userId}/points")
 	public ResponseEntity<UserPointResponse> getPoint(
 		@PathVariable String userId
 	) {
@@ -67,7 +67,7 @@ public class UserController {
 			description = "음수값 충전 등 잘못된 요청"
 		)
 	})
-	@PostMapping("/{userId}/point")
+	@PostMapping("/{userId}/points")
 	public ResponseEntity<UserPointResponse> chargePoint(
 		@PathVariable UUID userId,
 		@RequestBody ChargePointRequest request

@@ -132,7 +132,7 @@ public class ConcertController {
 			description = "콘서트 찾을 수 없음"
 		),
 	})
-	@GetMapping("/{concertId}/date")
+	@GetMapping("/{concertId}/dates")
 	public ResponseEntity<List<ConcertDateResponse>> getAvailableDates(
 		@PathVariable UUID concertId
 	) {
@@ -164,7 +164,7 @@ public class ConcertController {
 			description = "콘서트 날짜 찾을 수 없음"
 		),
 	})
-	@GetMapping("/{concertId}/date/{concertDateId}/seat")
+	@GetMapping("/{concertId}/dates/{concertDateId}/seats")
 	public ResponseEntity<List<SeatResponse>> getAvailableSeats(
 		@PathVariable UUID concertId,
 		@PathVariable UUID concertDateId
