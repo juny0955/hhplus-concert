@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.interfaces.api.concert;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
@@ -7,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -17,7 +19,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.hhplus.be.server.interfaces.dto.request.QueueTokenRequest;
+import kr.hhplus.be.server.interfaces.dto.request.ReservationRequest;
 import kr.hhplus.be.server.interfaces.dto.response.QueueTokenResponse;
+import kr.hhplus.be.server.interfaces.dto.response.ReservationResponse;
 
 @RestController
 @RequestMapping("/api/v1/concerts")
@@ -48,8 +52,24 @@ public class ConcertController {
 		@PathVariable UUID concertId,
 		@RequestBody QueueTokenRequest request
 	) {
-
 		QueueTokenResponse response = new QueueTokenResponse("example-queue-token", 10, 5);
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
+	}
+
+	@PostMapping("/{concertId}/reservations")
+	public ResponseEntity<ReservationResponse> reservationConcert(
+		@PathVariable UUID concertId,
+		@RequestBody ReservationRequest request,
+		@RequestHeader(value = "Authorization", required = true) String queueToken
+	) {
+		ReservationResponse response = new ReservationResponse(
+			UUID.randomUUID(),
+			UUID.randomUUID(),
+			UUID.randomUUID(),
+			10,
+			BigDecimal.valueOf(50000),
+			"PENDING"
+		);
+		return ResponseEntity.ok(response);
 	}
 }

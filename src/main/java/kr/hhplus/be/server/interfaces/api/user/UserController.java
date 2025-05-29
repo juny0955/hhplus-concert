@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.interfaces.api.user;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -43,7 +44,7 @@ public class UserController {
 	public ResponseEntity<UserPointResponse> getPoint(
 		@PathVariable String userId
 	) {
-		UserPointResponse response = new UserPointResponse("example-user-uuid", BigDecimal.valueOf(10000));
+		UserPointResponse response = new UserPointResponse(UUID.randomUUID(), BigDecimal.valueOf(10000));
 		return ResponseEntity.ok(response);
 	}
 
@@ -67,10 +68,10 @@ public class UserController {
 	})
 	@PostMapping("/{userId}/point")
 	public ResponseEntity<Void> chargePoint(
-		@PathVariable String userId,
+		@PathVariable UUID userId,
 		@RequestBody ChargePointRequest request
 	) {
-		UserPointResponse response = new UserPointResponse(userId, BigDecimal.valueOf(10000).add(request.point()));
+		UserPointResponse response = new UserPointResponse(UUID.randomUUID(), BigDecimal.valueOf(10000).add(request.point()));
 		return ResponseEntity.ok(null);
 	}
 }
