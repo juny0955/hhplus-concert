@@ -7,7 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 public record ConcertDateResponse(
 	@Schema(description = "콘서트 날짜 ID")
-	UUID id,
+	UUID concertDateId,
 	@Schema(description = "공연 일시")
 	LocalDateTime date,
 	@Schema(description = "예약 마감 일시")
