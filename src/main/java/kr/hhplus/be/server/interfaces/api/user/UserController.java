@@ -17,13 +17,19 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import kr.hhplus.be.server.entity.user.User;
 import kr.hhplus.be.server.interfaces.api.user.dto.request.ChargePointRequest;
 import kr.hhplus.be.server.interfaces.api.user.dto.response.UserPointResponse;
+import kr.hhplus.be.server.usecase.user.UserService;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/v1/users")
+@RequiredArgsConstructor
 @Tag(name = "User API", description = "유저 관련 API")
 public class UserController {
+
+	private final UserService userService;
 
 	@Operation(
 		summary = "유저 포인트 조회",
@@ -42,10 +48,11 @@ public class UserController {
 	})
 	@GetMapping("/{userId}/points")
 	public ResponseEntity<UserPointResponse> getPoint(
-		@PathVariable String userId
+		@PathVariable UUID userId
 	) {
-		UserPointResponse response = new UserPointResponse(UUID.randomUUID(), BigDecimal.valueOf(10000));
-		return ResponseEntity.ok(response);
+		User user = userService.getUser(userId);
+
+		return ResponseEntity.ok(UserPointResponse.from(user));
 	}
 
 	@Operation(
@@ -72,7 +79,8 @@ public class UserController {
 		@PathVariable UUID userId,
 		@RequestBody ChargePointRequest request
 	) {
-		UserPointResponse response = new UserPointResponse(UUID.randomUUID(), BigDecimal.valueOf(10000).add(request.point()));
-		return ResponseEntity.ok(response);
+		User user = userService.chargePoint(userId, request.point());
+
+		return ResponseEntity.ok(UserPointResponse.from(user));
 	}
 }

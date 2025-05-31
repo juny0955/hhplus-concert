@@ -78,7 +78,7 @@ class UserServiceTest {
 		verify(userRepository, times(1)).findById(userId.toString());
 
 		assertThat(user).isNotNull();
-		assertThat(user.amount()).isEqualTo(userEntity.getAmount().add(chargePoint));
+		assertThat(user.amount()).isEqualTo(initAmount.add(chargePoint));
 	}
 
 	@Test

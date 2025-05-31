@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.interfaces.gateway.repository.user;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -12,6 +13,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import kr.hhplus.be.server.entity.user.User;
 import kr.hhplus.be.server.interfaces.gateway.repository.BaseTimeEntity;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -36,4 +38,18 @@ public class UserEntity extends BaseTimeEntity {
 	@Column(name = "amount", precision = 10, nullable = false)
 	@ColumnDefault("0")
 	private BigDecimal amount;
+
+	public User toDomain() {
+		return User.builder()
+			.id(UUID.fromString(id))
+			.amount(amount)
+			.createdAt(getCreatedAt())
+			.updatedAt(getUpdatedAt())
+			.build();
+	}
+
+	public UserEntity charge(BigDecimal point) {
+		amount = amount.add(point);
+		return this;
+	}
 }
