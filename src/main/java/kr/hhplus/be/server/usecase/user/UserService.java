@@ -21,8 +21,7 @@ public class UserService {
 	private final UserRepository userRepository;
 
 	public User getUser(UUID userId) {
-		UserEntity userEntity = userRepository.findById(userId.toString())
-			.orElseThrow(() -> new EntityNotFoundException("해당 유저를 찾을 수 없습니다."));
+		UserEntity userEntity = getUserEntity(userId);
 
 		return userEntity.toDomain();
 	}
@@ -32,10 +31,14 @@ public class UserService {
 		if (point.compareTo(MIN_CHARGE_POINT) < 0)
 			throw new IllegalArgumentException("최소 충전 금액("+MIN_CHARGE_POINT+"원) 보다 적은 금액은 충전 할 수 없습니다.");
 
-		UserEntity userEntity = userRepository.findById(userId.toString())
-			.orElseThrow(() -> new EntityNotFoundException("해당 유저를 찾을 수 없습니다."));
+		UserEntity userEntity = getUserEntity(userId);
 
 		userEntity.charge(point);
 		return userEntity.toDomain();
+	}
+
+	private UserEntity getUserEntity(UUID userId) {
+		return userRepository.findById(userId.toString())
+			.orElseThrow(() -> new EntityNotFoundException("해당 유저를 찾을 수 없습니다."));
 	}
 }
