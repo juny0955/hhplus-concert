@@ -1,7 +1,5 @@
 package kr.hhplus.be.server.interfaces.gateway.repository.concert;
 
-import java.util.UUID;
-
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 

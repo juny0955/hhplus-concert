@@ -1,7 +1,6 @@
 package kr.hhplus.be.server.interfaces.gateway.repository.payment;
 
 import java.math.BigDecimal;
-import java.util.UUID;
 
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.JdbcTypeCode;
