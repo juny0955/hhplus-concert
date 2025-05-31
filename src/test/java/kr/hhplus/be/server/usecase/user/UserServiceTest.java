@@ -16,9 +16,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import jakarta.persistence.EntityNotFoundException;
 import kr.hhplus.be.server.entity.user.User;
 import kr.hhplus.be.server.interfaces.gateway.repository.user.UserEntity;
+import kr.hhplus.be.server.usecase.exception.CustomException;
+import kr.hhplus.be.server.usecase.exception.ErrorCode;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
@@ -45,7 +46,7 @@ class UserServiceTest {
 
 	@Test
 	@DisplayName("유저_조회_성공")
-	void getUser_Success() {
+	void getUser_Success() throws CustomException {
 		when(userRepository.findById(userId.toString())).thenReturn(Optional.of(userEntity));
 
 		User findUser = userService.getUser(userId);
@@ -61,14 +62,16 @@ class UserServiceTest {
 	void getUser_Failure_UserNotFound() {
 		when(userRepository.findById(userId.toString())).thenReturn(Optional.empty());
 
-		assertThrows(EntityNotFoundException.class, () -> userService.getUser(userId));
+		CustomException customException = assertThrows(CustomException.class,
+			() -> userService.getUser(userId));
 
 		verify(userRepository, times(1)).findById(userId.toString());
+		assertThat(customException.getErrorCode()).isEqualTo(ErrorCode.USER_NOT_FOUND);
 	}
 
 	@Test
 	@DisplayName("유저_포인트_충전_성공")
-	void chargePoint_Success() {
+	void chargePoint_Success() throws CustomException {
 		BigDecimal chargePoint = BigDecimal.valueOf(5000);
 
 		when(userRepository.findById(userId.toString())).thenReturn(Optional.of(userEntity));
@@ -88,9 +91,12 @@ class UserServiceTest {
 
 		when(userRepository.findById(userId.toString())).thenReturn(Optional.empty());
 
-		assertThrows(EntityNotFoundException.class, () -> userService.chargePoint(userId, chargePoint));
+		CustomException customException = assertThrows(CustomException.class,
+			() -> userService.chargePoint(userId, chargePoint));
 
 		verify(userRepository, times(1)).findById(userId.toString());
+
+		assertThat(customException.getErrorCode()).isEqualTo(ErrorCode.USER_NOT_FOUND);
 	}
 
 	@Test
@@ -98,8 +104,11 @@ class UserServiceTest {
 	void chargePoint_Failure_NotEnoughMinChargePoint() {
 		BigDecimal chargePoint = BigDecimal.valueOf(500);
 
-		assertThrows(IllegalArgumentException.class, () -> userService.chargePoint(userId, chargePoint));
+		CustomException customException = assertThrows(CustomException.class,
+			() -> userService.chargePoint(userId, chargePoint));
 
 		verify(userRepository, never()).findById(userId.toString());
+
+		assertThat(customException.getErrorCode()).isEqualTo(ErrorCode.NOT_ENOUGH_MIN_CHARGE_POINT);
 	}
 }
