@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.interfaces.api.concert.concert.dto.request;
+package kr.hhplus.be.server.interfaces.api.concert.dto.request;
 
 import java.util.UUID;
 

@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.interfaces.api.concert.concert.dto.response;
+package kr.hhplus.be.server.interfaces.api.concert.dto.response;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

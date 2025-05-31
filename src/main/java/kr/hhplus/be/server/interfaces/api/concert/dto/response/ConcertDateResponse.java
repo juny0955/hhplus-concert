@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.interfaces.api.concert.concert.dto.response;
+package kr.hhplus.be.server.interfaces.api.concert.dto.response;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
