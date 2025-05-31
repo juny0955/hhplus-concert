@@ -1,6 +1,5 @@
 package kr.hhplus.be.server.interfaces.api.user;
 
-import java.math.BigDecimal;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
@@ -20,6 +19,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.hhplus.be.server.entity.user.User;
 import kr.hhplus.be.server.interfaces.api.user.dto.request.ChargePointRequest;
 import kr.hhplus.be.server.interfaces.api.user.dto.response.UserPointResponse;
+import kr.hhplus.be.server.usecase.exception.CustomException;
 import kr.hhplus.be.server.usecase.user.UserService;
 import lombok.RequiredArgsConstructor;
 
@@ -49,7 +49,7 @@ public class UserController {
 	@GetMapping("/{userId}/points")
 	public ResponseEntity<UserPointResponse> getPoint(
 		@PathVariable UUID userId
-	) {
+	) throws CustomException {
 		User user = userService.getUser(userId);
 
 		return ResponseEntity.ok(UserPointResponse.from(user));
@@ -78,7 +78,7 @@ public class UserController {
 	public ResponseEntity<UserPointResponse> chargePoint(
 		@PathVariable UUID userId,
 		@RequestBody ChargePointRequest request
-	) {
+	) throws CustomException {
 		User user = userService.chargePoint(userId, request.point());
 
 		return ResponseEntity.ok(UserPointResponse.from(user));
