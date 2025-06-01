@@ -21,6 +21,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import kr.hhplus.be.server.entity.concert.ConcertDate;
 import kr.hhplus.be.server.entity.concert.SeatClass;
 import kr.hhplus.be.server.entity.concert.SeatStatus;
 import kr.hhplus.be.server.entity.reservation.ReservationStatus;
@@ -30,11 +31,16 @@ import kr.hhplus.be.server.interfaces.api.concert.dto.response.ConcertDateRespon
 import kr.hhplus.be.server.interfaces.api.concert.dto.response.QueueTokenResponse;
 import kr.hhplus.be.server.interfaces.api.concert.dto.response.ReservationResponse;
 import kr.hhplus.be.server.interfaces.api.concert.dto.response.SeatResponse;
+import kr.hhplus.be.server.usecase.concert.ConcertService;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/v1/concerts")
+@RequiredArgsConstructor
 @Tag(name = "Concert API", description = "콘서트 관련 API")
 public class ConcertController {
+
+	private final ConcertService concertService;
 
 	@Operation(
 		summary = "콘서트 대기열 토큰 발급",
@@ -136,13 +142,12 @@ public class ConcertController {
 	public ResponseEntity<List<ConcertDateResponse>> getAvailableDates(
 		@PathVariable UUID concertId
 	) {
-		ConcertDateResponse response = new ConcertDateResponse(
-			UUID.randomUUID(),
-			LocalDateTime.now(),
-			LocalDateTime.now(),
-			50
-		);
-		return ResponseEntity.ok(List.of(response));
+		List<ConcertDate> concertDates = concertService.getAvailableConcertDates(concertId);
+		List<ConcertDateResponse> responses = concertDates.stream()
+			.map(ConcertDateResponse::from)
+			.toList();
+
+		return ResponseEntity.ok(responses);
 	}
 
 	@Operation(

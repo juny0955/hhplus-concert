@@ -19,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class UserService {
 
-	private final static BigDecimal MIN_CHARGE_POINT = BigDecimal.valueOf(1000);
+	private static final BigDecimal MIN_CHARGE_POINT = BigDecimal.valueOf(1000);
 
 	private final UserRepository userRepository;
 
