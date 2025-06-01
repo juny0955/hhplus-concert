@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.interfaces.gateway.repository.concert;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
@@ -14,6 +15,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import kr.hhplus.be.server.entity.concert.ConcertDate;
 import kr.hhplus.be.server.interfaces.gateway.repository.BaseTimeEntity;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -44,4 +46,16 @@ public class ConcertDateEntity extends BaseTimeEntity {
 
 	@Column(name = "deadline", nullable = false)
 	private LocalDateTime deadline;
+
+	public ConcertDate toDomain(Integer remainingSeatCount) {
+		return ConcertDate.builder()
+			.id(UUID.fromString(id))
+			.concertId(UUID.fromString(concert.getId()))
+			.date(date)
+			.deadline(deadline)
+			.remainingSeatCount(remainingSeatCount)
+			.createdAt(getCreatedAt())
+			.updatedAt(getUpdatedAt())
+			.build();
+	}
 }

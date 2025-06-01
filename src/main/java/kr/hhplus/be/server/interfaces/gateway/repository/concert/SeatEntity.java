@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.interfaces.gateway.repository.concert;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -17,6 +18,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import kr.hhplus.be.server.entity.concert.Seat;
 import kr.hhplus.be.server.entity.concert.SeatClass;
 import kr.hhplus.be.server.entity.concert.SeatStatus;
 import kr.hhplus.be.server.interfaces.gateway.repository.BaseTimeEntity;
@@ -58,4 +60,17 @@ public class SeatEntity extends BaseTimeEntity {
 	@Column(name = "status", nullable = false)
 	@ColumnDefault("'AVAILABLE'")
 	private SeatStatus status;
+
+	public Seat toDomain() {
+		return Seat.builder()
+			.id(UUID.fromString(id))
+			.concertDateId(UUID.fromString(concertDate.getId()))
+			.seatNo(seatNo)
+			.price(price)
+			.seatClass(seatClass)
+			.status(status)
+			.createdAt(getCreatedAt())
+			.updatedAt(getUpdatedAt())
+			.build();
+	}
 }
