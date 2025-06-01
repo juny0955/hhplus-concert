@@ -4,6 +4,9 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import lombok.Builder;
+
+@Builder
 public record Seat(
 	UUID id,
 	UUID concertDateId,

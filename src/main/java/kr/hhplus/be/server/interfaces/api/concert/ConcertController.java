@@ -22,8 +22,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.hhplus.be.server.entity.concert.ConcertDate;
-import kr.hhplus.be.server.entity.concert.SeatClass;
-import kr.hhplus.be.server.entity.concert.SeatStatus;
+import kr.hhplus.be.server.entity.concert.Seat;
 import kr.hhplus.be.server.entity.reservation.ReservationStatus;
 import kr.hhplus.be.server.interfaces.api.concert.dto.request.QueueTokenRequest;
 import kr.hhplus.be.server.interfaces.api.concert.dto.request.ReservationRequest;
@@ -32,6 +31,7 @@ import kr.hhplus.be.server.interfaces.api.concert.dto.response.QueueTokenRespons
 import kr.hhplus.be.server.interfaces.api.concert.dto.response.ReservationResponse;
 import kr.hhplus.be.server.interfaces.api.concert.dto.response.SeatResponse;
 import kr.hhplus.be.server.usecase.concert.ConcertService;
+import kr.hhplus.be.server.usecase.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -141,9 +141,9 @@ public class ConcertController {
 	@GetMapping("/{concertId}/dates")
 	public ResponseEntity<List<ConcertDateResponse>> getAvailableDates(
 		@PathVariable UUID concertId
-	) {
-		List<ConcertDate> concertDates = concertService.getAvailableConcertDates(concertId);
-		List<ConcertDateResponse> responses = concertDates.stream()
+	) throws CustomException {
+		List<ConcertDate> availableConcertDates = concertService.getAvailableConcertDates(concertId);
+		List<ConcertDateResponse> responses = availableConcertDates.stream()
 			.map(ConcertDateResponse::from)
 			.toList();
 
@@ -173,14 +173,12 @@ public class ConcertController {
 	public ResponseEntity<List<SeatResponse>> getAvailableSeats(
 		@PathVariable UUID concertId,
 		@PathVariable UUID concertDateId
-	) {
-		SeatResponse response = new SeatResponse(
-			UUID.randomUUID(),
-			1,
-			BigDecimal.valueOf(50000),
-			SeatClass.VIP,
-			SeatStatus.AVAILABLE
-		);
-		return ResponseEntity.ok(List.of(response));
+	) throws CustomException {
+		List<Seat> availableSeats = concertService.getAvailableSeats(concertId, concertDateId);
+		List<SeatResponse> response = availableSeats.stream()
+			.map(SeatResponse::from)
+			.toList();
+
+		return ResponseEntity.ok(response);
 	}
 }

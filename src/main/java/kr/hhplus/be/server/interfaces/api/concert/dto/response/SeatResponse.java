@@ -4,9 +4,12 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import kr.hhplus.be.server.entity.concert.Seat;
 import kr.hhplus.be.server.entity.concert.SeatClass;
 import kr.hhplus.be.server.entity.concert.SeatStatus;
+import lombok.Builder;
 
+@Builder
 public record SeatResponse(
 	@Schema(description = "좌석 ID")
 	UUID seatId,
@@ -19,4 +22,13 @@ public record SeatResponse(
 	@Schema(description = "좌석 상태")
 	SeatStatus status
 ) {
+	public static SeatResponse from(Seat seat) {
+		return SeatResponse.builder()
+			.seatId(seat.id())
+			.seatNo(seat.seatNo())
+			.price(seat.price())
+			.seatClass(seat.seatClass())
+			.status(seat.status())
+			.build();
+	}
 }
