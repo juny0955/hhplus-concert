@@ -29,16 +29,22 @@ public class ConcertService {
 	private final SeatRepository seatRepository;
 
 	public List<ConcertDate> getAvailableConcertDates(UUID concertId) throws CustomException {
-		ConcertEntity concertEntity = concertRepository.findById(concertId.toString())
-			.orElseThrow(() -> new CustomException(ErrorCode.CONCERT_NOT_FOUND));
+		ConcertEntity concertEntity = getConcertEntity(concertId);
 
 		List<ConcertDateEntity> availableDates = concertDateRepository.findAvailableDates(concertEntity.getId());
-		if (availableDates.isEmpty())
+		if (availableDates.isEmpty()) {
+			log.debug("콘서트 예약 가능 날짜 조회 - 없음: CONCERT_ID - {}", concertEntity.getId());
 			return Collections.emptyList();
+		}
 
 		List<ConcertDate> concertDates = new ArrayList<>();
 		for (ConcertDateEntity availableDate : availableDates) {
 			Integer availableSeatCount = seatRepository.countRemainingSeat(availableDate.getId());
+			if (availableSeatCount <= 0) {
+				log.debug("콘서트 예약 가능 날짜 조회 - 좌석 없음: CONCERT_DATE_ID - {}", availableDate.getId());
+				continue;
+			}
+
 			concertDates.add(availableDate.toDomain(availableSeatCount));
 		}
 
@@ -46,18 +52,35 @@ public class ConcertService {
 	}
 
 	public List<Seat> getAvailableSeats(UUID concertId, UUID concertDateId) throws CustomException {
-		ConcertEntity concertEntity = concertRepository.findById(concertId.toString())
-			.orElseThrow(() -> new CustomException(ErrorCode.CONCERT_NOT_FOUND));
+		ConcertEntity concertEntity = getConcertEntity(concertId);
 
 		ConcertDateEntity availableDate = concertDateRepository.findAvailableDate(concertEntity.getId(), concertDateId.toString())
-			.orElseThrow(() -> new CustomException(ErrorCode.CANNOT_RESERVATION_DATE));
+			.orElseThrow(() -> {
+				log.warn("콘서트 예약 가능 좌석 조회 실패: CONCERT_ID - {}, CONCERT_DATE_ID - {}", concertEntity.getId(), concertDateId);
+				return new CustomException(ErrorCode.CANNOT_RESERVATION_DATE);
+			});
 
 		List<SeatEntity> availableSeats = seatRepository.findAvailableSeats(availableDate.getId());
-		if (availableSeats.isEmpty())
+		if (availableSeats.isEmpty()) {
+			log.debug("콘서트 예약 가능 좌석 조회 - 없음: CONCERT_DATE_ID - {}", availableDate.getId());
 			return Collections.emptyList();
+		}
 
 		return availableSeats.stream()
 			.map(SeatEntity::toDomain)
 			.toList();
+	}
+
+	private ConcertEntity getConcertEntity(UUID concertId) throws CustomException {
+		try {
+			ConcertEntity concertEntity = concertRepository.findById(concertId.toString())
+				.orElseThrow(() -> new CustomException(ErrorCode.CONCERT_NOT_FOUND));
+
+			log.debug("콘서트 조회: CONCERT_ID - {}", concertId);
+			return concertEntity;
+		} catch (CustomException e) {
+			log.warn("콘서트 조회 실패: CONCERT_ID - {}", concertId);
+			throw e;
+		}
 	}
 }
