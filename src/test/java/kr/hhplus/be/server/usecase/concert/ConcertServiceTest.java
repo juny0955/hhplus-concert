@@ -88,7 +88,7 @@ class ConcertServiceTest {
 
 		when(concertRepository.findById(concertId.toString())).thenReturn(Optional.of(concertEntity));
 		when(concertDateRepository.findAvailableDates(concertEntity.getId())).thenReturn(concertDateEntities);
-		when(seatRepository.countRemainingSeat(concertDateEntity.getId())).thenReturn(concertDateEntities.size());
+		when(seatRepository.countRemainingSeat(concertDateEntity.getId())).thenReturn(50);
 
 		List<ConcertDate> results = concertService.getAvailableConcertDates(concertId);
 
@@ -126,6 +126,25 @@ class ConcertServiceTest {
 		verify(concertRepository, times(1)).findById(concertId.toString());
 		verify(concertDateRepository, times(1)).findAvailableDates(concertEntity.getId());
 		verify(seatRepository, times(0)).countRemainingSeat(concertDateEntity.getId());
+
+		assertThat(results).isEmpty();
+	}
+
+	@Test
+	@DisplayName("에약_가능_콘서트_날짜_조회_정상_빈_리스트(가능한 좌석 수 0)")
+	void getAvailableConcertDates_Success_CanReservationSeatsZero() throws CustomException {
+		List<ConcertDateEntity> concertDateEntities = List.of(concertDateEntity);
+
+		when(concertRepository.findById(concertId.toString())).thenReturn(Optional.of(concertEntity));
+		when(concertDateRepository.findAvailableDates(concertEntity.getId())).thenReturn(concertDateEntities);
+		when(seatRepository.countRemainingSeat(concertDateEntity.getId())).thenReturn(0);
+
+		List<ConcertDate> results = concertService.getAvailableConcertDates(concertId);
+
+		verify(concertRepository, times(1)).findById(concertId.toString());
+		verify(concertDateRepository, times(1)).findAvailableDates(concertEntity.getId());
+		verify(seatRepository, times(concertDateEntities.size())).countRemainingSeat(concertDateEntity.getId());
+
 		assertThat(results).isEmpty();
 	}
 
