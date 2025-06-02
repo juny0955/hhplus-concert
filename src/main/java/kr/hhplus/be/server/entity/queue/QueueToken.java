@@ -7,6 +7,7 @@ import lombok.Builder;
 
 @Builder
 public record QueueToken(
+	UUID tokenId,
 	UUID userId,
 	UUID concertId,
 	QueueStatus status,
