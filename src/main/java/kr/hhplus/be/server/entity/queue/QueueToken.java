@@ -16,4 +16,30 @@ public record QueueToken(
 	LocalDateTime expiresAt,
 	LocalDateTime enteredAt
 ) {
+
+	public static QueueToken activeTokenOf(UUID tokenId, UUID userId, UUID concertId, long expiresTime) {
+		LocalDateTime now = LocalDateTime.now();
+
+		return QueueToken.builder()
+			.tokenId(tokenId)
+			.userId(userId)
+			.concertId(concertId)
+			.issuedAt(now)
+			.enteredAt(now)
+			.expiresAt(now.plusMinutes(expiresTime))
+			.position(0)
+			.status(QueueStatus.ACTIVE)
+			.build();
+	}
+
+	public static QueueToken waitingTokenOf(UUID tokenId, UUID userId, UUID concertId, int waitingTokens) {
+		return QueueToken.builder()
+			.tokenId(tokenId)
+			.userId(userId)
+			.concertId(concertId)
+			.issuedAt(LocalDateTime.now())
+			.position(waitingTokens + 1)
+			.status(QueueStatus.WAITING)
+			.build();
+	}
 }

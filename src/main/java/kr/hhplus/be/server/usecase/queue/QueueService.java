@@ -1,12 +1,10 @@
 package kr.hhplus.be.server.usecase.queue;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import kr.hhplus.be.server.entity.queue.QueueStatus;
 import kr.hhplus.be.server.entity.queue.QueueToken;
 import kr.hhplus.be.server.interfaces.gateway.repository.concert.JpaConcertRepository;
 import kr.hhplus.be.server.interfaces.gateway.repository.queue.RedisQueueTokenRepository;
@@ -21,50 +19,46 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class QueueService {
 
+	private static final int MAX_ACTIVE_TOKEN_SIZE = 50;
+	private static final long QUEUE_EXPIRES_TIME = 60L;
+
 	private final RedisQueueTokenRepository redisQueueTokenRepository;
 	private final JpaConcertRepository jpaConcertRepository;
 	private final JpaUserRepository jpaUserRepository;
 
 	@Transactional
 	public QueueToken issueQueueToken(UUID userId, UUID concertId) throws CustomException {
-		if (!jpaUserRepository.existsById(userId.toString()))
-			throw new CustomException(ErrorCode.USER_NOT_FOUND);
-
-		if (!jpaConcertRepository.existsById(concertId.toString()))
-			throw new CustomException(ErrorCode.CONCERT_NOT_FOUND);
+		validateUserId(userId);
+		validateConcertId(concertId);
 
 		String findTokenId = redisQueueTokenRepository.findTokenIdByUserIdAndConcertId(userId, concertId);
 		if (findTokenId != null)
 			return redisQueueTokenRepository.findQueueTokenByTokenId(findTokenId);
 
-		UUID tokenId = UUID.randomUUID();
 		Integer activeTokens = redisQueueTokenRepository.countActiveTokens(concertId);
+
+		UUID tokenId = UUID.randomUUID();
 		QueueToken queueToken;
-		if (activeTokens >= 50) {
+		if (activeTokens >= MAX_ACTIVE_TOKEN_SIZE) {
 			Integer waitingTokens = redisQueueTokenRepository.countWaitingTokens(concertId);
-			queueToken = QueueToken.builder()
-				.tokenId(tokenId)
-				.userId(userId)
-				.concertId(concertId)
-				.issuedAt(LocalDateTime.now())
-				.position(waitingTokens + 1)
-				.status(QueueStatus.WAITING)
-				.build();
+
+			queueToken = QueueToken.waitingTokenOf(tokenId, userId, concertId, waitingTokens);
 		} else {
-			queueToken = QueueToken.builder()
-				.tokenId(tokenId)
-				.userId(userId)
-				.concertId(concertId)
-				.issuedAt(LocalDateTime.now())
-				.enteredAt(LocalDateTime.now())
-				.expiresAt(LocalDateTime.now().plusMinutes(60))
-				.position(0)
-				.status(QueueStatus.ACTIVE)
-				.build();
+			queueToken = QueueToken.activeTokenOf(tokenId, userId, concertId, QUEUE_EXPIRES_TIME);
 		}
 
 		redisQueueTokenRepository.save(queueToken);
 		return queueToken;
+	}
+
+	private void validateUserId(UUID userId) throws CustomException {
+		if (!jpaUserRepository.existsById(userId.toString()))
+			throw new CustomException(ErrorCode.USER_NOT_FOUND);
+	}
+
+	private void validateConcertId(UUID concertId) throws CustomException {
+		if (!jpaConcertRepository.existsById(concertId.toString()))
+			throw new CustomException(ErrorCode.CONCERT_NOT_FOUND);
 	}
 
 }
