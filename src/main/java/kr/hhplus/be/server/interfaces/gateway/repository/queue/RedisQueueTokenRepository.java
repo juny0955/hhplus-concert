@@ -14,8 +14,7 @@ public class RedisQueueTokenRepository {
 
 	private final RedisTemplate<String, Object> redisTemplate;
 
-	public QueueToken save(QueueToken queueToken) {
-		return null;
+	public void save(QueueToken queueToken) {
 	}
 
 	public String findTokenIdByUserIdAndConcertId(UUID userId, UUID concertId) {
