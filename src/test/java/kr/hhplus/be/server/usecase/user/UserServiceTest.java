@@ -18,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import kr.hhplus.be.server.entity.user.User;
 import kr.hhplus.be.server.interfaces.gateway.repository.user.UserEntity;
+import kr.hhplus.be.server.interfaces.gateway.repository.user.JpaUserRepository;
 import kr.hhplus.be.server.usecase.exception.CustomException;
 import kr.hhplus.be.server.usecase.exception.ErrorCode;
 
@@ -28,7 +29,7 @@ class UserServiceTest {
 	private UserService userService;
 
 	@Mock
-	private UserRepository userRepository;
+	private JpaUserRepository jpaUserRepository;
 
 	private UUID userId;
 	private BigDecimal initAmount;
@@ -47,11 +48,11 @@ class UserServiceTest {
 	@Test
 	@DisplayName("유저_조회_성공")
 	void getUser_Success() throws CustomException {
-		when(userRepository.findById(userId.toString())).thenReturn(Optional.of(userEntity));
+		when(jpaUserRepository.findById(userId.toString())).thenReturn(Optional.of(userEntity));
 
 		User findUser = userService.getUser(userId);
 
-		verify(userRepository, times(1)).findById(userId.toString());
+		verify(jpaUserRepository, times(1)).findById(userId.toString());
 		assertThat(findUser).isNotNull();
 		assertThat(findUser.id()).isEqualTo(userId);
 		assertThat(findUser.amount()).isEqualTo(initAmount);
@@ -60,12 +61,12 @@ class UserServiceTest {
 	@Test
 	@DisplayName("유저_조회_실패_유저못찾음")
 	void getUser_Failure_UserNotFound() {
-		when(userRepository.findById(userId.toString())).thenReturn(Optional.empty());
+		when(jpaUserRepository.findById(userId.toString())).thenReturn(Optional.empty());
 
 		CustomException customException = assertThrows(CustomException.class,
 			() -> userService.getUser(userId));
 
-		verify(userRepository, times(1)).findById(userId.toString());
+		verify(jpaUserRepository, times(1)).findById(userId.toString());
 		assertThat(customException.getErrorCode()).isEqualTo(ErrorCode.USER_NOT_FOUND);
 	}
 
@@ -74,11 +75,11 @@ class UserServiceTest {
 	void chargePoint_Success() throws CustomException {
 		BigDecimal chargePoint = BigDecimal.valueOf(5000);
 
-		when(userRepository.findById(userId.toString())).thenReturn(Optional.of(userEntity));
+		when(jpaUserRepository.findById(userId.toString())).thenReturn(Optional.of(userEntity));
 
 		User user = userService.chargePoint(userId, chargePoint);
 
-		verify(userRepository, times(1)).findById(userId.toString());
+		verify(jpaUserRepository, times(1)).findById(userId.toString());
 
 		assertThat(user).isNotNull();
 		assertThat(user.amount()).isEqualTo(initAmount.add(chargePoint));
@@ -89,12 +90,12 @@ class UserServiceTest {
 	void chargePoint_Failure_UserNotFound() {
 		BigDecimal chargePoint = BigDecimal.valueOf(5000);
 
-		when(userRepository.findById(userId.toString())).thenReturn(Optional.empty());
+		when(jpaUserRepository.findById(userId.toString())).thenReturn(Optional.empty());
 
 		CustomException customException = assertThrows(CustomException.class,
 			() -> userService.chargePoint(userId, chargePoint));
 
-		verify(userRepository, times(1)).findById(userId.toString());
+		verify(jpaUserRepository, times(1)).findById(userId.toString());
 
 		assertThat(customException.getErrorCode()).isEqualTo(ErrorCode.USER_NOT_FOUND);
 	}
@@ -107,7 +108,7 @@ class UserServiceTest {
 		CustomException customException = assertThrows(CustomException.class,
 			() -> userService.chargePoint(userId, chargePoint));
 
-		verify(userRepository, never()).findById(userId.toString());
+		verify(jpaUserRepository, never()).findById(userId.toString());
 
 		assertThat(customException.getErrorCode()).isEqualTo(ErrorCode.NOT_ENOUGH_MIN_CHARGE_POINT);
 	}

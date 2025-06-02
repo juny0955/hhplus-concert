@@ -6,7 +6,6 @@ import java.util.UUID;
 
 import lombok.Builder;
 
-
 @Builder
 public record User (
 	UUID id,

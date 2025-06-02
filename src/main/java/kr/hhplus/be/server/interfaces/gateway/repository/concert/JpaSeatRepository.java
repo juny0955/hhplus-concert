@@ -1,13 +1,11 @@
-package kr.hhplus.be.server.usecase.concert;
+package kr.hhplus.be.server.interfaces.gateway.repository.concert;
 
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import kr.hhplus.be.server.interfaces.gateway.repository.concert.SeatEntity;
-
-public interface SeatRepository extends JpaRepository<SeatEntity, String> {
+public interface JpaSeatRepository extends JpaRepository<SeatEntity, String> {
 
 	@Query("""
 		select s 

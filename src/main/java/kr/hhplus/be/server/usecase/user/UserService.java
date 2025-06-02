@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import kr.hhplus.be.server.entity.user.User;
 import kr.hhplus.be.server.interfaces.gateway.repository.user.UserEntity;
+import kr.hhplus.be.server.interfaces.gateway.repository.user.JpaUserRepository;
 import kr.hhplus.be.server.usecase.exception.CustomException;
 import kr.hhplus.be.server.usecase.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -21,7 +22,7 @@ public class UserService {
 
 	private static final BigDecimal MIN_CHARGE_POINT = BigDecimal.valueOf(1000);
 
-	private final UserRepository userRepository;
+	private final JpaUserRepository jpaUserRepository;
 
 	public User getUser(UUID userId) throws CustomException {
 		UserEntity userEntity = getUserEntity(userId);
@@ -46,7 +47,7 @@ public class UserService {
 
 	private UserEntity getUserEntity(UUID userId) throws CustomException {
 		try {
-			UserEntity userEntity = userRepository.findById(userId.toString())
+			UserEntity userEntity = jpaUserRepository.findById(userId.toString())
 				.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
 			log.debug("유저 조회: USER_ID - {}", userId);

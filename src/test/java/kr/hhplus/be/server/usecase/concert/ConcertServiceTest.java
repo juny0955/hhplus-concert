@@ -24,8 +24,11 @@ import kr.hhplus.be.server.entity.concert.Seat;
 import kr.hhplus.be.server.entity.concert.SeatClass;
 import kr.hhplus.be.server.entity.concert.SeatStatus;
 import kr.hhplus.be.server.interfaces.gateway.repository.concert.ConcertDateEntity;
+import kr.hhplus.be.server.interfaces.gateway.repository.concert.JpaConcertDateRepository;
 import kr.hhplus.be.server.interfaces.gateway.repository.concert.ConcertEntity;
+import kr.hhplus.be.server.interfaces.gateway.repository.concert.JpaConcertRepository;
 import kr.hhplus.be.server.interfaces.gateway.repository.concert.SeatEntity;
+import kr.hhplus.be.server.interfaces.gateway.repository.concert.JpaSeatRepository;
 import kr.hhplus.be.server.usecase.exception.CustomException;
 import kr.hhplus.be.server.usecase.exception.ErrorCode;
 
@@ -36,13 +39,13 @@ class ConcertServiceTest {
 	private ConcertService concertService;
 
 	@Mock
-	private ConcertRepository concertRepository;
+	private JpaConcertRepository jpaConcertRepository;
 
 	@Mock
-	private ConcertDateRepository concertDateRepository;
+	private JpaConcertDateRepository jpaConcertDateRepository;
 
 	@Mock
-	private SeatRepository seatRepository;
+	private JpaSeatRepository jpaSeatRepository;
 
 	private UUID concertId;
 	private UUID concertDateId;
@@ -86,15 +89,15 @@ class ConcertServiceTest {
 	void getAvailableConcertDates_Success() throws CustomException {
 		List<ConcertDateEntity> concertDateEntities = List.of(concertDateEntity);
 
-		when(concertRepository.findById(concertId.toString())).thenReturn(Optional.of(concertEntity));
-		when(concertDateRepository.findAvailableDates(concertEntity.getId())).thenReturn(concertDateEntities);
-		when(seatRepository.countRemainingSeat(concertDateEntity.getId())).thenReturn(50);
+		when(jpaConcertRepository.findById(concertId.toString())).thenReturn(Optional.of(concertEntity));
+		when(jpaConcertDateRepository.findAvailableDates(concertEntity.getId())).thenReturn(concertDateEntities);
+		when(jpaSeatRepository.countRemainingSeat(concertDateEntity.getId())).thenReturn(50);
 
 		List<ConcertDate> results = concertService.getAvailableConcertDates(concertId);
 
-		verify(concertRepository, times(1)).findById(concertId.toString());
-		verify(concertDateRepository, times(1)).findAvailableDates(concertEntity.getId());
-		verify(seatRepository, times(concertDateEntities.size())).countRemainingSeat(concertDateEntity.getId());
+		verify(jpaConcertRepository, times(1)).findById(concertId.toString());
+		verify(jpaConcertDateRepository, times(1)).findAvailableDates(concertEntity.getId());
+		verify(jpaSeatRepository, times(concertDateEntities.size())).countRemainingSeat(concertDateEntity.getId());
 
 		assertThat(results).hasSize(1);
 		assertThat(results.get(0).id()).isEqualTo(concertDateId);
@@ -103,14 +106,14 @@ class ConcertServiceTest {
 	@Test
 	@DisplayName("예약_가능_콘서트_날짜_조회_실패_콘서트못찾음")
 	void getAvailableConcertDates_Failure_ConcertNotFound() {
-		when(concertRepository.findById(concertId.toString())).thenReturn(Optional.empty());
+		when(jpaConcertRepository.findById(concertId.toString())).thenReturn(Optional.empty());
 
 		CustomException customException = assertThrows(CustomException.class,
 			() -> concertService.getAvailableConcertDates(concertId));
 
-		verify(concertRepository, times(1)).findById(concertId.toString());
-		verify(concertDateRepository, never()).findAvailableDates(concertEntity.getId());
-		verify(seatRepository, never()).countRemainingSeat(concertDateEntity.getId());
+		verify(jpaConcertRepository, times(1)).findById(concertId.toString());
+		verify(jpaConcertDateRepository, never()).findAvailableDates(concertEntity.getId());
+		verify(jpaSeatRepository, never()).countRemainingSeat(concertDateEntity.getId());
 
 		assertThat(customException.getErrorCode()).isEqualTo(ErrorCode.CONCERT_NOT_FOUND);
 	}
@@ -118,14 +121,14 @@ class ConcertServiceTest {
 	@Test
 	@DisplayName("예약_가능_콘서트_날짜_조회_정상_빈_리스트(매진, 예약)")
 	void getAvailableConcertDates_Success_CanReservationDateNotFound() throws CustomException {
-		when(concertRepository.findById(concertId.toString())).thenReturn(Optional.of(concertEntity));
-		when(concertDateRepository.findAvailableDates(concertEntity.getId())).thenReturn(Collections.emptyList());
+		when(jpaConcertRepository.findById(concertId.toString())).thenReturn(Optional.of(concertEntity));
+		when(jpaConcertDateRepository.findAvailableDates(concertEntity.getId())).thenReturn(Collections.emptyList());
 
 		List<ConcertDate> results = concertService.getAvailableConcertDates(concertId);
 
-		verify(concertRepository, times(1)).findById(concertId.toString());
-		verify(concertDateRepository, times(1)).findAvailableDates(concertEntity.getId());
-		verify(seatRepository, times(0)).countRemainingSeat(concertDateEntity.getId());
+		verify(jpaConcertRepository, times(1)).findById(concertId.toString());
+		verify(jpaConcertDateRepository, times(1)).findAvailableDates(concertEntity.getId());
+		verify(jpaSeatRepository, times(0)).countRemainingSeat(concertDateEntity.getId());
 
 		assertThat(results).isEmpty();
 	}
@@ -135,15 +138,15 @@ class ConcertServiceTest {
 	void getAvailableConcertDates_Success_CanReservationSeatsZero() throws CustomException {
 		List<ConcertDateEntity> concertDateEntities = List.of(concertDateEntity);
 
-		when(concertRepository.findById(concertId.toString())).thenReturn(Optional.of(concertEntity));
-		when(concertDateRepository.findAvailableDates(concertEntity.getId())).thenReturn(concertDateEntities);
-		when(seatRepository.countRemainingSeat(concertDateEntity.getId())).thenReturn(0);
+		when(jpaConcertRepository.findById(concertId.toString())).thenReturn(Optional.of(concertEntity));
+		when(jpaConcertDateRepository.findAvailableDates(concertEntity.getId())).thenReturn(concertDateEntities);
+		when(jpaSeatRepository.countRemainingSeat(concertDateEntity.getId())).thenReturn(0);
 
 		List<ConcertDate> results = concertService.getAvailableConcertDates(concertId);
 
-		verify(concertRepository, times(1)).findById(concertId.toString());
-		verify(concertDateRepository, times(1)).findAvailableDates(concertEntity.getId());
-		verify(seatRepository, times(concertDateEntities.size())).countRemainingSeat(concertDateEntity.getId());
+		verify(jpaConcertRepository, times(1)).findById(concertId.toString());
+		verify(jpaConcertDateRepository, times(1)).findAvailableDates(concertEntity.getId());
+		verify(jpaSeatRepository, times(concertDateEntities.size())).countRemainingSeat(concertDateEntity.getId());
 
 		assertThat(results).isEmpty();
 	}
@@ -151,15 +154,15 @@ class ConcertServiceTest {
 	@Test
 	@DisplayName("예약_가능_좌석_조회_정상")
 	void getAvailableSeats_Success() throws CustomException {
-		when(concertRepository.findById(concertId.toString())).thenReturn(Optional.of(concertEntity));
-		when(concertDateRepository.findAvailableDate(concertEntity.getId(), concertDateId.toString())).thenReturn(Optional.of(concertDateEntity));
-		when(seatRepository.findAvailableSeats(concertDateEntity.getId())).thenReturn(List.of(seatEntity));
+		when(jpaConcertRepository.findById(concertId.toString())).thenReturn(Optional.of(concertEntity));
+		when(jpaConcertDateRepository.findAvailableDate(concertEntity.getId(), concertDateId.toString())).thenReturn(Optional.of(concertDateEntity));
+		when(jpaSeatRepository.findAvailableSeats(concertDateEntity.getId())).thenReturn(List.of(seatEntity));
 
 		List<Seat> results = concertService.getAvailableSeats(concertId, concertDateId);
 
-		verify(concertRepository, times(1)).findById(concertId.toString());
-		verify(concertDateRepository, times(1)).findAvailableDate(concertEntity.getId(), concertDateId.toString());
-		verify(seatRepository, times(1)).findAvailableSeats(concertDateEntity.getId());
+		verify(jpaConcertRepository, times(1)).findById(concertId.toString());
+		verify(jpaConcertDateRepository, times(1)).findAvailableDate(concertEntity.getId(), concertDateId.toString());
+		verify(jpaSeatRepository, times(1)).findAvailableSeats(concertDateEntity.getId());
 
 		assertThat(results).hasSize(1);
 		assertThat(results.get(0).id()).isEqualTo(seatId);
@@ -168,14 +171,14 @@ class ConcertServiceTest {
 	@Test
 	@DisplayName("예약_가능_좌석_조회_실패_콘서트찾을수없음")
 	void getAvailableSeats_Failure_ConcertNotFound() {
-		when(concertRepository.findById(concertId.toString())).thenReturn(Optional.empty());
+		when(jpaConcertRepository.findById(concertId.toString())).thenReturn(Optional.empty());
 
 		CustomException customException = assertThrows(CustomException.class,
 			() -> concertService.getAvailableSeats(concertId, concertDateId));
 
-		verify(concertRepository, times(1)).findById(concertId.toString());
-		verify(concertDateRepository, never()).findAvailableDate(concertEntity.getId(), concertDateId.toString());
-		verify(seatRepository, never()).findAvailableSeats(concertDateEntity.getId());
+		verify(jpaConcertRepository, times(1)).findById(concertId.toString());
+		verify(jpaConcertDateRepository, never()).findAvailableDate(concertEntity.getId(), concertDateId.toString());
+		verify(jpaSeatRepository, never()).findAvailableSeats(concertDateEntity.getId());
 
 		assertThat(customException.getErrorCode()).isEqualTo(ErrorCode.CONCERT_NOT_FOUND);
 	}
@@ -183,15 +186,15 @@ class ConcertServiceTest {
 	@Test
 	@DisplayName("예약_가능_좌석_조회_실패_해당날짜예약불가")
 	void getAvailableSeats_Failure_CannotReservationDate() {
-		when(concertRepository.findById(concertId.toString())).thenReturn(Optional.of(concertEntity));
-		when(concertDateRepository.findAvailableDate(concertEntity.getId(), concertDateId.toString())).thenReturn(Optional.empty());
+		when(jpaConcertRepository.findById(concertId.toString())).thenReturn(Optional.of(concertEntity));
+		when(jpaConcertDateRepository.findAvailableDate(concertEntity.getId(), concertDateId.toString())).thenReturn(Optional.empty());
 
 		CustomException customException = assertThrows(CustomException.class,
 			() -> concertService.getAvailableSeats(concertId, concertDateId));
 
-		verify(concertRepository, times(1)).findById(concertId.toString());
-		verify(concertDateRepository, times(1)).findAvailableDate(concertEntity.getId(), concertDateId.toString());
-		verify(seatRepository, never()).findAvailableSeats(concertDateEntity.getId());
+		verify(jpaConcertRepository, times(1)).findById(concertId.toString());
+		verify(jpaConcertDateRepository, times(1)).findAvailableDate(concertEntity.getId(), concertDateId.toString());
+		verify(jpaSeatRepository, never()).findAvailableSeats(concertDateEntity.getId());
 
 		assertThat(customException.getErrorCode()).isEqualTo(ErrorCode.CANNOT_RESERVATION_DATE);
 	}
@@ -199,15 +202,15 @@ class ConcertServiceTest {
 	@Test
 	@DisplayName("예약_가능_좌석_조회_정상_빈_리스트(매진, 예약)")
 	void getAvailableSeats_Success_EmptyList() throws CustomException {
-		when(concertRepository.findById(concertId.toString())).thenReturn(Optional.of(concertEntity));
-		when(concertDateRepository.findAvailableDate(concertEntity.getId(), concertDateId.toString())).thenReturn(Optional.of(concertDateEntity));
-		when(seatRepository.findAvailableSeats(concertDateId.toString())).thenReturn(Collections.emptyList());
+		when(jpaConcertRepository.findById(concertId.toString())).thenReturn(Optional.of(concertEntity));
+		when(jpaConcertDateRepository.findAvailableDate(concertEntity.getId(), concertDateId.toString())).thenReturn(Optional.of(concertDateEntity));
+		when(jpaSeatRepository.findAvailableSeats(concertDateId.toString())).thenReturn(Collections.emptyList());
 
 		List<Seat> results = concertService.getAvailableSeats(concertId, concertDateId);
 
-		verify(concertRepository, times(1)).findById(concertId.toString());
-		verify(concertDateRepository, times(1)).findAvailableDate(concertEntity.getId(), concertDateId.toString());
-		verify(seatRepository, times(1)).findAvailableSeats(concertDateEntity.getId());
+		verify(jpaConcertRepository, times(1)).findById(concertId.toString());
+		verify(jpaConcertDateRepository, times(1)).findAvailableDate(concertEntity.getId(), concertDateId.toString());
+		verify(jpaSeatRepository, times(1)).findAvailableSeats(concertDateEntity.getId());
 
 		assertThat(results).isEmpty();
 	}

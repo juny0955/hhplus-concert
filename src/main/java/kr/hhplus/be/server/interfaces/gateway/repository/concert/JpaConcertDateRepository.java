@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.usecase.concert;
+package kr.hhplus.be.server.interfaces.gateway.repository.concert;
 
 import java.util.List;
 import java.util.Optional;
@@ -6,9 +6,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import kr.hhplus.be.server.interfaces.gateway.repository.concert.ConcertDateEntity;
-
-public interface ConcertDateRepository extends JpaRepository<ConcertDateEntity, String> {
+public interface JpaConcertDateRepository extends JpaRepository<ConcertDateEntity, String> {
 
 	@Query("""
 		select cd
