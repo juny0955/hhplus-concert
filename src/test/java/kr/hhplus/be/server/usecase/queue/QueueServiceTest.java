@@ -64,10 +64,13 @@ class QueueServiceTest {
 	@Test
 	@DisplayName("콘서트_대기열_토큰_발급_성공(대기상태)") // 최대 활성 토큰 수 50개
 	void issueQueueToken_Success_Waiting() throws CustomException {
+		Integer waitingCount = 10;
+
 		when(jpaUserRepository.existsById(userId.toString())).thenReturn(true);
 		when(jpaConcertRepository.existsById(concertId.toString())).thenReturn(true);
 		when(redisQueueTokenRepository.findTokenIdByUserIdAndConcertId(userId, concertId)).thenReturn(null);
 		when(redisQueueTokenRepository.countActiveTokens(concertId)).thenReturn(50);
+		when(redisQueueTokenRepository.countWaitingTokens(concertId)).thenReturn(waitingCount);
 
 		QueueToken queueToken = queueService.issueQueueToken(userId, concertId);
 
@@ -75,11 +78,13 @@ class QueueServiceTest {
 		verify(jpaConcertRepository, times(1)).existsById(concertId.toString());
 		verify(redisQueueTokenRepository, times(1)).findTokenIdByUserIdAndConcertId(userId, concertId);
 		verify(redisQueueTokenRepository, times(1)).countActiveTokens(concertId);
+		verify(redisQueueTokenRepository, times(1)).countWaitingTokens(concertId);
 		verify(redisQueueTokenRepository, times(1)).save(any(QueueToken.class));
 
 		verify(redisQueueTokenRepository, never()).findQueueTokenByTokenId(tokenId.toString());
 
 		assertThat(queueToken.status()).isEqualTo(QueueStatus.WAITING);
+		assertThat(queueToken.position()).isEqualTo(waitingCount + 1);
 		assertThat(queueToken.issuedAt()).isNotNull();
 		assertThat(queueToken.expiresAt()).isNull();
 		assertThat(queueToken.enteredAt()).isNull();
