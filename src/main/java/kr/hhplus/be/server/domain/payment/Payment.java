@@ -25,4 +25,15 @@ public record Payment(
 			.status(PaymentStatus.PENDING)
 			.build();
 	}
+
+	public Payment success() {
+		return Payment.builder()
+			.id(id)
+			.userId(userId)
+			.reservationId(reservationId)
+			.amount(amount)
+			.status(PaymentStatus.SUCCESS)
+			.updatedAt(LocalDateTime.now())
+			.build();
+	}
 }

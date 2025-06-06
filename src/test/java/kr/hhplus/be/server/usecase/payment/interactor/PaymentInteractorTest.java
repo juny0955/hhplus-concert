@@ -106,12 +106,22 @@ class PaymentInteractorTest {
 	@Test
 	@DisplayName("결제_성공")
 	void payment_Success() throws CustomException {
+		Payment successPayment = new Payment(paymentId, userId, reservationId, BigDecimal.valueOf(10000), PaymentStatus.SUCCESS, null, LocalDateTime.now(), LocalDateTime.now());
+		Reservation successReservation = new Reservation(reservationId, userId, seatId, ReservationStatus.SUCCESS, LocalDateTime.now(), LocalDateTime.now());
+		Seat successSeat = new Seat(seatId, concertDateId, 10, BigDecimal.valueOf(10000), SeatClass.VIP, SeatStatus.ASSIGNED, LocalDateTime.now(), LocalDateTime.now());
+		User successUser = new User(userId, BigDecimal.valueOf(90000), LocalDateTime.now(), LocalDateTime.now());
+
 		when(queueTokenRepository.findQueueTokenByTokenId(paymentCommand.queueTokenId())).thenReturn(queueToken);
 		when(reservationRepository.findById(paymentCommand.reservationId())).thenReturn(Optional.of(reservation));
 		when(paymentRepository.findByReservationId(reservation.id())).thenReturn(Optional.of(payment));
 		when(userRepository.findById(queueToken.userId())).thenReturn(Optional.of(user));
 		when(seatRepository.findById(reservation.seatId())).thenReturn(Optional.of(seat));
 		when(seatHoldRepository.isHoldSeat(seat.id(), user.id())).thenReturn(true);
+
+		when(reservationRepository.save(any(Reservation.class))).thenReturn(successReservation);
+		when(paymentRepository.save(any(Payment.class))).thenReturn(successPayment);
+		when(seatRepository.save(any(Seat.class))).thenReturn(successSeat);
+		when(userRepository.save(any(User.class))).thenReturn(successUser);
 
 		paymentInteractor.payment(paymentCommand);
 
@@ -125,6 +135,7 @@ class PaymentInteractorTest {
 		verify(paymentRepository, times(1)).save(any(Payment.class));
 		verify(reservationRepository, times(1)).save(any(Reservation.class));
 		verify(seatRepository, times(1)).save(any(Seat.class));
+		verify(seatHoldRepository, times(1)).deleteHold(seat.id(), user.id());
 		verify(queueTokenRepository, times(1)).expiresQueueToken(queueToken.tokenId().toString());
 		verify(eventPublisher, times(1)).publish(any(KafkaEventObject.class));
 		verify(paymentOutput, times(1)).ok(any(PaymentResult.class));
@@ -150,6 +161,7 @@ class PaymentInteractorTest {
 		verify(paymentRepository, never()).save(any(Payment.class));
 		verify(reservationRepository, never()).save(any(Reservation.class));
 		verify(seatRepository, never()).save(any(Seat.class));
+		verify(seatHoldRepository, never()).deleteHold(seat.id(), user.id());
 		verify(queueTokenRepository, never()).expiresQueueToken(queueToken.tokenId().toString());
 		verify(eventPublisher, never()).publish(any(KafkaEventObject.class));
 		verify(paymentOutput, never()).ok(any(PaymentResult.class));
@@ -176,6 +188,7 @@ class PaymentInteractorTest {
 		verify(paymentRepository, never()).save(any(Payment.class));
 		verify(reservationRepository, never()).save(any(Reservation.class));
 		verify(seatRepository, never()).save(any(Seat.class));
+		verify(seatHoldRepository, never()).deleteHold(seat.id(), user.id());
 		verify(queueTokenRepository, never()).expiresQueueToken(queueToken.tokenId().toString());
 		verify(eventPublisher, never()).publish(any(KafkaEventObject.class));
 		verify(paymentOutput, never()).ok(any(PaymentResult.class));
@@ -203,6 +216,7 @@ class PaymentInteractorTest {
 		verify(paymentRepository, never()).save(any(Payment.class));
 		verify(reservationRepository, never()).save(any(Reservation.class));
 		verify(seatRepository, never()).save(any(Seat.class));
+		verify(seatHoldRepository, never()).deleteHold(seat.id(), user.id());
 		verify(queueTokenRepository, never()).expiresQueueToken(queueToken.tokenId().toString());
 		verify(eventPublisher, never()).publish(any(KafkaEventObject.class));
 		verify(paymentOutput, never()).ok(any(PaymentResult.class));
@@ -231,6 +245,7 @@ class PaymentInteractorTest {
 		verify(paymentRepository, never()).save(any(Payment.class));
 		verify(reservationRepository, never()).save(any(Reservation.class));
 		verify(seatRepository, never()).save(any(Seat.class));
+		verify(seatHoldRepository, never()).deleteHold(seat.id(), user.id());
 		verify(queueTokenRepository, never()).expiresQueueToken(queueToken.tokenId().toString());
 		verify(eventPublisher, never()).publish(any(KafkaEventObject.class));
 		verify(paymentOutput, never()).ok(any(PaymentResult.class));
@@ -260,6 +275,7 @@ class PaymentInteractorTest {
 		verify(paymentRepository, never()).save(any(Payment.class));
 		verify(reservationRepository, never()).save(any(Reservation.class));
 		verify(seatRepository, never()).save(any(Seat.class));
+		verify(seatHoldRepository, never()).deleteHold(seat.id(), user.id());
 		verify(queueTokenRepository, never()).expiresQueueToken(queueToken.tokenId().toString());
 		verify(eventPublisher, never()).publish(any(KafkaEventObject.class));
 		verify(paymentOutput, never()).ok(any(PaymentResult.class));
@@ -291,6 +307,7 @@ class PaymentInteractorTest {
 		verify(paymentRepository, never()).save(any(Payment.class));
 		verify(reservationRepository, never()).save(any(Reservation.class));
 		verify(seatRepository, never()).save(any(Seat.class));
+		verify(seatHoldRepository, never()).deleteHold(seat.id(), user.id());
 		verify(queueTokenRepository, never()).expiresQueueToken(queueToken.tokenId().toString());
 		verify(eventPublisher, never()).publish(any(KafkaEventObject.class));
 		verify(paymentOutput, never()).ok(any(PaymentResult.class));
@@ -321,6 +338,7 @@ class PaymentInteractorTest {
 		verify(paymentRepository, never()).save(any(Payment.class));
 		verify(reservationRepository, never()).save(any(Reservation.class));
 		verify(seatRepository, never()).save(any(Seat.class));
+		verify(seatHoldRepository, never()).deleteHold(seat.id(), user.id());
 		verify(queueTokenRepository, never()).expiresQueueToken(queueToken.tokenId().toString());
 		verify(eventPublisher, never()).publish(any(KafkaEventObject.class));
 		verify(paymentOutput, never()).ok(any(PaymentResult.class));

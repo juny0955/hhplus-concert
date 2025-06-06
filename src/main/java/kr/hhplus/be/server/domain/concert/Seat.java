@@ -25,10 +25,24 @@ public record Seat(
 	public Seat reserve() {
 		return Seat.builder()
 			.id(id)
+			.concertDateId(concertDateId)
 			.seatNo(seatNo)
 			.price(price)
 			.seatClass(seatClass)
 			.status(SeatStatus.RESERVED)
+			.updatedAt(LocalDateTime.now())
+			.build();
+	}
+
+	public Seat payment() {
+		return Seat.builder()
+			.id(id)
+			.concertDateId(concertDateId)
+			.seatNo(seatNo)
+			.price(price)
+			.seatClass(seatClass)
+			.status(SeatStatus.ASSIGNED)
+			.updatedAt(LocalDateTime.now())
 			.build();
 	}
 }

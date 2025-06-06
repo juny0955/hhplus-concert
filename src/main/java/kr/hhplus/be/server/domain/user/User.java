@@ -18,8 +18,19 @@ public record User (
 		return User.builder()
 			.id(id)
 			.amount(amount.add(point))
-			.createdAt(createdAt)
 			.updatedAt(updatedAt)
 			.build();
+	}
+
+	public User payment(BigDecimal balance) {
+		return User.builder()
+			.id(id)
+			.amount(amount.subtract(balance))
+			.updatedAt(updatedAt)
+			.build();
+	}
+
+	public boolean checkEnoughAmount(BigDecimal balance) {
+		return amount.compareTo(balance) >= 0;
 	}
 }

@@ -7,7 +7,8 @@ import lombok.Getter;
 @Getter
 public enum EventTopic {
 
-	RESERVATION_CREATED("reservation.created")
+	RESERVATION_CREATED("reservation.created"),
+	PAYMENT_SUCCESS("payment.success")
 	;
 
 	private String topicName;

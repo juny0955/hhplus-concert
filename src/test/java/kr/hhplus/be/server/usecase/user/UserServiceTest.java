@@ -72,8 +72,10 @@ class UserServiceTest {
 	@DisplayName("유저_포인트_충전_성공")
 	void chargePoint_Success() throws CustomException {
 		BigDecimal chargePoint = BigDecimal.valueOf(5000);
+		User charged = user.charge(chargePoint);
 
 		when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+		when(userRepository.save(any(User.class))).thenReturn(charged);
 
 		User user = userService.chargePoint(userId, chargePoint);
 

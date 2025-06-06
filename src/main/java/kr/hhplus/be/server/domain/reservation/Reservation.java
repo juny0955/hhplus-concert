@@ -22,4 +22,14 @@ public record Reservation(
 			.status(ReservationStatus.PENDING)
 			.build();
 	}
+
+	public Reservation payment() {
+		return Reservation.builder()
+			.id(id)
+			.userId(userId)
+			.seatId(seatId)
+			.status(ReservationStatus.SUCCESS)
+			.updatedAt(LocalDateTime.now())
+			.build();
+	}
 }
