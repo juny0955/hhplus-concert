@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.entity.concert;
+package kr.hhplus.be.server.domain.concert;
 
 public enum SeatClass {
 	VIP, PREMIUM, NORMAL

@@ -8,8 +8,8 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import kr.hhplus.be.server.entity.concert.ConcertDate;
-import kr.hhplus.be.server.entity.concert.Seat;
+import kr.hhplus.be.server.domain.concert.ConcertDate;
+import kr.hhplus.be.server.domain.concert.Seat;
 import kr.hhplus.be.server.interfaces.gateway.repository.concert.ConcertDateEntity;
 import kr.hhplus.be.server.interfaces.gateway.repository.concert.JpaConcertDateRepository;
 import kr.hhplus.be.server.interfaces.gateway.repository.concert.ConcertEntity;

@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import kr.hhplus.be.server.entity.payment.PaymentStatus;
+import kr.hhplus.be.server.domain.payment.PaymentStatus;
 
 public record PaymentResponse(
 	@Schema(description = "결제 ID")

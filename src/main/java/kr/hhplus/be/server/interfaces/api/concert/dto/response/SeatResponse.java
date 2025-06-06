@@ -4,9 +4,9 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import kr.hhplus.be.server.entity.concert.Seat;
-import kr.hhplus.be.server.entity.concert.SeatClass;
-import kr.hhplus.be.server.entity.concert.SeatStatus;
+import kr.hhplus.be.server.domain.concert.Seat;
+import kr.hhplus.be.server.domain.concert.SeatClass;
+import kr.hhplus.be.server.domain.concert.SeatStatus;
 import lombok.Builder;
 
 @Builder

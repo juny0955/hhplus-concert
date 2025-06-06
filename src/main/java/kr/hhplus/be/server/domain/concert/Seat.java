@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.entity.user;
+package kr.hhplus.be.server.domain.concert;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -7,9 +7,12 @@ import java.util.UUID;
 import lombok.Builder;
 
 @Builder
-public record User (
+public record Seat(
 	UUID id,
-	BigDecimal amount,
+	int seatNo,
+	BigDecimal price,
+	SeatClass seatClass,
+	SeatStatus status,
 	LocalDateTime createdAt,
 	LocalDateTime updatedAt
 ) {

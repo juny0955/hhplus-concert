@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import kr.hhplus.be.server.entity.user.User;
+import kr.hhplus.be.server.domain.user.User;
 import lombok.Builder;
 
 @Builder

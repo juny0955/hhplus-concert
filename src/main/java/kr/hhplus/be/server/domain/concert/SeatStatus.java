@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.entity.concert;
+package kr.hhplus.be.server.domain.concert;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

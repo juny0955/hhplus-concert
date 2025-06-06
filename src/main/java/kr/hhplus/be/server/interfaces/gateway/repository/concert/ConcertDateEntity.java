@@ -15,7 +15,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import kr.hhplus.be.server.entity.concert.ConcertDate;
+import kr.hhplus.be.server.domain.concert.ConcertDate;
 import kr.hhplus.be.server.interfaces.gateway.repository.BaseTimeEntity;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;

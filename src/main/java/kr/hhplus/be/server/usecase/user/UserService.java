@@ -6,7 +6,7 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import kr.hhplus.be.server.entity.user.User;
+import kr.hhplus.be.server.domain.user.User;
 import kr.hhplus.be.server.interfaces.gateway.repository.user.UserEntity;
 import kr.hhplus.be.server.interfaces.gateway.repository.user.JpaUserRepository;
 import kr.hhplus.be.server.usecase.exception.CustomException;

@@ -1,16 +1,15 @@
-package kr.hhplus.be.server.entity.payment;
+package kr.hhplus.be.server.domain.user;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public record Payment(
+import lombok.Builder;
+
+@Builder
+public record User (
 	UUID id,
-	UUID userId,
-	UUID reservationId,
 	BigDecimal amount,
-	PaymentStatus status,
-	String failureReason,
 	LocalDateTime createdAt,
 	LocalDateTime updatedAt
 ) {

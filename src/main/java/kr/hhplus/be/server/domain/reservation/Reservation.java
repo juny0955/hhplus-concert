@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.entity.reservation;
+package kr.hhplus.be.server.domain.reservation;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.entity.queue;
+package kr.hhplus.be.server.domain.queue;
 
 public enum QueueStatus {
 	WAITING,

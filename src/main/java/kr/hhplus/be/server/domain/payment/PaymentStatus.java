@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.entity.payment;
+package kr.hhplus.be.server.domain.payment;
 
 public enum PaymentStatus {
 	PENDING, SUCCESS, FAILED, CANCELLED

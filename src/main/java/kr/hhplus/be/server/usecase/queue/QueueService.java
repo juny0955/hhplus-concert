@@ -5,7 +5,7 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import kr.hhplus.be.server.entity.queue.QueueToken;
+import kr.hhplus.be.server.domain.queue.QueueToken;
 import kr.hhplus.be.server.interfaces.gateway.repository.concert.JpaConcertRepository;
 import kr.hhplus.be.server.interfaces.gateway.repository.queue.RedisQueueTokenRepository;
 import kr.hhplus.be.server.interfaces.gateway.repository.user.JpaUserRepository;
@@ -47,6 +47,7 @@ public class QueueService {
 			queueToken = QueueToken.activeTokenOf(tokenId, userId, concertId, QUEUE_EXPIRES_TIME);
 		}
 
+		log.debug("대기열 토큰 발급: USER_ID - {}, CONCERT_ID - {}", userId, concertId);
 		redisQueueTokenRepository.save(queueToken);
 		return queueToken;
 	}

@@ -16,7 +16,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import kr.hhplus.be.server.entity.reservation.ReservationStatus;
+import kr.hhplus.be.server.domain.reservation.ReservationStatus;
 import kr.hhplus.be.server.interfaces.gateway.repository.BaseTimeEntity;
 import kr.hhplus.be.server.interfaces.gateway.repository.concert.SeatEntity;
 import kr.hhplus.be.server.interfaces.gateway.repository.user.UserEntity;

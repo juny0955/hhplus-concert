@@ -13,7 +13,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import kr.hhplus.be.server.entity.user.User;
+import kr.hhplus.be.server.domain.user.User;
 import kr.hhplus.be.server.interfaces.gateway.repository.BaseTimeEntity;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;

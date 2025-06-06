@@ -16,7 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import kr.hhplus.be.server.entity.user.User;
+import kr.hhplus.be.server.domain.user.User;
 import kr.hhplus.be.server.interfaces.gateway.repository.user.UserEntity;
 import kr.hhplus.be.server.interfaces.gateway.repository.user.JpaUserRepository;
 import kr.hhplus.be.server.usecase.exception.CustomException;

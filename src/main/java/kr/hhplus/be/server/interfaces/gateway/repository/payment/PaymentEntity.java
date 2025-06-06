@@ -18,7 +18,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import kr.hhplus.be.server.entity.payment.PaymentStatus;
+import kr.hhplus.be.server.domain.payment.PaymentStatus;
 import kr.hhplus.be.server.interfaces.gateway.repository.BaseTimeEntity;
 import kr.hhplus.be.server.interfaces.gateway.repository.reservation.ReservationEntity;
 import kr.hhplus.be.server.interfaces.gateway.repository.user.UserEntity;

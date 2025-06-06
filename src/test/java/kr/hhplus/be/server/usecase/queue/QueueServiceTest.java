@@ -15,8 +15,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import kr.hhplus.be.server.entity.queue.QueueStatus;
-import kr.hhplus.be.server.entity.queue.QueueToken;
+import kr.hhplus.be.server.domain.queue.QueueStatus;
+import kr.hhplus.be.server.domain.queue.QueueToken;
 import kr.hhplus.be.server.interfaces.gateway.repository.concert.JpaConcertRepository;
 import kr.hhplus.be.server.interfaces.gateway.repository.queue.RedisQueueTokenRepository;
 import kr.hhplus.be.server.interfaces.gateway.repository.user.JpaUserRepository;
