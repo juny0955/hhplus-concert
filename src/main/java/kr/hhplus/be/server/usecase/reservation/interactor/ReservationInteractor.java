@@ -62,14 +62,13 @@ public class ReservationInteractor implements ReservationInput {
 
 			seatRepository.save(seat.reserve());
 
-			LocalDateTime now = LocalDateTime.now();
-			Reservation reservation = reservationRepository.save(Reservation.of(queueToken.userId(), seat.id(), now));
-			Payment payment = paymentRepository.save(Payment.of(queueToken.userId(), reservation.id(), seat.price(), now));
+			Reservation reservation = reservationRepository.save(Reservation.of(queueToken.userId(), seat.id()));
+			Payment payment = paymentRepository.save(Payment.of(queueToken.userId(), reservation.id(), seat.price()));
 			seatHoldRepository.hold(seat.id());
 
-			reservationOutput.ok(ReserveSeatResult.of(reservation.id(), seat.id(), seat.seatNo(), seat.price(), reservation.status(), now));
+			reservationOutput.ok(ReserveSeatResult.of(reservation.id(), seat.id(), seat.seatNo(), seat.price(), reservation.status()));
 
-			publishReservationCreateEvent(reservation, queueToken, payment, seat, now);
+			publishReservationCreateEvent(reservation, queueToken, payment, seat);
 
 		} catch (CustomException e) {
 			ErrorCode errorCode = e.getErrorCode();
@@ -84,14 +83,14 @@ public class ReservationInteractor implements ReservationInput {
 		}
 	}
 
-	private void publishReservationCreateEvent(Reservation reservation, QueueToken queueToken, Payment payment, Seat seat, LocalDateTime now) {
+	private void publishReservationCreateEvent(Reservation reservation, QueueToken queueToken, Payment payment, Seat seat) {
 		ReservationCreatedEvent reservationCreatedEvent = ReservationCreatedEvent.of(
 			reservation.id(),
 			queueToken.userId(),
 			payment.id(),
 			seat.id(),
 			payment.amount(),
-			now
+			LocalDateTime.now()
 		);
 
 		KafkaEventObject<ReservationCreatedEvent> event = KafkaEventObject.from(reservationCreatedEvent);

@@ -17,14 +17,14 @@ public record ReserveSeatResult(
 	ReservationStatus status,
 	LocalDateTime createdAt
 ) {
-	public static ReserveSeatResult of(UUID reservationId, UUID seatId, Integer seatNo, BigDecimal price, ReservationStatus status, LocalDateTime now) {
+	public static ReserveSeatResult of(UUID reservationId, UUID seatId, Integer seatNo, BigDecimal price, ReservationStatus status) {
 		return ReserveSeatResult.builder()
 			.reservationId(reservationId)
 			.seatId(seatId)
 			.seatNo(seatNo)
 			.price(price)
 			.status(status)
-			.createdAt(now)
+			.createdAt(LocalDateTime.now())
 			.build();
 	}
 

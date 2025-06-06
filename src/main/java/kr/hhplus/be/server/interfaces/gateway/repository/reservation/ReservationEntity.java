@@ -8,18 +8,13 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import kr.hhplus.be.server.domain.reservation.Reservation;
 import kr.hhplus.be.server.domain.reservation.ReservationStatus;
 import kr.hhplus.be.server.interfaces.gateway.repository.BaseTimeEntity;
-import kr.hhplus.be.server.interfaces.gateway.repository.concert.SeatEntity;
-import kr.hhplus.be.server.interfaces.gateway.repository.user.UserEntity;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -40,16 +35,24 @@ public class ReservationEntity extends BaseTimeEntity {
 	@Column(name = "id", length = 36)
 	private String id;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "user_id", nullable = false)
-	private UserEntity user;
+	@JdbcTypeCode(SqlTypes.VARCHAR)
+	@Column(name = "user_id", length = 36, nullable = false)
+	private String userId;
 
-	@OneToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "seat_id", nullable = false)
-	private SeatEntity seat;
+	@JdbcTypeCode(SqlTypes.VARCHAR)
+	@Column(name = "seat_id", length = 36, nullable = false)
+	private String seatId;
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "status", nullable = false)
 	@ColumnDefault("'PENDING'")
 	private ReservationStatus status;
+
+	public static ReservationEntity from(Reservation reservation) {
+		return ReservationEntity.builder()
+			.userId(reservation.userId().toString())
+			.seatId(reservation.seatId().toString())
+			.status(reservation.status())
+			.build();
+	}
 }

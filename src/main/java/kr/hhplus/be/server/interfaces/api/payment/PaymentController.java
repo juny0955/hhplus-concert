@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.annotation.RequestScope;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -21,6 +22,7 @@ import kr.hhplus.be.server.domain.payment.PaymentStatus;
 import kr.hhplus.be.server.interfaces.api.payment.dto.response.PaymentResponse;
 
 @RestController
+@RequestScope
 @RequestMapping("/api/v1/payments")
 @Tag(name = "Payment API", description = "결제 관련 API")
 public class PaymentController {

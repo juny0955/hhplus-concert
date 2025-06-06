@@ -10,18 +10,13 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import kr.hhplus.be.server.domain.payment.Payment;
 import kr.hhplus.be.server.domain.payment.PaymentStatus;
 import kr.hhplus.be.server.interfaces.gateway.repository.BaseTimeEntity;
-import kr.hhplus.be.server.interfaces.gateway.repository.reservation.ReservationEntity;
-import kr.hhplus.be.server.interfaces.gateway.repository.user.UserEntity;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -42,13 +37,13 @@ public class PaymentEntity extends BaseTimeEntity {
 	@Column(name = "id", length = 36)
 	private String id;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "user_id", nullable = false)
-	private UserEntity user;
+	@JdbcTypeCode(SqlTypes.VARCHAR)
+	@Column(name = "user_id", length = 36, nullable = false)
+	private String userId;
 
-	@OneToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "reservation_id", nullable = false)
-	private ReservationEntity reservation;
+	@JdbcTypeCode(SqlTypes.VARCHAR)
+	@Column(name = "reservation_id", length = 36, nullable = false)
+	private String reservationId;
 
 	@Column(name = "amount", precision = 10, nullable = false)
 	private BigDecimal amount;
@@ -60,4 +55,13 @@ public class PaymentEntity extends BaseTimeEntity {
 
 	@Column(name = "failure_reason")
 	private String failureReason;
+
+	public static PaymentEntity from(Payment payment) {
+		return PaymentEntity.builder()
+			.userId(payment.userId().toString())
+			.reservationId(payment.reservationId().toString())
+			.amount(payment.amount())
+			.status(payment.status())
+			.build();
+	}
 }

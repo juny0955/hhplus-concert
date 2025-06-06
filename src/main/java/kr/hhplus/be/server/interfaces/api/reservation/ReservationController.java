@@ -1,20 +1,19 @@
 package kr.hhplus.be.server.interfaces.api.reservation;
 
-import java.util.UUID;
-
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.annotation.RequestScope;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.hhplus.be.server.interfaces.api.concert.dto.request.ReservationRequest;
 import kr.hhplus.be.server.interfaces.api.concert.dto.response.ReservationResponse;
 import kr.hhplus.be.server.usecase.exception.CustomException;
@@ -25,8 +24,10 @@ import kr.hhplus.be.server.usecase.reservation.output.ReserveSeatResult;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/concerts/{concertId}")
+@RequestScope
+@RequestMapping("/api/v1/reservations")
 @RequiredArgsConstructor
+@Tag(name = "Reservation API", description = "예약 관련 API")
 public class ReservationController implements ReservationOutput {
 
 	private final ReservationInput reservationInput;
@@ -67,19 +68,18 @@ public class ReservationController implements ReservationOutput {
 			description = "락 획득 실패 (다른 사용자 점유중)"
 		)
 	})
-	@PostMapping("/reservations")
+	@PostMapping("/seats")
 	public ResponseEntity<ReservationResponse> reservationConcert(
-		@PathVariable UUID concertId,
 		@RequestBody ReservationRequest request,
 		@RequestHeader(value = "Authorization") String queueToken
 	) throws CustomException {
-		reservationInput.reserveSeat(ReserveSeatCommand.of(concertId, request, queueToken));
+		reservationInput.reserveSeat(ReserveSeatCommand.of(request, queueToken));
 
 		return ResponseEntity.ok(reservationResponse);
 	}
 
 	@Override
 	public void ok(ReserveSeatResult result) {
-		reservationResponse = result.toResponse();
+		reservationResponse = ReservationResponse.from(result);
 	}
 }

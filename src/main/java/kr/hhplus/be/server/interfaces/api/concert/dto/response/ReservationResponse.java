@@ -6,7 +6,10 @@ import java.util.UUID;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import kr.hhplus.be.server.domain.reservation.ReservationStatus;
+import kr.hhplus.be.server.usecase.reservation.output.ReserveSeatResult;
+import lombok.Builder;
 
+@Builder
 public record ReservationResponse(
 	@Schema(description = "예약 ID")
 	UUID reservationId,
@@ -21,4 +24,14 @@ public record ReservationResponse(
 	@Schema(description = "예약 시간")
 	LocalDateTime createdAt
 ) {
+	public static ReservationResponse from(ReserveSeatResult result) {
+		return ReservationResponse.builder()
+			.reservationId(result.reservationId())
+			.seatId(result.seatId())
+			.seatNo(result.seatNo())
+			.price(result.price())
+			.status(result.status())
+			.createdAt(result.createdAt())
+			.build();
+	}
 }

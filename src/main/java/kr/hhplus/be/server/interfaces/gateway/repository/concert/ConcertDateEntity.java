@@ -8,12 +8,9 @@ import org.hibernate.type.SqlTypes;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import kr.hhplus.be.server.domain.concert.ConcertDate;
 import kr.hhplus.be.server.interfaces.gateway.repository.BaseTimeEntity;
@@ -37,9 +34,9 @@ public class ConcertDateEntity extends BaseTimeEntity {
 	@Column(name = "id", length = 36)
 	private String id;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "concert_id", nullable = false)
-	private ConcertEntity concert;
+	@JdbcTypeCode(SqlTypes.VARCHAR)
+	@Column(name = "concert_id", length = 36, nullable = false)
+	private String concertId;
 
 	@Column(name = "date", nullable = false)
 	private LocalDateTime date;
@@ -50,7 +47,7 @@ public class ConcertDateEntity extends BaseTimeEntity {
 	public ConcertDate toDomain(Integer remainingSeatCount) {
 		return ConcertDate.builder()
 			.id(UUID.fromString(id))
-			.concertId(UUID.fromString(concert.getId()))
+			.concertId(UUID.fromString(concertId))
 			.date(date)
 			.deadline(deadline)
 			.remainingSeatCount(remainingSeatCount)

@@ -68,14 +68,14 @@ class ConcertServiceTest {
 
 		concertDateEntity = ConcertDateEntity.builder()
 			.id(concertDateId.toString())
-			.concert(concertEntity)
+			.concertId(concertId.toString())
 			.date(LocalDateTime.now().plusDays(7))
 			.deadline(LocalDateTime.now().plusDays(5))
 			.build();
 
 		seatEntity = SeatEntity.builder()
 			.id(seatId.toString())
-			.concertDate(concertDateEntity)
+			.concertDateId(concertDateId.toString())
 			.seatNo(1)
 			.seatClass(SeatClass.VIP)
 			.status(SeatStatus.AVAILABLE)
