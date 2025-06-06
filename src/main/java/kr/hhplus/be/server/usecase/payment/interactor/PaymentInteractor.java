@@ -1,7 +1,5 @@
 package kr.hhplus.be.server.usecase.payment.interactor;
 
-import java.time.LocalDateTime;
-
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +20,7 @@ import kr.hhplus.be.server.usecase.payment.input.PaymentInput;
 import kr.hhplus.be.server.usecase.payment.output.PaymentOutput;
 import kr.hhplus.be.server.usecase.payment.output.PaymentResult;
 import kr.hhplus.be.server.usecase.queue.QueueTokenRepository;
+import kr.hhplus.be.server.usecase.queue.QueueTokenUtil;
 import kr.hhplus.be.server.usecase.reservation.ReservationRepository;
 import kr.hhplus.be.server.usecase.reservation.SeatHoldRepository;
 import kr.hhplus.be.server.usecase.user.UserRepository;
@@ -46,40 +45,79 @@ public class PaymentInteractor implements PaymentInput {
 	@Override
 	@Transactional
 	public void payment(PaymentCommand command) throws CustomException {
-		QueueToken queueToken = queueTokenRepository.findQueueTokenByTokenId(command.queueTokenId());
-		if (queueToken == null || !queueToken.isActive())
-			throw new CustomException(ErrorCode.INVALID_QUEUE_TOKEN);
+		try {
+			QueueToken queueToken = getQueueTokenAndValid(command);
 
-		Reservation reservation = reservationRepository.findById(command.reservationId())
-			.orElseThrow(() -> new CustomException(ErrorCode.RESERVATION_NOT_FOUND));
+			Reservation reservation = getReservation(command);
+			Payment payment = getPayment(reservation);
+			Seat seat = getSeat(reservation);
+			User user = getUserAndValid(queueToken, payment);
 
-		Payment payment = paymentRepository.findByReservationId(reservation.id())
-			.orElseThrow(() -> new CustomException(ErrorCode.PAYMENT_NOT_FOUND));
+			validateSeatHold(seat, user);
 
-		Seat seat = seatRepository.findById(reservation.seatId())
-			.orElseThrow(() -> new CustomException(ErrorCode.SEAT_NOT_FOUND));
+			User savedUser = userRepository.save(user.payment(payment.amount()));
+			Reservation savedReservation = reservationRepository.save(reservation.payment());
+			Payment savedPayment = paymentRepository.save(payment.success());
+			Seat savedSeat = seatRepository.save(seat.payment());
 
+			afterSuccessProcess(savedSeat, savedUser, queueToken);
+
+			paymentOutput.ok(PaymentResult.of(savedPayment, savedSeat, savedReservation.id(), savedUser.id()));
+
+			publishPaymentSuccessEvent(savedPayment, savedReservation, savedSeat, savedUser);
+		} catch (CustomException e) {
+			log.warn("결제 진행 중 비즈니스 예외 발생 - {}", e.getErrorCode(), e);
+			throw e;
+		} catch (Exception e) {
+			log.error("결제 진행 중 예외 발생 - {}", ErrorCode.INTERNAL_SERVER_ERROR, e);
+			throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	private void afterSuccessProcess(Seat savedSeat, User savedUser, QueueToken queueToken) {
+		seatHoldRepository.deleteHold(savedSeat.id(), savedUser.id());
+		queueTokenRepository.expiresQueueToken(queueToken.tokenId().toString());
+	}
+
+	private void validateSeatHold(Seat seat, User user) throws CustomException {
+		if (!seatHoldRepository.isHoldSeat(seat.id(), user.id()))
+			throw new CustomException(ErrorCode.SEAT_NOT_HOLD);
+	}
+
+	private void publishPaymentSuccessEvent(Payment payment, Reservation reservation, Seat seat, User user) {
+		PaymentSuccessEvent paymentSuccessEvent = PaymentSuccessEvent.of(
+			payment.id(), reservation.id(), seat.id(), user.id(), payment.amount());
+		KafkaEventObject<PaymentSuccessEvent> kafkaEventObject = KafkaEventObject.from(paymentSuccessEvent);
+		eventPublisher.publish(kafkaEventObject);
+	}
+
+	private User getUserAndValid(QueueToken queueToken, Payment payment) throws CustomException {
 		User user = userRepository.findById(queueToken.userId())
 			.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
 		if (!user.checkEnoughAmount(payment.amount()))
 			throw new CustomException(ErrorCode.INSUFFICIENT_BALANCE);
+		return user;
+	}
 
-		if (!seatHoldRepository.isHoldSeat(seat.id(), user.id()))
-			throw new CustomException(ErrorCode.SEAT_NOT_HOLD);
+	private Seat getSeat(Reservation reservation) throws CustomException {
+		return seatRepository.findById(reservation.seatId())
+			.orElseThrow(() -> new CustomException(ErrorCode.SEAT_NOT_FOUND));
+	}
 
-		User savedUser = userRepository.save(user.payment(payment.amount()));
-		Reservation savedReservation = reservationRepository.save(reservation.payment());
-		Payment savePayment = paymentRepository.save(payment.success());
-		Seat savedSeat = seatRepository.save(seat.payment());
+	private Payment getPayment(Reservation reservation) throws CustomException {
+		return paymentRepository.findByReservationId(reservation.id())
+			.orElseThrow(() -> new CustomException(ErrorCode.PAYMENT_NOT_FOUND));
+	}
 
-		seatHoldRepository.deleteHold(savedSeat.id(), savedUser.id());
-		queueTokenRepository.expiresQueueToken(queueToken.tokenId().toString());
+	private Reservation getReservation(PaymentCommand command) throws CustomException {
+		return reservationRepository.findById(command.reservationId())
+			.orElseThrow(() -> new CustomException(ErrorCode.RESERVATION_NOT_FOUND));
+	}
 
-		paymentOutput.ok(PaymentResult.of(savePayment, savedSeat, savedReservation.id(), savedUser.id()));
-
-		PaymentSuccessEvent paymentSuccessEvent = PaymentSuccessEvent.of(payment.id(), reservation.id(), seat.id(), user.id(), payment.amount());
-		KafkaEventObject<PaymentSuccessEvent> kafkaEventObject = KafkaEventObject.from(paymentSuccessEvent);
-		eventPublisher.publish(kafkaEventObject);
+	private QueueToken getQueueTokenAndValid(PaymentCommand command) throws CustomException {
+		QueueToken queueToken = queueTokenRepository.findQueueTokenByTokenId(command.queueTokenId());
+		QueueTokenUtil.validateQueueToken(queueToken);
+		return queueToken;
 	}
 }

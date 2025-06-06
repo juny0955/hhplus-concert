@@ -21,6 +21,7 @@ import kr.hhplus.be.server.usecase.exception.CustomException;
 import kr.hhplus.be.server.usecase.exception.ErrorCode;
 import kr.hhplus.be.server.usecase.payment.PaymentRepository;
 import kr.hhplus.be.server.usecase.queue.QueueTokenRepository;
+import kr.hhplus.be.server.usecase.queue.QueueTokenUtil;
 import kr.hhplus.be.server.usecase.reservation.ReservationRepository;
 import kr.hhplus.be.server.usecase.reservation.SeatLockRepository;
 import kr.hhplus.be.server.usecase.reservation.SeatHoldRepository;
@@ -129,9 +130,7 @@ public class ReservationInteractor implements ReservationInput {
 
 	private QueueToken getQueueTokenAndValid(ReserveSeatCommand command) throws CustomException {
 		QueueToken queueToken = queueTokenRepository.findQueueTokenByTokenId(command.queueTokenId());
-		if (queueToken == null || !queueToken.isActive())
-			throw new CustomException(ErrorCode.INVALID_QUEUE_TOKEN);
-
+		QueueTokenUtil.validateQueueToken(queueToken);
 		return queueToken;
 	}
 }

@@ -67,6 +67,7 @@ public class PaymentController implements PaymentOutput {
 		@RequestHeader(value = "Authorization") String queueToken
 	) throws CustomException {
 		paymentInput.payment(PaymentCommand.of(reservationId, queueToken));
+
 		return ResponseEntity.ok(paymentResponse);
 	}
 
