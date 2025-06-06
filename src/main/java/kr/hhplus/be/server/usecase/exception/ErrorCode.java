@@ -21,8 +21,10 @@ public enum ErrorCode {
 
 	// QUEUE TOKEN
 	INVALID_QUEUE_TOKEN(400, "Q001", "대기열 토큰이 유효하지 않습니다."),
-	;
 
+	// SERVER
+	INTERNAL_SERVER_ERROR(500, "S001", "시스템 에러 발생")
+	;
 
 	private final int status;
 	private final String code;

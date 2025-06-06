@@ -23,8 +23,10 @@ import kr.hhplus.be.server.domain.concert.SeatClass;
 import kr.hhplus.be.server.domain.concert.SeatStatus;
 import kr.hhplus.be.server.domain.event.KafkaEventObject;
 import kr.hhplus.be.server.domain.payment.Payment;
+import kr.hhplus.be.server.domain.payment.PaymentStatus;
 import kr.hhplus.be.server.domain.queue.QueueToken;
 import kr.hhplus.be.server.domain.reservation.Reservation;
+import kr.hhplus.be.server.domain.reservation.ReservationStatus;
 import kr.hhplus.be.server.usecase.concert.ConcertDateRepository;
 import kr.hhplus.be.server.usecase.concert.ConcertRepository;
 import kr.hhplus.be.server.usecase.concert.SeatRepository;
@@ -80,37 +82,49 @@ class ReservationInteractorTest {
 	private UUID concertDateId;
 	private UUID seatId;
 	private UUID userId;
-	private String queueTokenId;
+	private UUID queueTokenId;
+	private UUID reservationId;
+	private UUID paymentId;
 	private ReserveSeatCommand command;
 	private QueueToken queueToken;
 	private Seat seat;
 	private ConcertDate concertDate;
+	private Reservation reservation;
+	private Payment payment;
 
 	@BeforeEach
 	void beforeEach() {
 		LocalDateTime now = LocalDateTime.now();
 		concertId = UUID.randomUUID();
+		concertDateId = UUID.randomUUID();
 		seatId = UUID.randomUUID();
 		userId = UUID.randomUUID();
-		queueTokenId = "test-queue-token";
-		command = new ReserveSeatCommand(concertId, seatId, concertDateId, queueTokenId);
-		queueToken = QueueToken.activeTokenOf(UUID.fromString(queueTokenId), userId, concertId, 1000000);
-		seat = new Seat(seatId, 10, BigDecimal.valueOf(10000), SeatClass.VIP, SeatStatus.AVAILABLE, now, now);
+		queueTokenId = UUID.randomUUID();
+		reservationId = UUID.randomUUID();
+		paymentId= UUID.randomUUID();
+
+		command = new ReserveSeatCommand(concertId, concertDateId, seatId, queueTokenId.toString());
+		queueToken = QueueToken.activeTokenOf(queueTokenId, userId, concertId, 1000000);
+		seat = new Seat(seatId, concertDateId, 10, BigDecimal.valueOf(10000), SeatClass.VIP, SeatStatus.AVAILABLE, now, now);
 		concertDate = new ConcertDate(concertDateId, concertId, null, now.plusDays(7), now.plusDays(5), now, now);
+		reservation = new Reservation(reservationId, userId, seatId, ReservationStatus.PENDING, now, now);
+		payment = new Payment(paymentId, userId, reservationId, BigDecimal.valueOf(10000), PaymentStatus.PENDING, null, now, now);
 	}
 
 	@Test
 	@DisplayName("콘서트_좌석_예약_성공")
-	void concertSeatReservation_Success() {
-		when(queueTokenRepository.findQueueTokenByTokenId(queueTokenId)).thenReturn(queueToken);
+	void concertSeatReservation_Success() throws CustomException {
+		when(queueTokenRepository.findQueueTokenByTokenId(queueTokenId.toString())).thenReturn(queueToken);
 		when(concertRepository.existsConcert(command.concertId())).thenReturn(true);
 		when(concertDateRepository.findById(command.concertDateId())).thenReturn(Optional.of(concertDate));
 		when(seatRepository.findById(command.seatId())).thenReturn(Optional.of(seat));
+		when(reservationRepository.save(any(Reservation.class))).thenReturn(reservation);
+		when(paymentRepository.save(any(Payment.class))).thenReturn(payment);
 		when(seatLockRepository.getLock(command.seatId())).thenReturn(true);
 
 		reservationInteractor.reserveSeat(command);
 
-		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(queueTokenId);
+		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(queueTokenId.toString());
 		verify(concertRepository, times(1)).existsConcert(command.concertId());
 		verify(concertDateRepository, times(1)).findById(command.concertDateId());
 		verify(seatRepository, times(1)).findById(command.seatId());
@@ -127,14 +141,14 @@ class ReservationInteractorTest {
 	@Test
 	@DisplayName("콘서트_좌석_예약_실패_대기열토큰유효하지않음")
 	void concertSeatReservation_Failure_InvalidQueueToken() {
-		QueueToken waitingToken = QueueToken.waitingTokenOf(UUID.fromString(queueTokenId), userId, concertId, 10);
+		QueueToken waitingToken = QueueToken.waitingTokenOf(UUID.fromString(queueTokenId.toString()), userId, concertId, 10);
 
-		when(queueTokenRepository.findQueueTokenByTokenId(queueTokenId)).thenReturn(waitingToken);
+		when(queueTokenRepository.findQueueTokenByTokenId(queueTokenId.toString())).thenReturn(waitingToken);
 
 		CustomException customException = assertThrows(CustomException.class,
 			() -> reservationInteractor.reserveSeat(command));
 
-		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(queueTokenId);
+		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(queueTokenId.toString());
 		verify(concertRepository, never()).existsConcert(command.concertId());
 		verify(concertDateRepository, never()).findById(command.concertDateId());
 		verify(seatRepository, never()).findById(command.seatId());
@@ -153,13 +167,13 @@ class ReservationInteractorTest {
 	@Test
 	@DisplayName("콘서트_좌석_예약_실패_콘서트못찾음")
 	void concertSeatReservation_Failure_ConcertNotFound() {
-		when(queueTokenRepository.findQueueTokenByTokenId(queueTokenId)).thenReturn(queueToken);
+		when(queueTokenRepository.findQueueTokenByTokenId(queueTokenId.toString())).thenReturn(queueToken);
 		when(concertRepository.existsConcert(command.concertId())).thenReturn(false);
 
 		CustomException customException = assertThrows(CustomException.class,
 			() -> reservationInteractor.reserveSeat(command));
 
-		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(queueTokenId);
+		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(queueTokenId.toString());
 		verify(concertRepository, times(1)).existsConcert(command.concertId());
 		verify(concertDateRepository, never()).findById(command.concertDateId());
 		verify(seatRepository, never()).findById(command.seatId());
@@ -178,14 +192,14 @@ class ReservationInteractorTest {
 	@Test
 	@DisplayName("콘서트_좌석_예약_실패_콘서트날짜못찾음")
 	void concertSeatReservation_Failure_ConcertDateNotFound() {
-		when(queueTokenRepository.findQueueTokenByTokenId(queueTokenId)).thenReturn(queueToken);
+		when(queueTokenRepository.findQueueTokenByTokenId(queueTokenId.toString())).thenReturn(queueToken);
 		when(concertRepository.existsConcert(command.concertId())).thenReturn(true);
 		when(concertDateRepository.findById(command.concertDateId())).thenReturn(Optional.empty());
 
 		CustomException customException = assertThrows(CustomException.class,
 			() -> reservationInteractor.reserveSeat(command));
 
-		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(queueTokenId);
+		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(queueTokenId.toString());
 		verify(concertRepository, times(1)).existsConcert(command.concertId());
 		verify(concertDateRepository, times(1)).findById(command.concertDateId());
 		verify(seatRepository, never()).findById(command.seatId());
@@ -206,14 +220,14 @@ class ReservationInteractorTest {
 	void concertSeatReservation_Failure_OverDeadline() {
 		ConcertDate concertDate = new ConcertDate(concertDateId, concertId, null, LocalDateTime.now().plusDays(1), LocalDateTime.now().minusDays(3), LocalDateTime.now(), LocalDateTime.now());
 
-		when(queueTokenRepository.findQueueTokenByTokenId(queueTokenId)).thenReturn(queueToken);
+		when(queueTokenRepository.findQueueTokenByTokenId(queueTokenId.toString())).thenReturn(queueToken);
 		when(concertRepository.existsConcert(command.concertId())).thenReturn(true);
 		when(concertDateRepository.findById(command.concertDateId())).thenReturn(Optional.of(concertDate));
 
 		CustomException customException = assertThrows(CustomException.class,
 			() -> reservationInteractor.reserveSeat(command));
 
-		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(queueTokenId);
+		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(queueTokenId.toString());
 		verify(concertRepository, times(1)).existsConcert(command.concertId());
 		verify(concertDateRepository, times(1)).findById(command.concertDateId());
 		verify(seatRepository, never()).findById(command.seatId());
@@ -232,7 +246,7 @@ class ReservationInteractorTest {
 	@Test
 	@DisplayName("콘서트_좌석_예약_실패_좌석못찾음")
 	void concertSeatReservation_Failure_SeatNotFound() {
-		when(queueTokenRepository.findQueueTokenByTokenId(queueTokenId)).thenReturn(queueToken);
+		when(queueTokenRepository.findQueueTokenByTokenId(queueTokenId.toString())).thenReturn(queueToken);
 		when(concertRepository.existsConcert(command.concertId())).thenReturn(true);
 		when(concertDateRepository.findById(command.concertDateId())).thenReturn(Optional.of(concertDate));
 		when(seatRepository.findById(command.seatId())).thenReturn(Optional.empty());
@@ -240,7 +254,7 @@ class ReservationInteractorTest {
 		CustomException customException = assertThrows(CustomException.class,
 			() -> reservationInteractor.reserveSeat(command));
 
-		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(queueTokenId);
+		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(queueTokenId.toString());
 		verify(concertRepository, times(1)).existsConcert(command.concertId());
 		verify(concertDateRepository, times(1)).findById(command.concertDateId());
 		verify(seatRepository, times(1)).findById(command.seatId());
@@ -259,9 +273,9 @@ class ReservationInteractorTest {
 	@Test
 	@DisplayName("콘서트_좌석_예약_실패_좌석예약중")
 	void concertSeatReservation_Failure_SeatIsReserved() {
-		Seat reservationSeat = new Seat(seatId, 10, BigDecimal.valueOf(10000), SeatClass.VIP, SeatStatus.RESERVED, LocalDateTime.now(), LocalDateTime.now());
+		Seat reservationSeat = new Seat(seatId, concertDateId, 10, BigDecimal.valueOf(10000), SeatClass.VIP, SeatStatus.RESERVED, LocalDateTime.now(), LocalDateTime.now());
 
-		when(queueTokenRepository.findQueueTokenByTokenId(queueTokenId)).thenReturn(queueToken);
+		when(queueTokenRepository.findQueueTokenByTokenId(queueTokenId.toString())).thenReturn(queueToken);
 		when(concertRepository.existsConcert(command.concertId())).thenReturn(true);
 		when(concertDateRepository.findById(command.concertDateId())).thenReturn(Optional.of(concertDate));
 		when(seatRepository.findById(command.seatId())).thenReturn(Optional.of(reservationSeat));
@@ -269,7 +283,7 @@ class ReservationInteractorTest {
 		CustomException customException = assertThrows(CustomException.class,
 			() -> reservationInteractor.reserveSeat(command));
 
-		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(queueTokenId);
+		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(queueTokenId.toString());
 		verify(concertRepository, times(1)).existsConcert(command.concertId());
 		verify(concertDateRepository, times(1)).findById(command.concertDateId());
 		verify(seatRepository, times(1)).findById(command.seatId());
@@ -288,7 +302,7 @@ class ReservationInteractorTest {
 	@Test
 	@DisplayName("콘서트_좌석_예약_실패_좌석락획득실패")
 	void concertSeatReservation_Failure_getSeatLockFail() {
-		when(queueTokenRepository.findQueueTokenByTokenId(queueTokenId)).thenReturn(queueToken);
+		when(queueTokenRepository.findQueueTokenByTokenId(queueTokenId.toString())).thenReturn(queueToken);
 		when(concertRepository.existsConcert(command.concertId())).thenReturn(true);
 		when(concertDateRepository.findById(command.concertDateId())).thenReturn(Optional.of(concertDate));
 		when(seatRepository.findById(command.seatId())).thenReturn(Optional.of(seat));
@@ -297,7 +311,7 @@ class ReservationInteractorTest {
 		CustomException customException = assertThrows(CustomException.class,
 			() -> reservationInteractor.reserveSeat(command));
 
-		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(queueTokenId);
+		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(queueTokenId.toString());
 		verify(concertRepository, times(1)).existsConcert(command.concertId());
 		verify(concertDateRepository, times(1)).findById(command.concertDateId());
 		verify(seatRepository, times(1)).findById(command.seatId());

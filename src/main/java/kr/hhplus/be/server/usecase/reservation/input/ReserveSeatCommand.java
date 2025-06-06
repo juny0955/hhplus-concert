@@ -8,7 +8,7 @@ public record ReserveSeatCommand(
 	UUID concertId,
 	UUID concertDateId,
 	UUID seatId,
-	String queueToken
+	String queueTokenId
 ){
 	public static ReserveSeatCommand of(UUID concertId, ReservationRequest request, String queueToken) {
 		return new ReserveSeatCommand(concertId, request.seatId(), request.concertDateId(), queueToken);

@@ -15,4 +15,8 @@ public record ConcertDate(
 	LocalDateTime createdAt,
 	LocalDateTime updatedAt
 ) {
+
+	public boolean checkDeadline() {
+		return deadline.isAfter(LocalDateTime.now());
+	}
 }

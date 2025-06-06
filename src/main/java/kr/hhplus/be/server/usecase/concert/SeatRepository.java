@@ -7,6 +7,6 @@ import kr.hhplus.be.server.domain.concert.Seat;
 
 public interface SeatRepository {
 
-	void save(Seat seat);
+	Seat save(Seat seat);
 	Optional<Seat> findById(UUID seatId);
 }

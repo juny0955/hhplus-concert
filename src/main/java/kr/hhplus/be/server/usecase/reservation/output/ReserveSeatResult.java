@@ -6,7 +6,9 @@ import java.util.UUID;
 
 import kr.hhplus.be.server.domain.reservation.ReservationStatus;
 import kr.hhplus.be.server.interfaces.api.concert.dto.response.ReservationResponse;
+import lombok.Builder;
 
+@Builder
 public record ReserveSeatResult(
 	UUID reservationId,
 	UUID seatId,
@@ -15,6 +17,17 @@ public record ReserveSeatResult(
 	ReservationStatus status,
 	LocalDateTime createdAt
 ) {
+	public static ReserveSeatResult of(UUID reservationId, UUID seatId, Integer seatNo, BigDecimal price, ReservationStatus status, LocalDateTime now) {
+		return ReserveSeatResult.builder()
+			.reservationId(reservationId)
+			.seatId(seatId)
+			.seatNo(seatNo)
+			.price(price)
+			.status(status)
+			.createdAt(now)
+			.build();
+	}
+
 	public ReservationResponse toResponse() {
 		return new ReservationResponse(reservationId, seatId, seatNo, price, status, createdAt);
 	}
