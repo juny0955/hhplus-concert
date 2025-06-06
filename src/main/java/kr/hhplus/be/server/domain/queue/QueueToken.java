@@ -42,4 +42,8 @@ public record QueueToken(
 			.status(QueueStatus.WAITING)
 			.build();
 	}
+
+	public boolean isActive() {
+		return status.equals(QueueStatus.ACTIVE);
+	}
 }

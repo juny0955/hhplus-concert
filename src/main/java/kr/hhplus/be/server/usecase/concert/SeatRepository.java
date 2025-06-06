@@ -8,5 +8,5 @@ import kr.hhplus.be.server.domain.concert.Seat;
 public interface SeatRepository {
 
 	Seat save(Seat seat);
-	Optional<Seat> findById(UUID seatId);
+	Optional<Seat> findBySeatIdAndConcertDateId(UUID seatId, UUID concertDateId);
 }
