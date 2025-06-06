@@ -38,4 +38,9 @@ public class RedisQueueTokenRepository implements QueueTokenRepository {
 	public Integer countActiveTokens(UUID concertId) {
 		return null;
 	}
+
+	@Override
+	public void expiresQueueToken(String tokenId) {
+
+	}
 }

@@ -1,5 +1,7 @@
 package kr.hhplus.be.server.interfaces.gateway.repository.reservation;
 
+import java.util.UUID;
+
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
@@ -53,6 +55,17 @@ public class ReservationEntity extends BaseTimeEntity {
 			.userId(reservation.userId().toString())
 			.seatId(reservation.seatId().toString())
 			.status(reservation.status())
+			.build();
+	}
+
+	public Reservation toDomain() {
+		return Reservation.builder()
+			.id(UUID.fromString(id))
+			.userId(UUID.fromString(userId))
+			.seatId(UUID.fromString(seatId))
+			.status(status)
+			.createdAt(getCreatedAt())
+			.updatedAt(getUpdatedAt())
 			.build();
 	}
 }

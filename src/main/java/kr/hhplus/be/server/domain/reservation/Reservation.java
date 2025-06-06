@@ -22,15 +22,4 @@ public record Reservation(
 			.status(ReservationStatus.PENDING)
 			.build();
 	}
-
-	public static Reservation from(ReservationEntity save) {
-		return Reservation.builder()
-			.id(UUID.fromString(save.getId()))
-			.userId(UUID.fromString(save.getUserId()))
-			.seatId(UUID.fromString(save.getSeatId()))
-			.status(save.getStatus())
-			.createdAt(save.getCreatedAt())
-			.updatedAt(save.getUpdatedAt())
-			.build();
-	}
 }

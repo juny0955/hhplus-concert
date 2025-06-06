@@ -120,7 +120,7 @@ class ReservationInteractorTest {
 		when(seatRepository.findBySeatIdAndConcertDateId(command.seatId(), command.concertDateId())).thenReturn(Optional.of(seat));
 		when(reservationRepository.save(any(Reservation.class))).thenReturn(reservation);
 		when(paymentRepository.save(any(Payment.class))).thenReturn(payment);
-		when(seatLockRepository.getLock(command.seatId())).thenReturn(true);
+		when(seatLockRepository.acquisitionLock(command.seatId())).thenReturn(true);
 
 		reservationInteractor.reserveSeat(command);
 
@@ -128,11 +128,11 @@ class ReservationInteractorTest {
 		verify(concertRepository, times(1)).existsConcert(command.concertId());
 		verify(concertDateRepository, times(1)).findById(command.concertDateId());
 		verify(seatRepository, times(1)).findBySeatIdAndConcertDateId(command.seatId(), command.concertDateId());
-		verify(seatLockRepository, times(1)).getLock(command.seatId());
+		verify(seatLockRepository, times(1)).acquisitionLock(command.seatId());
 		verify(seatRepository, times(1)).save(any(Seat.class));
 		verify(reservationRepository, times(1)).save(any(Reservation.class));
 		verify(paymentRepository, times(1)).save(any(Payment.class));
-		verify(seatHoldRepository, times(1)).hold(seatId);
+		verify(seatHoldRepository, times(1)).hold(seatId, queueToken.userId());
 		verify(seatLockRepository, times(1)).releaseLock(seatId);
 		verify(eventPublisher, times(1)).publish(any(KafkaEventObject.class));
 		verify(reservationOutput, times(1)).ok(any(ReserveSeatResult.class));
@@ -141,7 +141,7 @@ class ReservationInteractorTest {
 	@Test
 	@DisplayName("콘서트_좌석_예약_실패_대기열토큰유효하지않음")
 	void concertSeatReservation_Failure_InvalidQueueToken() {
-		QueueToken waitingToken = QueueToken.waitingTokenOf(UUID.fromString(queueTokenId.toString()), userId, concertId, 10);
+		QueueToken waitingToken = QueueToken.waitingTokenOf(queueTokenId, userId, concertId, 10);
 
 		when(queueTokenRepository.findQueueTokenByTokenId(queueTokenId.toString())).thenReturn(waitingToken);
 
@@ -152,11 +152,11 @@ class ReservationInteractorTest {
 		verify(concertRepository, never()).existsConcert(command.concertId());
 		verify(concertDateRepository, never()).findById(command.concertDateId());
 		verify(seatRepository, never()).findBySeatIdAndConcertDateId(command.seatId(), command.concertDateId());
-		verify(seatLockRepository, never()).getLock(command.seatId());
+		verify(seatLockRepository, never()).acquisitionLock(command.seatId());
 		verify(seatRepository, never()).save(any(Seat.class));
 		verify(reservationRepository, never()).save(any(Reservation.class));
 		verify(paymentRepository, never()).save(any(Payment.class));
-		verify(seatHoldRepository, never()).hold(seatId);
+		verify(seatHoldRepository, never()).hold(seatId, queueToken.userId());
 		verify(seatLockRepository, never()).releaseLock(seatId);
 		verify(eventPublisher, never()).publish(any(KafkaEventObject.class));
 		verify(reservationOutput, never()).ok(any(ReserveSeatResult.class));
@@ -177,11 +177,11 @@ class ReservationInteractorTest {
 		verify(concertRepository, times(1)).existsConcert(command.concertId());
 		verify(concertDateRepository, never()).findById(command.concertDateId());
 		verify(seatRepository, never()).findBySeatIdAndConcertDateId(command.seatId(), command.concertDateId());
-		verify(seatLockRepository, never()).getLock(command.seatId());
+		verify(seatLockRepository, never()).acquisitionLock(command.seatId());
 		verify(seatRepository, never()).save(any(Seat.class));
 		verify(reservationRepository, never()).save(any(Reservation.class));
 		verify(paymentRepository, never()).save(any(Payment.class));
-		verify(seatHoldRepository, never()).hold(seatId);
+		verify(seatHoldRepository, never()).hold(seatId, queueToken.userId());
 		verify(seatLockRepository, never()).releaseLock(seatId);
 		verify(eventPublisher, never()).publish(any(KafkaEventObject.class));
 		verify(reservationOutput, never()).ok(any(ReserveSeatResult.class));
@@ -203,11 +203,11 @@ class ReservationInteractorTest {
 		verify(concertRepository, times(1)).existsConcert(command.concertId());
 		verify(concertDateRepository, times(1)).findById(command.concertDateId());
 		verify(seatRepository, never()).findBySeatIdAndConcertDateId(command.seatId(), command.concertDateId());
-		verify(seatLockRepository, never()).getLock(command.seatId());
+		verify(seatLockRepository, never()).acquisitionLock(command.seatId());
 		verify(seatRepository, never()).save(any(Seat.class));
 		verify(reservationRepository, never()).save(any(Reservation.class));
 		verify(paymentRepository, never()).save(any(Payment.class));
-		verify(seatHoldRepository, never()).hold(seatId);
+		verify(seatHoldRepository, never()).hold(seatId, queueToken.userId());
 		verify(seatLockRepository, never()).releaseLock(seatId);
 		verify(eventPublisher, never()).publish(any(KafkaEventObject.class));
 		verify(reservationOutput, never()).ok(any(ReserveSeatResult.class));
@@ -231,11 +231,11 @@ class ReservationInteractorTest {
 		verify(concertRepository, times(1)).existsConcert(command.concertId());
 		verify(concertDateRepository, times(1)).findById(command.concertDateId());
 		verify(seatRepository, never()).findBySeatIdAndConcertDateId(command.seatId(), command.concertDateId());
-		verify(seatLockRepository, never()).getLock(command.seatId());
+		verify(seatLockRepository, never()).acquisitionLock(command.seatId());
 		verify(seatRepository, never()).save(any(Seat.class));
 		verify(reservationRepository, never()).save(any(Reservation.class));
 		verify(paymentRepository, never()).save(any(Payment.class));
-		verify(seatHoldRepository, never()).hold(seatId);
+		verify(seatHoldRepository, never()).hold(seatId, queueToken.userId());
 		verify(seatLockRepository, never()).releaseLock(seatId);
 		verify(eventPublisher, never()).publish(any(KafkaEventObject.class));
 		verify(reservationOutput, never()).ok(any(ReserveSeatResult.class));
@@ -258,11 +258,11 @@ class ReservationInteractorTest {
 		verify(concertRepository, times(1)).existsConcert(command.concertId());
 		verify(concertDateRepository, times(1)).findById(command.concertDateId());
 		verify(seatRepository, times(1)).findBySeatIdAndConcertDateId(command.seatId(), command.concertDateId());
-		verify(seatLockRepository, never()).getLock(command.seatId());
+		verify(seatLockRepository, never()).acquisitionLock(command.seatId());
 		verify(seatRepository, never()).save(any(Seat.class));
 		verify(reservationRepository, never()).save(any(Reservation.class));
 		verify(paymentRepository, never()).save(any(Payment.class));
-		verify(seatHoldRepository, never()).hold(seatId);
+		verify(seatHoldRepository, never()).hold(seatId, queueToken.userId());
 		verify(seatLockRepository, never()).releaseLock(seatId);
 		verify(eventPublisher, never()).publish(any(KafkaEventObject.class));
 		verify(reservationOutput, never()).ok(any(ReserveSeatResult.class));
@@ -287,11 +287,11 @@ class ReservationInteractorTest {
 		verify(concertRepository, times(1)).existsConcert(command.concertId());
 		verify(concertDateRepository, times(1)).findById(command.concertDateId());
 		verify(seatRepository, times(1)).findBySeatIdAndConcertDateId(command.seatId(), command.concertDateId());
-		verify(seatLockRepository, never()).getLock(command.seatId());
+		verify(seatLockRepository, never()).acquisitionLock(command.seatId());
 		verify(seatRepository, never()).save(any(Seat.class));
 		verify(reservationRepository, never()).save(any(Reservation.class));
 		verify(paymentRepository, never()).save(any(Payment.class));
-		verify(seatHoldRepository, never()).hold(seatId);
+		verify(seatHoldRepository, never()).hold(seatId, queueToken.userId());
 		verify(seatLockRepository, never()).releaseLock(seatId);
 		verify(eventPublisher, never()).publish(any(KafkaEventObject.class));
 		verify(reservationOutput, never()).ok(any(ReserveSeatResult.class));
@@ -306,7 +306,7 @@ class ReservationInteractorTest {
 		when(concertRepository.existsConcert(command.concertId())).thenReturn(true);
 		when(concertDateRepository.findById(command.concertDateId())).thenReturn(Optional.of(concertDate));
 		when(seatRepository.findBySeatIdAndConcertDateId(command.seatId(), command.concertDateId())).thenReturn(Optional.of(seat));
-		when(seatLockRepository.getLock(command.seatId())).thenReturn(false);
+		when(seatLockRepository.acquisitionLock(command.seatId())).thenReturn(false);
 
 		CustomException customException = assertThrows(CustomException.class,
 			() -> reservationInteractor.reserveSeat(command));
@@ -315,11 +315,11 @@ class ReservationInteractorTest {
 		verify(concertRepository, times(1)).existsConcert(command.concertId());
 		verify(concertDateRepository, times(1)).findById(command.concertDateId());
 		verify(seatRepository, times(1)).findBySeatIdAndConcertDateId(command.seatId(), command.concertDateId());
-		verify(seatLockRepository, times(1)).getLock(command.seatId());
+		verify(seatLockRepository, times(1)).acquisitionLock(command.seatId());
 		verify(seatRepository, never()).save(any(Seat.class));
 		verify(reservationRepository, never()).save(any(Reservation.class));
 		verify(paymentRepository, never()).save(any(Payment.class));
-		verify(seatHoldRepository, never()).hold(seatId);
+		verify(seatHoldRepository, never()).hold(seatId, queueToken.userId());
 		verify(seatLockRepository, never()).releaseLock(seatId);
 		verify(eventPublisher, never()).publish(any(KafkaEventObject.class));
 		verify(reservationOutput, never()).ok(any(ReserveSeatResult.class));

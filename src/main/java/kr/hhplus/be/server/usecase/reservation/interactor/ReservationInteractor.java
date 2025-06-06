@@ -64,7 +64,7 @@ public class ReservationInteractor implements ReservationInput {
 
 			Reservation reservation = reservationRepository.save(Reservation.of(queueToken.userId(), seat.id()));
 			Payment payment = paymentRepository.save(Payment.of(queueToken.userId(), reservation.id(), seat.price()));
-			seatHoldRepository.hold(seat.id());
+			seatHoldRepository.hold(seat.id(), queueToken.userId());
 
 			reservationOutput.ok(ReserveSeatResult.of(reservation.id(), seat.id(), seat.seatNo(), seat.price(), reservation.status()));
 
@@ -98,7 +98,7 @@ public class ReservationInteractor implements ReservationInput {
 	}
 
 	private boolean acquisitionSeatLock(UUID seatId) throws CustomException {
-		if (!seatLockRepository.getLock(seatId))
+		if (!seatLockRepository.acquisitionLock(seatId))
 			throw new CustomException(ErrorCode.SEAT_LOCK_CONFLICT);
 
 		return true;

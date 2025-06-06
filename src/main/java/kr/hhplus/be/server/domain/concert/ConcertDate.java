@@ -19,4 +19,16 @@ public record ConcertDate(
 	public boolean checkDeadline() {
 		return deadline.isAfter(LocalDateTime.now());
 	}
+
+	public ConcertDate withRemainingSeatCount(Integer availableSeatCount) {
+		return ConcertDate.builder()
+			.id(id)
+			.concertId(concertId)
+			.remainingSeatCount(availableSeatCount)
+			.date(date)
+			.deadline(deadline)
+			.createdAt(createdAt)
+			.updatedAt(updatedAt)
+			.build();
+	}
 }

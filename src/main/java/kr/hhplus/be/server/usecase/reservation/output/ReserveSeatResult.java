@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import kr.hhplus.be.server.domain.reservation.ReservationStatus;
-import kr.hhplus.be.server.interfaces.api.concert.dto.response.ReservationResponse;
+import kr.hhplus.be.server.interfaces.api.reservation.dto.response.ReservationResponse;
 import lombok.Builder;
 
 @Builder

@@ -6,7 +6,10 @@ import java.util.UUID;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import kr.hhplus.be.server.domain.payment.PaymentStatus;
+import kr.hhplus.be.server.usecase.payment.output.PaymentResult;
+import lombok.Builder;
 
+@Builder
 public record PaymentResponse(
 	@Schema(description = "결제 ID")
 	UUID paymentId,
@@ -19,4 +22,7 @@ public record PaymentResponse(
 	@Schema(description = "결제 시간")
 	LocalDateTime createdAt
 ) {
+	public static PaymentResponse from(PaymentResult paymentResult) {
+		return null;
+	}
 }

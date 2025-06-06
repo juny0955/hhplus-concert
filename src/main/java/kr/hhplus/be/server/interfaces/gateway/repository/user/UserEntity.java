@@ -39,6 +39,13 @@ public class UserEntity extends BaseTimeEntity {
 	@ColumnDefault("0")
 	private BigDecimal amount;
 
+	public static UserEntity from(User user) {
+		return UserEntity.builder()
+			.id(user.id().toString())
+			.amount(user.amount())
+			.build();
+	}
+
 	public User toDomain() {
 		return User.builder()
 			.id(UUID.fromString(id))
@@ -46,10 +53,5 @@ public class UserEntity extends BaseTimeEntity {
 			.createdAt(getCreatedAt())
 			.updatedAt(getUpdatedAt())
 			.build();
-	}
-
-	public UserEntity charge(BigDecimal point) {
-		amount = amount.add(point);
-		return this;
 	}
 }

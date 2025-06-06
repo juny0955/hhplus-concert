@@ -9,6 +9,7 @@ public enum ErrorCode {
 	// USER
 	USER_NOT_FOUND(404, "U001", "해당 사용자를 찾을 수 없습니다."),
 	NOT_ENOUGH_MIN_CHARGE_POINT(400, "U002", "최소 충전 금액보다 적은 금액은 충전할 수 없습니다."),
+	INSUFFICIENT_BALANCE(400, "U003", "보유 포인트가 부족합니다."),
 
 	// CONCERT
 	CONCERT_NOT_FOUND(404, "C001", "해당 콘서트를 찾을 수 없습니다"),
@@ -18,6 +19,13 @@ public enum ErrorCode {
 	SEAT_NOT_FOUND(404, "C005", "해당 좌석을 찾을 수 없습니다."),
 	ALREADY_RESERVED_SEAT(400, "C006", "해당 좌석은 이미 예약되었습니다."),
 	SEAT_LOCK_CONFLICT(409, "C007", "이미 다른 사용자가 예약중입니다."),
+	SEAT_NOT_HOLD(409, "C008", "해당 좌석은 임시 배정되어있지 않습니다."),
+
+	// RESERVATION
+	RESERVATION_NOT_FOUND(404, "R001", "해당 예약정보를 찾을 수 없습니다."),
+
+	// PAYMENT
+	PAYMENT_NOT_FOUND(404, "P001", "해당 결제정보를 찾을 수 없습니다."),
 
 	// QUEUE TOKEN
 	INVALID_QUEUE_TOKEN(400, "Q001", "대기열 토큰이 유효하지 않습니다."),

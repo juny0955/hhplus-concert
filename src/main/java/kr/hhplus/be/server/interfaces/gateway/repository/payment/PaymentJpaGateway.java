@@ -1,5 +1,8 @@
 package kr.hhplus.be.server.interfaces.gateway.repository.payment;
 
+import java.util.Optional;
+import java.util.UUID;
+
 import org.springframework.stereotype.Component;
 
 import kr.hhplus.be.server.domain.payment.Payment;
@@ -15,7 +18,12 @@ public class PaymentJpaGateway implements PaymentRepository {
 	@Override
 	public Payment save(Payment payment) {
 		PaymentEntity paymentEntity = PaymentEntity.from(payment);
-		PaymentEntity save = jpaPaymentRepository.save(paymentEntity);
-		return Payment.from(save);
+		return jpaPaymentRepository.save(paymentEntity).toDomain();
+	}
+
+	@Override
+	public Optional<Payment> findByReservationId(UUID reservationId) {
+		return jpaPaymentRepository.findByReservationId(reservationId.toString())
+			.map(PaymentEntity::toDomain);
 	}
 }

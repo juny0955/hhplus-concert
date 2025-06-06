@@ -10,4 +10,5 @@ public interface QueueTokenRepository {
 	QueueToken findQueueTokenByTokenId(String tokenId);
 	Integer countWaitingTokens(UUID concertId);
 	Integer countActiveTokens(UUID concertId);
+	void expiresQueueToken(String tokenId);
 }

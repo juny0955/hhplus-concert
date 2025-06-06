@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.interfaces.gateway.repository.payment;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -62,6 +63,18 @@ public class PaymentEntity extends BaseTimeEntity {
 			.reservationId(payment.reservationId().toString())
 			.amount(payment.amount())
 			.status(payment.status())
+			.build();
+	}
+
+	public Payment toDomain() {
+		return Payment.builder()
+			.id(UUID.fromString(id))
+			.userId(UUID.fromString(userId))
+			.reservationId(UUID.fromString(reservationId))
+			.status(status)
+			.failureReason(failureReason)
+			.createdAt(getCreatedAt())
+			.updatedAt(getUpdatedAt())
 			.build();
 	}
 }

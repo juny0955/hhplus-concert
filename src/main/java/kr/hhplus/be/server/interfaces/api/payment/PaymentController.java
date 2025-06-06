@@ -1,7 +1,5 @@
 package kr.hhplus.be.server.interfaces.api.payment;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
@@ -18,14 +16,22 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import kr.hhplus.be.server.domain.payment.PaymentStatus;
 import kr.hhplus.be.server.interfaces.api.payment.dto.response.PaymentResponse;
+import kr.hhplus.be.server.usecase.payment.input.PaymentCommand;
+import kr.hhplus.be.server.usecase.payment.input.PaymentInput;
+import kr.hhplus.be.server.usecase.payment.output.PaymentOutput;
+import kr.hhplus.be.server.usecase.payment.output.PaymentResult;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestScope
 @RequestMapping("/api/v1/payments")
+@RequiredArgsConstructor
 @Tag(name = "Payment API", description = "결제 관련 API")
-public class PaymentController {
+public class PaymentController implements PaymentOutput {
+
+	private final PaymentInput paymentInput;
+	private PaymentResponse paymentResponse;
 
 	@Operation(
 		summary = "예약 결제 API",
@@ -59,13 +65,12 @@ public class PaymentController {
 		@PathVariable UUID reservationId,
 		@RequestHeader(value = "Authorization") String queueToken
 	) {
-		PaymentResponse response = new PaymentResponse(
-			UUID.randomUUID(),
-			UUID.randomUUID(),
-			BigDecimal.valueOf(100000),
-			PaymentStatus.SUCCESS,
-			LocalDateTime.now()
-		);
-		return ResponseEntity.ok(response);
+		paymentInput.payment(PaymentCommand.of(reservationId, queueToken));
+		return ResponseEntity.ok(paymentResponse);
+	}
+
+	@Override
+	public void ok(PaymentResult paymentResult) {
+		paymentResponse = PaymentResponse.from(paymentResult);
 	}
 }

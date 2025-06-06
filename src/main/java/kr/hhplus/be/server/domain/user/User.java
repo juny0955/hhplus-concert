@@ -13,4 +13,13 @@ public record User (
 	LocalDateTime createdAt,
 	LocalDateTime updatedAt
 ) {
+
+	public User charge(BigDecimal point) {
+		return User.builder()
+			.id(id)
+			.amount(amount.add(point))
+			.createdAt(createdAt)
+			.updatedAt(updatedAt)
+			.build();
+	}
 }

@@ -7,8 +7,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import kr.hhplus.be.server.domain.user.User;
-import kr.hhplus.be.server.interfaces.gateway.repository.user.UserEntity;
-import kr.hhplus.be.server.interfaces.gateway.repository.user.JpaUserRepository;
 import kr.hhplus.be.server.usecase.exception.CustomException;
 import kr.hhplus.be.server.usecase.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -22,12 +20,10 @@ public class UserService {
 
 	private static final BigDecimal MIN_CHARGE_POINT = BigDecimal.valueOf(1000);
 
-	private final JpaUserRepository jpaUserRepository;
+	private final UserRepository userRepository;
 
 	public User getUser(UUID userId) throws CustomException {
-		UserEntity userEntity = getUserEntity(userId);
-
-		return userEntity.toDomain();
+		return findUser(userId);
 	}
 
 	@Transactional
@@ -37,21 +33,22 @@ public class UserService {
 			throw new CustomException(ErrorCode.NOT_ENOUGH_MIN_CHARGE_POINT);
 		}
 
-		UserEntity userEntity = getUserEntity(userId);
+		User user = findUser(userId);
 
-		userEntity.charge(point);
+		User charged = user.charge(point);
+		User saved = userRepository.save(charged);
 
-		log.info("유저 포인트 충전: USER_ID - {}, CHARGE_POINT - {}, AFTER_POINT - {}", userId, point, userEntity.getAmount());
-		return userEntity.toDomain();
+		log.info("유저 포인트 충전: USER_ID - {}, CHARGE_POINT - {}, AFTER_POINT - {}", userId, point, user.amount());
+		return saved;
 	}
 
-	private UserEntity getUserEntity(UUID userId) throws CustomException {
+	private User findUser(UUID userId) throws CustomException {
 		try {
-			UserEntity userEntity = jpaUserRepository.findById(userId.toString())
+			User user = userRepository.findById(userId)
 				.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
 			log.debug("유저 조회: USER_ID - {}", userId);
-			return userEntity;
+			return user;
 		} catch (CustomException e) {
 			log.warn("유저 조회 실패: USER_ID - {}", userId);
 			throw e;
