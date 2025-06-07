@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.interfaces.gateway.repository.concert;
+package kr.hhplus.be.server.interfaces.gateway.repository.concertDate;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -44,13 +44,12 @@ public class ConcertDateEntity extends BaseTimeEntity {
 	@Column(name = "deadline", nullable = false)
 	private LocalDateTime deadline;
 
-	public ConcertDate toDomain(Integer remainingSeatCount) {
+	public ConcertDate toDomain() {
 		return ConcertDate.builder()
 			.id(UUID.fromString(id))
 			.concertId(UUID.fromString(concertId))
 			.date(date)
 			.deadline(deadline)
-			.remainingSeatCount(remainingSeatCount)
 			.createdAt(getCreatedAt())
 			.updatedAt(getUpdatedAt())
 			.build();

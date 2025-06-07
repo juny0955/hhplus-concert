@@ -1,5 +1,7 @@
 package kr.hhplus.be.server.interfaces.gateway.repository.concert;
 
+import java.util.UUID;
+
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
@@ -9,6 +11,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import kr.hhplus.be.server.domain.concert.Concert;
 import kr.hhplus.be.server.interfaces.gateway.repository.BaseTimeEntity;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -35,4 +38,14 @@ public class ConcertEntity extends BaseTimeEntity {
 
 	@Column(name = "artist", length = 50, nullable = false)
 	private String artist;
+
+	public Concert toDomain() {
+		return Concert.builder()
+			.id(UUID.fromString(id))
+			.title(title)
+			.artist(artist)
+			.createdAt(getCreatedAt())
+			.updatedAt(getUpdatedAt())
+			.build();
+	}
 }

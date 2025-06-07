@@ -8,4 +8,6 @@ import kr.hhplus.be.server.domain.user.User;
 public interface UserRepository {
 	User save(User user);
 	Optional<User> findById(UUID userId);
+
+	boolean existsById(UUID userId);
 }

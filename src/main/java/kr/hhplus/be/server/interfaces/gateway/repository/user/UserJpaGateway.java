@@ -26,4 +26,9 @@ public class UserJpaGateway implements UserRepository {
 		return jpaUserRepository.findById(userId.toString())
 			.map(UserEntity::toDomain);
 	}
+
+	@Override
+	public boolean existsById(UUID userId) {
+		return jpaUserRepository.existsById(userId.toString());
+	}
 }

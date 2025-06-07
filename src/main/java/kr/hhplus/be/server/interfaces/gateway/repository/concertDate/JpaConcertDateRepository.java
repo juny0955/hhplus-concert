@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.interfaces.gateway.repository.concert;
+package kr.hhplus.be.server.interfaces.gateway.repository.concertDate;
 
 import java.util.List;
 import java.util.Optional;

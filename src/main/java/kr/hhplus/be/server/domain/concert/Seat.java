@@ -18,7 +18,7 @@ public record Seat(
 	LocalDateTime updatedAt
 ) {
 
-	public boolean canReserve() {
+	public boolean isAvailable() {
 		return status.equals(SeatStatus.AVAILABLE);
 	}
 

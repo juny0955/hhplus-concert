@@ -20,15 +20,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import kr.hhplus.be.server.domain.concert.Seat;
 import kr.hhplus.be.server.domain.concert.SeatClass;
 import kr.hhplus.be.server.domain.concert.SeatStatus;
-import kr.hhplus.be.server.domain.event.KafkaEventObject;
 import kr.hhplus.be.server.domain.payment.Payment;
+import kr.hhplus.be.server.domain.payment.PaymentDomainResult;
+import kr.hhplus.be.server.domain.payment.PaymentDomainService;
 import kr.hhplus.be.server.domain.payment.PaymentStatus;
 import kr.hhplus.be.server.domain.queue.QueueToken;
 import kr.hhplus.be.server.domain.reservation.Reservation;
 import kr.hhplus.be.server.domain.reservation.ReservationStatus;
 import kr.hhplus.be.server.domain.user.User;
 import kr.hhplus.be.server.usecase.concert.SeatRepository;
-import kr.hhplus.be.server.usecase.event.EventPublisher;
 import kr.hhplus.be.server.usecase.exception.CustomException;
 import kr.hhplus.be.server.usecase.exception.ErrorCode;
 import kr.hhplus.be.server.usecase.payment.PaymentRepository;
@@ -68,7 +68,7 @@ class PaymentInteractorTest {
 	private PaymentOutput paymentOutput;
 
 	@Mock
-	private EventPublisher eventPublisher;
+	private PaymentDomainService paymentDomainService;
 
 	private UUID reservationId;
 	private UUID queueTokenId;
@@ -111,17 +111,19 @@ class PaymentInteractorTest {
 		Seat successSeat = new Seat(seatId, concertDateId, 10, BigDecimal.valueOf(10000), SeatClass.VIP, SeatStatus.ASSIGNED, LocalDateTime.now(), LocalDateTime.now());
 		User successUser = new User(userId, BigDecimal.valueOf(90000), LocalDateTime.now(), LocalDateTime.now());
 
+		PaymentDomainResult domainResult = new PaymentDomainResult(successUser, successReservation, successPayment, successSeat);
+
 		when(queueTokenRepository.findQueueTokenByTokenId(paymentCommand.queueTokenId())).thenReturn(queueToken);
 		when(reservationRepository.findById(paymentCommand.reservationId())).thenReturn(Optional.of(reservation));
 		when(paymentRepository.findByReservationId(reservation.id())).thenReturn(Optional.of(payment));
-		when(userRepository.findById(queueToken.userId())).thenReturn(Optional.of(user));
 		when(seatRepository.findById(reservation.seatId())).thenReturn(Optional.of(seat));
+		when(userRepository.findById(queueToken.userId())).thenReturn(Optional.of(user));
 		when(seatHoldRepository.isHoldSeat(seat.id(), user.id())).thenReturn(true);
-
-		when(reservationRepository.save(any(Reservation.class))).thenReturn(successReservation);
-		when(paymentRepository.save(any(Payment.class))).thenReturn(successPayment);
-		when(seatRepository.save(any(Seat.class))).thenReturn(successSeat);
-		when(userRepository.save(any(User.class))).thenReturn(successUser);
+		when(paymentDomainService.processPayment(reservation, payment, seat, user)).thenReturn(domainResult);
+		when(reservationRepository.save(successReservation)).thenReturn(successReservation);
+		when(paymentRepository.save(successPayment)).thenReturn(successPayment);
+		when(seatRepository.save(successSeat)).thenReturn(successSeat);
+		when(userRepository.save(successUser)).thenReturn(successUser);
 
 		paymentInteractor.payment(paymentCommand);
 
@@ -131,13 +133,14 @@ class PaymentInteractorTest {
 		verify(seatRepository, times(1)).findById(reservation.seatId());
 		verify(userRepository, times(1)).findById(queueToken.userId());
 		verify(seatHoldRepository, times(1)).isHoldSeat(seat.id(), user.id());
-		verify(userRepository, times(1)).save(any(User.class));
-		verify(paymentRepository, times(1)).save(any(Payment.class));
-		verify(reservationRepository, times(1)).save(any(Reservation.class));
-		verify(seatRepository, times(1)).save(any(Seat.class));
+		verify(paymentDomainService, times(1)).processPayment(reservation, payment, seat, user);
+		verify(userRepository, times(1)).save(successUser);
+		verify(paymentRepository, times(1)).save(successPayment);
+		verify(reservationRepository, times(1)).save(successReservation);
+		verify(seatRepository, times(1)).save(successSeat);
 		verify(seatHoldRepository, times(1)).deleteHold(seat.id(), user.id());
 		verify(queueTokenRepository, times(1)).expiresQueueToken(queueToken.tokenId().toString());
-		verify(eventPublisher, times(1)).publish(any(KafkaEventObject.class));
+		verify(paymentDomainService, times(1)).handlePaymentSuccess(successPayment, successReservation, successSeat, successUser);
 		verify(paymentOutput, times(1)).ok(any(PaymentResult.class));
 	}
 
@@ -152,19 +155,20 @@ class PaymentInteractorTest {
 			() -> paymentInteractor.payment(paymentCommand));
 
 		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(paymentCommand.queueTokenId());
-		verify(reservationRepository, never()).findById(paymentCommand.reservationId());
-		verify(paymentRepository, never()).findByReservationId(reservation.id());
-		verify(seatRepository, never()).findById(reservation.seatId());
-		verify(userRepository, never()).findById(queueToken.userId());
-		verify(seatHoldRepository, never()).isHoldSeat(seat.id(), user.id());
-		verify(userRepository, never()).save(any(User.class));
-		verify(paymentRepository, never()).save(any(Payment.class));
-		verify(reservationRepository, never()).save(any(Reservation.class));
-		verify(seatRepository, never()).save(any(Seat.class));
-		verify(seatHoldRepository, never()).deleteHold(seat.id(), user.id());
-		verify(queueTokenRepository, never()).expiresQueueToken(queueToken.tokenId().toString());
-		verify(eventPublisher, never()).publish(any(KafkaEventObject.class));
-		verify(paymentOutput, never()).ok(any(PaymentResult.class));
+		verify(reservationRepository, never()).findById(any());
+		verify(paymentRepository, never()).findByReservationId(any());
+		verify(seatRepository, never()).findById(any());
+		verify(userRepository, never()).findById(any());
+		verify(seatHoldRepository, never()).isHoldSeat(any(), any());
+		verify(paymentDomainService, never()).processPayment(any(), any(), any(), any());
+		verify(userRepository, never()).save(any());
+		verify(paymentRepository, never()).save(any());
+		verify(reservationRepository, never()).save(any());
+		verify(seatRepository, never()).save(any());
+		verify(seatHoldRepository, never()).deleteHold(any(), any());
+		verify(queueTokenRepository, never()).expiresQueueToken(any());
+		verify(paymentDomainService, never()).handlePaymentSuccess(any(), any(), any(), any());
+		verify(paymentOutput, never()).ok(any());
 
 		assertThat(customException.getErrorCode()).isEqualTo(ErrorCode.INVALID_QUEUE_TOKEN);
 	}
@@ -180,18 +184,11 @@ class PaymentInteractorTest {
 
 		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(paymentCommand.queueTokenId());
 		verify(reservationRepository, times(1)).findById(paymentCommand.reservationId());
-		verify(paymentRepository, never()).findByReservationId(reservation.id());
-		verify(seatRepository, never()).findById(reservation.seatId());
-		verify(userRepository, never()).findById(queueToken.userId());
-		verify(seatHoldRepository, never()).isHoldSeat(seat.id(), user.id());
-		verify(userRepository, never()).save(any(User.class));
-		verify(paymentRepository, never()).save(any(Payment.class));
-		verify(reservationRepository, never()).save(any(Reservation.class));
-		verify(seatRepository, never()).save(any(Seat.class));
-		verify(seatHoldRepository, never()).deleteHold(seat.id(), user.id());
-		verify(queueTokenRepository, never()).expiresQueueToken(queueToken.tokenId().toString());
-		verify(eventPublisher, never()).publish(any(KafkaEventObject.class));
-		verify(paymentOutput, never()).ok(any(PaymentResult.class));
+		verify(paymentRepository, never()).findByReservationId(any());
+		verify(seatRepository, never()).findById(any());
+		verify(userRepository, never()).findById(any());
+		verify(seatHoldRepository, never()).isHoldSeat(any(), any());
+		verify(paymentDomainService, never()).processPayment(any(), any(), any(), any());
 
 		assertThat(customException.getErrorCode()).isEqualTo(ErrorCode.RESERVATION_NOT_FOUND);
 	}
@@ -209,17 +206,10 @@ class PaymentInteractorTest {
 		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(paymentCommand.queueTokenId());
 		verify(reservationRepository, times(1)).findById(paymentCommand.reservationId());
 		verify(paymentRepository, times(1)).findByReservationId(reservation.id());
-		verify(seatRepository, never()).findById(reservation.seatId());
-		verify(userRepository, never()).findById(queueToken.userId());
-		verify(seatHoldRepository, never()).isHoldSeat(seat.id(), user.id());
-		verify(userRepository, never()).save(any(User.class));
-		verify(paymentRepository, never()).save(any(Payment.class));
-		verify(reservationRepository, never()).save(any(Reservation.class));
-		verify(seatRepository, never()).save(any(Seat.class));
-		verify(seatHoldRepository, never()).deleteHold(seat.id(), user.id());
-		verify(queueTokenRepository, never()).expiresQueueToken(queueToken.tokenId().toString());
-		verify(eventPublisher, never()).publish(any(KafkaEventObject.class));
-		verify(paymentOutput, never()).ok(any(PaymentResult.class));
+		verify(seatRepository, never()).findById(any());
+		verify(userRepository, never()).findById(any());
+		verify(seatHoldRepository, never()).isHoldSeat(any(), any());
+		verify(paymentDomainService, never()).processPayment(any(), any(), any(), any());
 
 		assertThat(customException.getErrorCode()).isEqualTo(ErrorCode.PAYMENT_NOT_FOUND);
 	}
@@ -239,16 +229,9 @@ class PaymentInteractorTest {
 		verify(reservationRepository, times(1)).findById(paymentCommand.reservationId());
 		verify(paymentRepository, times(1)).findByReservationId(reservation.id());
 		verify(seatRepository, times(1)).findById(reservation.seatId());
-		verify(userRepository, never()).findById(queueToken.userId());
-		verify(seatHoldRepository, never()).isHoldSeat(seat.id(), user.id());
-		verify(userRepository, never()).save(any(User.class));
-		verify(paymentRepository, never()).save(any(Payment.class));
-		verify(reservationRepository, never()).save(any(Reservation.class));
-		verify(seatRepository, never()).save(any(Seat.class));
-		verify(seatHoldRepository, never()).deleteHold(seat.id(), user.id());
-		verify(queueTokenRepository, never()).expiresQueueToken(queueToken.tokenId().toString());
-		verify(eventPublisher, never()).publish(any(KafkaEventObject.class));
-		verify(paymentOutput, never()).ok(any(PaymentResult.class));
+		verify(userRepository, never()).findById(any());
+		verify(seatHoldRepository, never()).isHoldSeat(any(), any());
+		verify(paymentDomainService, never()).processPayment(any(), any(), any(), any());
 
 		assertThat(customException.getErrorCode()).isEqualTo(ErrorCode.SEAT_NOT_FOUND);
 	}
@@ -270,49 +253,10 @@ class PaymentInteractorTest {
 		verify(paymentRepository, times(1)).findByReservationId(reservation.id());
 		verify(seatRepository, times(1)).findById(reservation.seatId());
 		verify(userRepository, times(1)).findById(queueToken.userId());
-		verify(seatHoldRepository, never()).isHoldSeat(seat.id(), user.id());
-		verify(userRepository, never()).save(any(User.class));
-		verify(paymentRepository, never()).save(any(Payment.class));
-		verify(reservationRepository, never()).save(any(Reservation.class));
-		verify(seatRepository, never()).save(any(Seat.class));
-		verify(seatHoldRepository, never()).deleteHold(seat.id(), user.id());
-		verify(queueTokenRepository, never()).expiresQueueToken(queueToken.tokenId().toString());
-		verify(eventPublisher, never()).publish(any(KafkaEventObject.class));
-		verify(paymentOutput, never()).ok(any(PaymentResult.class));
+		verify(seatHoldRepository, never()).isHoldSeat(any(), any());
+		verify(paymentDomainService, never()).processPayment(any(), any(), any(), any());
 
 		assertThat(customException.getErrorCode()).isEqualTo(ErrorCode.USER_NOT_FOUND);
-	}
-
-	@Test
-	@DisplayName("결제_실패_유저잔액부족")
-	void payment_Failure_UserNotEnoughPoint() throws CustomException {
-		User poorUser = new User(userId, BigDecimal.valueOf(5000), LocalDateTime.now(), LocalDateTime.now());
-
-		when(queueTokenRepository.findQueueTokenByTokenId(paymentCommand.queueTokenId())).thenReturn(queueToken);
-		when(reservationRepository.findById(paymentCommand.reservationId())).thenReturn(Optional.of(reservation));
-		when(paymentRepository.findByReservationId(reservation.id())).thenReturn(Optional.of(payment));
-		when(seatRepository.findById(reservation.seatId())).thenReturn(Optional.of(seat));
-		when(userRepository.findById(queueToken.userId())).thenReturn(Optional.of(poorUser));
-
-		CustomException customException = assertThrows(CustomException.class,
-			() -> paymentInteractor.payment(paymentCommand));
-
-		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(paymentCommand.queueTokenId());
-		verify(reservationRepository, times(1)).findById(paymentCommand.reservationId());
-		verify(paymentRepository, times(1)).findByReservationId(reservation.id());
-		verify(seatRepository, times(1)).findById(reservation.seatId());
-		verify(userRepository, times(1)).findById(queueToken.userId());
-		verify(seatHoldRepository, never()).isHoldSeat(seat.id(), user.id());
-		verify(userRepository, never()).save(any(User.class));
-		verify(paymentRepository, never()).save(any(Payment.class));
-		verify(reservationRepository, never()).save(any(Reservation.class));
-		verify(seatRepository, never()).save(any(Seat.class));
-		verify(seatHoldRepository, never()).deleteHold(seat.id(), user.id());
-		verify(queueTokenRepository, never()).expiresQueueToken(queueToken.tokenId().toString());
-		verify(eventPublisher, never()).publish(any(KafkaEventObject.class));
-		verify(paymentOutput, never()).ok(any(PaymentResult.class));
-
-		assertThat(customException.getErrorCode()).isEqualTo(ErrorCode.INSUFFICIENT_BALANCE);
 	}
 
 	@Test
@@ -334,14 +278,15 @@ class PaymentInteractorTest {
 		verify(seatRepository, times(1)).findById(reservation.seatId());
 		verify(userRepository, times(1)).findById(queueToken.userId());
 		verify(seatHoldRepository, times(1)).isHoldSeat(seat.id(), user.id());
-		verify(userRepository, never()).save(any(User.class));
-		verify(paymentRepository, never()).save(any(Payment.class));
-		verify(reservationRepository, never()).save(any(Reservation.class));
-		verify(seatRepository, never()).save(any(Seat.class));
-		verify(seatHoldRepository, never()).deleteHold(seat.id(), user.id());
-		verify(queueTokenRepository, never()).expiresQueueToken(queueToken.tokenId().toString());
-		verify(eventPublisher, never()).publish(any(KafkaEventObject.class));
-		verify(paymentOutput, never()).ok(any(PaymentResult.class));
+		verify(paymentDomainService, never()).processPayment(any(), any(), any(), any());
+		verify(userRepository, never()).save(any());
+		verify(paymentRepository, never()).save(any());
+		verify(reservationRepository, never()).save(any());
+		verify(seatRepository, never()).save(any());
+		verify(seatHoldRepository, never()).deleteHold(any(), any());
+		verify(queueTokenRepository, never()).expiresQueueToken(any());
+		verify(paymentDomainService, never()).handlePaymentSuccess(any(), any(), any(), any());
+		verify(paymentOutput, never()).ok(any());
 
 		assertThat(customException.getErrorCode()).isEqualTo(ErrorCode.SEAT_NOT_HOLD);
 	}

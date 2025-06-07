@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.interfaces.gateway.repository.concert;
+package kr.hhplus.be.server.interfaces.gateway.repository.seat;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -57,6 +57,17 @@ public class SeatEntity extends BaseTimeEntity {
 	@Column(name = "status", nullable = false)
 	@ColumnDefault("'AVAILABLE'")
 	private SeatStatus status;
+
+	public static SeatEntity from(Seat seat) {
+		return SeatEntity.builder()
+			.id(seat.id().toString())
+			.concertDateId(seat.concertDateId().toString())
+			.seatNo(seat.seatNo())
+			.price(seat.price())
+			.seatClass(seat.seatClass())
+			.status(seat.status())
+			.build();
+	}
 
 	public Seat toDomain() {
 		return Seat.builder()

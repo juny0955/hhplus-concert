@@ -17,11 +17,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import kr.hhplus.be.server.domain.queue.QueueStatus;
 import kr.hhplus.be.server.domain.queue.QueueToken;
-import kr.hhplus.be.server.interfaces.gateway.repository.concert.JpaConcertRepository;
 import kr.hhplus.be.server.interfaces.gateway.repository.queue.RedisQueueTokenRepository;
-import kr.hhplus.be.server.interfaces.gateway.repository.user.JpaUserRepository;
+import kr.hhplus.be.server.usecase.concert.ConcertRepository;
 import kr.hhplus.be.server.usecase.exception.CustomException;
 import kr.hhplus.be.server.usecase.exception.ErrorCode;
+import kr.hhplus.be.server.usecase.user.UserRepository;
 
 @ExtendWith(MockitoExtension.class)
 class QueueServiceTest {
@@ -33,10 +33,10 @@ class QueueServiceTest {
 	private RedisQueueTokenRepository redisQueueTokenRepository;
 
 	@Mock
-	private JpaConcertRepository jpaConcertRepository;
+	private ConcertRepository concertRepository;
 
 	@Mock
-	private JpaUserRepository jpaUserRepository;
+	private UserRepository userRepository;
 
 	private UUID userId;
 	private UUID concertId;
@@ -66,16 +66,16 @@ class QueueServiceTest {
 	void issueQueueToken_Success_Waiting() throws CustomException {
 		Integer waitingCount = 10;
 
-		when(jpaUserRepository.existsById(userId.toString())).thenReturn(true);
-		when(jpaConcertRepository.existsById(concertId.toString())).thenReturn(true);
+		when(userRepository.existsById(userId)).thenReturn(true);
+		when(concertRepository.existsById(concertId)).thenReturn(true);
 		when(redisQueueTokenRepository.findTokenIdByUserIdAndConcertId(userId, concertId)).thenReturn(null);
 		when(redisQueueTokenRepository.countActiveTokens(concertId)).thenReturn(50);
 		when(redisQueueTokenRepository.countWaitingTokens(concertId)).thenReturn(waitingCount);
 
 		QueueToken queueToken = queueService.issueQueueToken(userId, concertId);
 
-		verify(jpaUserRepository, times(1)).existsById(userId.toString());
-		verify(jpaConcertRepository, times(1)).existsById(concertId.toString());
+		verify(userRepository, times(1)).existsById(userId);
+		verify(concertRepository, times(1)).existsById(concertId);
 		verify(redisQueueTokenRepository, times(1)).findTokenIdByUserIdAndConcertId(userId, concertId);
 		verify(redisQueueTokenRepository, times(1)).countActiveTokens(concertId);
 		verify(redisQueueTokenRepository, times(1)).countWaitingTokens(concertId);
@@ -93,15 +93,15 @@ class QueueServiceTest {
 	@Test
 	@DisplayName("콘서트_대기열_토큰_발급_성공(활성상태)") // 최대 활성 토큰 수 50개
 	void issueQueueToken_Success_Active() throws CustomException {
-		when(jpaUserRepository.existsById(userId.toString())).thenReturn(true);
-		when(jpaConcertRepository.existsById(concertId.toString())).thenReturn(true);
+		when(userRepository.existsById(userId)).thenReturn(true);
+		when(concertRepository.existsById(concertId)).thenReturn(true);
 		when(redisQueueTokenRepository.findTokenIdByUserIdAndConcertId(userId, concertId)).thenReturn(null);
 		when(redisQueueTokenRepository.countActiveTokens(concertId)).thenReturn(30);
 
 		QueueToken queueToken = queueService.issueQueueToken(userId, concertId);
 
-		verify(jpaUserRepository, times(1)).existsById(userId.toString());
-		verify(jpaConcertRepository, times(1)).existsById(concertId.toString());
+		verify(userRepository, times(1)).existsById(userId);
+		verify(concertRepository, times(1)).existsById(concertId);
 		verify(redisQueueTokenRepository, times(1)).findTokenIdByUserIdAndConcertId(userId, concertId);
 		verify(redisQueueTokenRepository, times(1)).countActiveTokens(concertId);
 		verify(redisQueueTokenRepository, times(1)).save(any(QueueToken.class));
@@ -117,15 +117,15 @@ class QueueServiceTest {
 	@Test
 	@DisplayName("콘서트_대기열_토큰_발급_성공(기존_토큰_존재)")
 	void issueQueueToken_Success_existsToken() throws CustomException {
-		when(jpaUserRepository.existsById(userId.toString())).thenReturn(true);
-		when(jpaConcertRepository.existsById(concertId.toString())).thenReturn(true);
+		when(userRepository.existsById(userId)).thenReturn(true);
+		when(concertRepository.existsById(concertId)).thenReturn(true);
 		when(redisQueueTokenRepository.findTokenIdByUserIdAndConcertId(userId, concertId)).thenReturn(tokenId.toString());
 		when(redisQueueTokenRepository.findQueueTokenByTokenId(tokenId.toString())).thenReturn(existingToken);
 
 		QueueToken queueToken = queueService.issueQueueToken(userId, concertId);
 
-		verify(jpaUserRepository, times(1)).existsById(userId.toString());
-		verify(jpaConcertRepository, times(1)).existsById(concertId.toString());
+		verify(userRepository, times(1)).existsById(userId);
+		verify(concertRepository, times(1)).existsById(concertId);
 		verify(redisQueueTokenRepository, times(1)).findTokenIdByUserIdAndConcertId(userId, concertId);
 		verify(redisQueueTokenRepository, times(1)).findQueueTokenByTokenId(tokenId.toString());
 
@@ -142,13 +142,13 @@ class QueueServiceTest {
 	@Test
 	@DisplayName("콘서트_대기열_토큰_발급_실패_유저못찾음")
 	void issueQueueToken_Failure_UserNotFound() {
-		when(jpaUserRepository.existsById(userId.toString())).thenReturn(false);
+		when(userRepository.existsById(userId)).thenReturn(false);
 
 		CustomException customException = assertThrows(CustomException.class,
 			() -> queueService.issueQueueToken(userId, concertId));
 
-		verify(jpaUserRepository, times(1)).existsById(userId.toString());
-		verify(jpaConcertRepository, never()).existsById(concertId.toString());
+		verify(userRepository, times(1)).existsById(userId);
+		verify(concertRepository, never()).existsById(concertId);
 		verify(redisQueueTokenRepository, never()).findTokenIdByUserIdAndConcertId(userId, concertId);
 		verify(redisQueueTokenRepository, never()).findQueueTokenByTokenId(tokenId.toString());
 		verify(redisQueueTokenRepository, never()).countActiveTokens(concertId);
@@ -160,14 +160,14 @@ class QueueServiceTest {
 	@Test
 	@DisplayName("콘서트_대기열_토큰_발급_실패_콘서트못찾음")
 	void issueQueueToken_Failure_ConcertNotFound() {
-		when(jpaUserRepository.existsById(userId.toString())).thenReturn(true);
-		when(jpaConcertRepository.existsById(concertId.toString())).thenReturn(false);
+		when(userRepository.existsById(userId)).thenReturn(true);
+		when(concertRepository.existsById(concertId)).thenReturn(false);
 
 		CustomException customException = assertThrows(CustomException.class,
 			() -> queueService.issueQueueToken(userId, concertId));
 
-		verify(jpaUserRepository, times(1)).existsById(userId.toString());
-		verify(jpaConcertRepository, times(1)).existsById(concertId.toString());
+		verify(userRepository, times(1)).existsById(userId);
+		verify(concertRepository, times(1)).existsById(concertId);
 		verify(redisQueueTokenRepository, never()).findTokenIdByUserIdAndConcertId(userId, concertId);
 		verify(redisQueueTokenRepository, never()).findQueueTokenByTokenId(tokenId.toString());
 		verify(redisQueueTokenRepository, never()).countActiveTokens(concertId);

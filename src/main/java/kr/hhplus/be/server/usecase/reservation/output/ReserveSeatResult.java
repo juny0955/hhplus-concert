@@ -4,8 +4,9 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import kr.hhplus.be.server.domain.concert.Seat;
+import kr.hhplus.be.server.domain.reservation.Reservation;
 import kr.hhplus.be.server.domain.reservation.ReservationStatus;
-import kr.hhplus.be.server.interfaces.api.reservation.dto.response.ReservationResponse;
 import lombok.Builder;
 
 @Builder
@@ -17,18 +18,14 @@ public record ReserveSeatResult(
 	ReservationStatus status,
 	LocalDateTime createdAt
 ) {
-	public static ReserveSeatResult of(UUID reservationId, UUID seatId, Integer seatNo, BigDecimal price, ReservationStatus status) {
+	public static ReserveSeatResult of(Reservation reservation, Seat seat) {
 		return ReserveSeatResult.builder()
-			.reservationId(reservationId)
-			.seatId(seatId)
-			.seatNo(seatNo)
-			.price(price)
-			.status(status)
+			.reservationId(reservation.id())
+			.seatId(seat.id())
+			.seatNo(seat.seatNo())
+			.price(seat.price())
+			.status(reservation.status())
 			.createdAt(LocalDateTime.now())
 			.build();
-	}
-
-	public ReservationResponse toResponse() {
-		return new ReservationResponse(reservationId, seatId, seatNo, price, status, createdAt);
 	}
 }

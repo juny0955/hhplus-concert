@@ -6,7 +6,7 @@ import java.util.UUID;
 import kr.hhplus.be.server.domain.concert.Concert;
 
 public interface ConcertRepository {
-	boolean existsConcert(UUID concertId);
+	boolean existsById(UUID concertId);
 
 	Optional<Concert> findById(UUID concertId);
 }
