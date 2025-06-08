@@ -24,11 +24,11 @@ public record QueueToken(
 			.tokenId(tokenId)
 			.userId(userId)
 			.concertId(concertId)
+			.status(QueueStatus.ACTIVE)
+			.position(0)
 			.issuedAt(now)
 			.enteredAt(now)
 			.expiresAt(now.plusMinutes(expiresTime))
-			.position(0)
-			.status(QueueStatus.ACTIVE)
 			.build();
 	}
 
@@ -37,9 +37,11 @@ public record QueueToken(
 			.tokenId(tokenId)
 			.userId(userId)
 			.concertId(concertId)
-			.issuedAt(LocalDateTime.now())
-			.position(waitingTokens + 1)
 			.status(QueueStatus.WAITING)
+			.position(waitingTokens + 1)
+			.issuedAt(LocalDateTime.now())
+			.enteredAt(null)
+			.expiresAt(null)
 			.build();
 	}
 

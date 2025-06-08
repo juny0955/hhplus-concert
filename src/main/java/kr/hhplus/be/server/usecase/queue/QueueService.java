@@ -36,20 +36,15 @@ public class QueueService {
 			return queueTokenRepository.findQueueTokenByTokenId(findTokenId);
 
 		Integer activeTokens = queueTokenRepository.countActiveTokens(concertId);
-
-		UUID tokenId = UUID.randomUUID();
-		QueueToken queueToken;
-		if (activeTokens >= MAX_ACTIVE_TOKEN_SIZE) {
-			Integer waitingTokens = queueTokenRepository.countWaitingTokens(concertId);
-
-			queueToken = QueueToken.waitingTokenOf(tokenId, userId, concertId, waitingTokens);
-		} else {
-			queueToken = QueueToken.activeTokenOf(tokenId, userId, concertId, QUEUE_EXPIRES_TIME);
-		}
+		QueueToken queueToken = createQueueToken(activeTokens, userId, concertId);
 
 		log.debug("대기열 토큰 발급: USER_ID - {}, CONCERT_ID - {}, 상태 - {}", userId, concertId, queueToken.status());
 		queueTokenRepository.save(queueToken);
 		return queueToken;
+	}
+
+	public QueueToken getQueueInfo(UUID concertId, String queueToken) {
+		return null;
 	}
 
 	private void validateUserId(UUID userId) throws CustomException {
@@ -62,4 +57,13 @@ public class QueueService {
 			throw new CustomException(ErrorCode.CONCERT_NOT_FOUND);
 	}
 
+	private QueueToken createQueueToken(Integer activeTokens, UUID userId, UUID concertId) {
+		UUID tokenId = UUID.randomUUID();
+
+		if (activeTokens < MAX_ACTIVE_TOKEN_SIZE)
+			return QueueToken.activeTokenOf(tokenId, userId, concertId, QUEUE_EXPIRES_TIME);
+
+		Integer waitingTokens = queueTokenRepository.countWaitingTokens(concertId);
+		return QueueToken.waitingTokenOf(tokenId, userId, concertId, waitingTokens);
+	}
 }

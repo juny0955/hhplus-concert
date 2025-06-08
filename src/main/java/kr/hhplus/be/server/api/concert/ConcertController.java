@@ -37,36 +37,6 @@ import lombok.RequiredArgsConstructor;
 public class ConcertController {
 
 	private final ConcertService concertService;
-	private final QueueService queueService;
-
-	@Operation(
-		summary = "콘서트 대기열 토큰 발급",
-		description = "서비스 사용 하기 위한 콘서트 별 대기열 토큰 발급"
-	)
-	@ApiResponses(value = {
-		@ApiResponse(
-			responseCode = "201",
-			description = "토큰 발급 성공",
-			content = @Content(schema = @Schema(implementation = QueueTokenResponse.class))
-		),
-		@ApiResponse(
-			responseCode = "404 - User",
-			description = "유저 찾을 수 없음"
-		),
-		@ApiResponse(
-			responseCode = "404 - Concert",
-			description = "콘서트 찾을 수 없음"
-		)
-	})
-	@PostMapping("/{concertId}/queue")
-	public ResponseEntity<QueueTokenResponse> issueQueueToken(
-		@PathVariable UUID concertId,
-		@RequestBody QueueTokenRequest request
-	) throws CustomException {
-		QueueToken queueToken = queueService.issueQueueToken(request.userId(), concertId);
-
-		return ResponseEntity.status(HttpStatus.CREATED).body(QueueTokenResponse.from(queueToken));
-	}
 
 	@Operation(
 		summary = "콘서트 예약 가능 날짜 조회 API",
