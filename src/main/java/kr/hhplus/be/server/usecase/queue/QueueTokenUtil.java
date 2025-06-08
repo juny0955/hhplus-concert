@@ -1,8 +1,8 @@
 package kr.hhplus.be.server.usecase.queue;
 
 import kr.hhplus.be.server.domain.queue.QueueToken;
-import kr.hhplus.be.server.usecase.exception.CustomException;
-import kr.hhplus.be.server.usecase.exception.ErrorCode;
+import kr.hhplus.be.server.framework.exception.CustomException;
+import kr.hhplus.be.server.framework.exception.ErrorCode;
 
 public final class QueueTokenUtil {
 

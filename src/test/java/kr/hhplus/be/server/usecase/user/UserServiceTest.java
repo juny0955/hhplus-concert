@@ -17,8 +17,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import kr.hhplus.be.server.domain.user.User;
-import kr.hhplus.be.server.usecase.exception.CustomException;
-import kr.hhplus.be.server.usecase.exception.ErrorCode;
+import kr.hhplus.be.server.domain.user.UserRepository;
+import kr.hhplus.be.server.framework.exception.CustomException;
+import kr.hhplus.be.server.framework.exception.ErrorCode;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {

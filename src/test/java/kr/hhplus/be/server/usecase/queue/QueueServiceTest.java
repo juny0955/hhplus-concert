@@ -15,13 +15,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import kr.hhplus.be.server.domain.concert.ConcertRepository;
 import kr.hhplus.be.server.domain.queue.QueueStatus;
 import kr.hhplus.be.server.domain.queue.QueueToken;
-import kr.hhplus.be.server.interfaces.gateway.repository.queue.RedisQueueTokenRepository;
-import kr.hhplus.be.server.usecase.concert.ConcertRepository;
-import kr.hhplus.be.server.usecase.exception.CustomException;
-import kr.hhplus.be.server.usecase.exception.ErrorCode;
-import kr.hhplus.be.server.usecase.user.UserRepository;
+import kr.hhplus.be.server.domain.queue.QueueTokenRepository;
+import kr.hhplus.be.server.domain.user.UserRepository;
+import kr.hhplus.be.server.framework.exception.CustomException;
+import kr.hhplus.be.server.framework.exception.ErrorCode;
 
 @ExtendWith(MockitoExtension.class)
 class QueueServiceTest {
@@ -30,7 +30,7 @@ class QueueServiceTest {
 	private QueueService queueService;
 
 	@Mock
-	private RedisQueueTokenRepository redisQueueTokenRepository;
+	private QueueTokenRepository queueTokenRepository;
 
 	@Mock
 	private ConcertRepository concertRepository;
@@ -68,20 +68,20 @@ class QueueServiceTest {
 
 		when(userRepository.existsById(userId)).thenReturn(true);
 		when(concertRepository.existsById(concertId)).thenReturn(true);
-		when(redisQueueTokenRepository.findTokenIdByUserIdAndConcertId(userId, concertId)).thenReturn(null);
-		when(redisQueueTokenRepository.countActiveTokens(concertId)).thenReturn(50);
-		when(redisQueueTokenRepository.countWaitingTokens(concertId)).thenReturn(waitingCount);
+		when(queueTokenRepository.findTokenIdByUserIdAndConcertId(userId, concertId)).thenReturn(null);
+		when(queueTokenRepository.countActiveTokens(concertId)).thenReturn(50);
+		when(queueTokenRepository.countWaitingTokens(concertId)).thenReturn(waitingCount);
 
 		QueueToken queueToken = queueService.issueQueueToken(userId, concertId);
 
 		verify(userRepository, times(1)).existsById(userId);
 		verify(concertRepository, times(1)).existsById(concertId);
-		verify(redisQueueTokenRepository, times(1)).findTokenIdByUserIdAndConcertId(userId, concertId);
-		verify(redisQueueTokenRepository, times(1)).countActiveTokens(concertId);
-		verify(redisQueueTokenRepository, times(1)).countWaitingTokens(concertId);
-		verify(redisQueueTokenRepository, times(1)).save(any(QueueToken.class));
+		verify(queueTokenRepository, times(1)).findTokenIdByUserIdAndConcertId(userId, concertId);
+		verify(queueTokenRepository, times(1)).countActiveTokens(concertId);
+		verify(queueTokenRepository, times(1)).countWaitingTokens(concertId);
+		verify(queueTokenRepository, times(1)).save(any(QueueToken.class));
 
-		verify(redisQueueTokenRepository, never()).findQueueTokenByTokenId(tokenId.toString());
+		verify(queueTokenRepository, never()).findQueueTokenByTokenId(tokenId.toString());
 
 		assertThat(queueToken.status()).isEqualTo(QueueStatus.WAITING);
 		assertThat(queueToken.position()).isEqualTo(waitingCount + 1);
@@ -95,18 +95,18 @@ class QueueServiceTest {
 	void issueQueueToken_Success_Active() throws CustomException {
 		when(userRepository.existsById(userId)).thenReturn(true);
 		when(concertRepository.existsById(concertId)).thenReturn(true);
-		when(redisQueueTokenRepository.findTokenIdByUserIdAndConcertId(userId, concertId)).thenReturn(null);
-		when(redisQueueTokenRepository.countActiveTokens(concertId)).thenReturn(30);
+		when(queueTokenRepository.findTokenIdByUserIdAndConcertId(userId, concertId)).thenReturn(null);
+		when(queueTokenRepository.countActiveTokens(concertId)).thenReturn(30);
 
 		QueueToken queueToken = queueService.issueQueueToken(userId, concertId);
 
 		verify(userRepository, times(1)).existsById(userId);
 		verify(concertRepository, times(1)).existsById(concertId);
-		verify(redisQueueTokenRepository, times(1)).findTokenIdByUserIdAndConcertId(userId, concertId);
-		verify(redisQueueTokenRepository, times(1)).countActiveTokens(concertId);
-		verify(redisQueueTokenRepository, times(1)).save(any(QueueToken.class));
+		verify(queueTokenRepository, times(1)).findTokenIdByUserIdAndConcertId(userId, concertId);
+		verify(queueTokenRepository, times(1)).countActiveTokens(concertId);
+		verify(queueTokenRepository, times(1)).save(any(QueueToken.class));
 
-		verify(redisQueueTokenRepository, never()).findQueueTokenByTokenId(tokenId.toString());
+		verify(queueTokenRepository, never()).findQueueTokenByTokenId(tokenId.toString());
 
 		assertThat(queueToken.status()).isEqualTo(QueueStatus.ACTIVE);
 		assertThat(queueToken.issuedAt()).isNotNull();
@@ -119,18 +119,18 @@ class QueueServiceTest {
 	void issueQueueToken_Success_existsToken() throws CustomException {
 		when(userRepository.existsById(userId)).thenReturn(true);
 		when(concertRepository.existsById(concertId)).thenReturn(true);
-		when(redisQueueTokenRepository.findTokenIdByUserIdAndConcertId(userId, concertId)).thenReturn(tokenId.toString());
-		when(redisQueueTokenRepository.findQueueTokenByTokenId(tokenId.toString())).thenReturn(existingToken);
+		when(queueTokenRepository.findTokenIdByUserIdAndConcertId(userId, concertId)).thenReturn(tokenId.toString());
+		when(queueTokenRepository.findQueueTokenByTokenId(tokenId.toString())).thenReturn(existingToken);
 
 		QueueToken queueToken = queueService.issueQueueToken(userId, concertId);
 
 		verify(userRepository, times(1)).existsById(userId);
 		verify(concertRepository, times(1)).existsById(concertId);
-		verify(redisQueueTokenRepository, times(1)).findTokenIdByUserIdAndConcertId(userId, concertId);
-		verify(redisQueueTokenRepository, times(1)).findQueueTokenByTokenId(tokenId.toString());
+		verify(queueTokenRepository, times(1)).findTokenIdByUserIdAndConcertId(userId, concertId);
+		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(tokenId.toString());
 
-		verify(redisQueueTokenRepository, never()).countActiveTokens(concertId);
-		verify(redisQueueTokenRepository, never()).save(any(QueueToken.class));
+		verify(queueTokenRepository, never()).countActiveTokens(concertId);
+		verify(queueTokenRepository, never()).save(any(QueueToken.class));
 
 		assertThat(queueToken.tokenId()).isEqualTo(tokenId);
 		assertThat(queueToken.status()).isEqualTo(QueueStatus.ACTIVE);
@@ -149,10 +149,10 @@ class QueueServiceTest {
 
 		verify(userRepository, times(1)).existsById(userId);
 		verify(concertRepository, never()).existsById(concertId);
-		verify(redisQueueTokenRepository, never()).findTokenIdByUserIdAndConcertId(userId, concertId);
-		verify(redisQueueTokenRepository, never()).findQueueTokenByTokenId(tokenId.toString());
-		verify(redisQueueTokenRepository, never()).countActiveTokens(concertId);
-		verify(redisQueueTokenRepository, never()).save(any(QueueToken.class));
+		verify(queueTokenRepository, never()).findTokenIdByUserIdAndConcertId(userId, concertId);
+		verify(queueTokenRepository, never()).findQueueTokenByTokenId(tokenId.toString());
+		verify(queueTokenRepository, never()).countActiveTokens(concertId);
+		verify(queueTokenRepository, never()).save(any(QueueToken.class));
 
 		assertThat(customException.getErrorCode()).isEqualTo(ErrorCode.USER_NOT_FOUND);
 	}
@@ -168,10 +168,10 @@ class QueueServiceTest {
 
 		verify(userRepository, times(1)).existsById(userId);
 		verify(concertRepository, times(1)).existsById(concertId);
-		verify(redisQueueTokenRepository, never()).findTokenIdByUserIdAndConcertId(userId, concertId);
-		verify(redisQueueTokenRepository, never()).findQueueTokenByTokenId(tokenId.toString());
-		verify(redisQueueTokenRepository, never()).countActiveTokens(concertId);
-		verify(redisQueueTokenRepository, never()).save(any(QueueToken.class));
+		verify(queueTokenRepository, never()).findTokenIdByUserIdAndConcertId(userId, concertId);
+		verify(queueTokenRepository, never()).findQueueTokenByTokenId(tokenId.toString());
+		verify(queueTokenRepository, never()).countActiveTokens(concertId);
+		verify(queueTokenRepository, never()).save(any(QueueToken.class));
 
 		assertThat(customException.getErrorCode()).isEqualTo(ErrorCode.CONCERT_NOT_FOUND);
 	}

@@ -5,24 +5,26 @@ import java.util.UUID;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import kr.hhplus.be.server.domain.concert.ConcertDate;
-import kr.hhplus.be.server.domain.concert.Seat;
+import kr.hhplus.be.server.domain.concertDate.ConcertDate;
+import kr.hhplus.be.server.domain.seat.Seat;
+import kr.hhplus.be.server.domain.event.reservation.ReservationCreatedEvent;
 import kr.hhplus.be.server.domain.payment.Payment;
 import kr.hhplus.be.server.domain.queue.QueueToken;
 import kr.hhplus.be.server.domain.reservation.Reservation;
 import kr.hhplus.be.server.domain.reservation.ReservationDomainResult;
 import kr.hhplus.be.server.domain.reservation.ReservationDomainService;
-import kr.hhplus.be.server.usecase.concert.ConcertDateRepository;
-import kr.hhplus.be.server.usecase.concert.ConcertRepository;
-import kr.hhplus.be.server.usecase.concert.SeatRepository;
-import kr.hhplus.be.server.usecase.exception.CustomException;
-import kr.hhplus.be.server.usecase.exception.ErrorCode;
-import kr.hhplus.be.server.usecase.payment.PaymentRepository;
-import kr.hhplus.be.server.usecase.queue.QueueTokenRepository;
+import kr.hhplus.be.server.domain.concertDate.ConcertDateRepository;
+import kr.hhplus.be.server.domain.concert.ConcertRepository;
+import kr.hhplus.be.server.domain.seat.SeatRepository;
+import kr.hhplus.be.server.usecase.event.EventPublisher;
+import kr.hhplus.be.server.framework.exception.CustomException;
+import kr.hhplus.be.server.framework.exception.ErrorCode;
+import kr.hhplus.be.server.domain.payment.PaymentRepository;
+import kr.hhplus.be.server.domain.queue.QueueTokenRepository;
 import kr.hhplus.be.server.usecase.queue.QueueTokenUtil;
-import kr.hhplus.be.server.usecase.reservation.ReservationRepository;
-import kr.hhplus.be.server.usecase.reservation.SeatHoldRepository;
-import kr.hhplus.be.server.usecase.reservation.SeatLockRepository;
+import kr.hhplus.be.server.domain.reservation.ReservationRepository;
+import kr.hhplus.be.server.domain.seat.SeatHoldRepository;
+import kr.hhplus.be.server.domain.seat.SeatLockRepository;
 import kr.hhplus.be.server.usecase.reservation.input.ReservationInput;
 import kr.hhplus.be.server.usecase.reservation.input.ReserveSeatCommand;
 import kr.hhplus.be.server.usecase.reservation.output.ReservationOutput;
@@ -46,6 +48,7 @@ public class ReservationInteractor implements ReservationInput {
 	private final PaymentRepository paymentRepository;
 	private final ReservationOutput reservationOutput;
 	private final ReservationDomainService reservationDomainService;
+	private final EventPublisher eventPublisher;
 
 	@Override
 	@Transactional
@@ -69,7 +72,7 @@ public class ReservationInteractor implements ReservationInput {
 
 			seatHoldRepository.hold(seat.id(), queueToken.userId());
 
-			reservationDomainService.handleReservationSuccess(savedReservation, queueToken, savedPayment, savedSeat);
+			eventPublisher.publish(ReservationCreatedEvent.of(savedPayment, savedReservation, savedSeat, queueToken.userId()));
 			reservationOutput.ok(ReserveSeatResult.of(savedReservation, savedSeat));
 		} catch (CustomException e) {
 			ErrorCode errorCode = e.getErrorCode();

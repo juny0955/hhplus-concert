@@ -17,9 +17,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import kr.hhplus.be.server.domain.concert.Seat;
-import kr.hhplus.be.server.domain.concert.SeatClass;
-import kr.hhplus.be.server.domain.concert.SeatStatus;
+import kr.hhplus.be.server.domain.seat.Seat;
+import kr.hhplus.be.server.domain.seat.SeatClass;
+import kr.hhplus.be.server.domain.seat.SeatStatus;
+import kr.hhplus.be.server.domain.event.payment.PaymentSuccessEvent;
 import kr.hhplus.be.server.domain.payment.Payment;
 import kr.hhplus.be.server.domain.payment.PaymentDomainResult;
 import kr.hhplus.be.server.domain.payment.PaymentDomainService;
@@ -28,17 +29,18 @@ import kr.hhplus.be.server.domain.queue.QueueToken;
 import kr.hhplus.be.server.domain.reservation.Reservation;
 import kr.hhplus.be.server.domain.reservation.ReservationStatus;
 import kr.hhplus.be.server.domain.user.User;
-import kr.hhplus.be.server.usecase.concert.SeatRepository;
-import kr.hhplus.be.server.usecase.exception.CustomException;
-import kr.hhplus.be.server.usecase.exception.ErrorCode;
-import kr.hhplus.be.server.usecase.payment.PaymentRepository;
+import kr.hhplus.be.server.domain.seat.SeatRepository;
+import kr.hhplus.be.server.usecase.event.EventPublisher;
+import kr.hhplus.be.server.framework.exception.CustomException;
+import kr.hhplus.be.server.framework.exception.ErrorCode;
+import kr.hhplus.be.server.domain.payment.PaymentRepository;
 import kr.hhplus.be.server.usecase.payment.input.PaymentCommand;
 import kr.hhplus.be.server.usecase.payment.output.PaymentOutput;
 import kr.hhplus.be.server.usecase.payment.output.PaymentResult;
-import kr.hhplus.be.server.usecase.queue.QueueTokenRepository;
-import kr.hhplus.be.server.usecase.reservation.ReservationRepository;
-import kr.hhplus.be.server.usecase.reservation.SeatHoldRepository;
-import kr.hhplus.be.server.usecase.user.UserRepository;
+import kr.hhplus.be.server.domain.queue.QueueTokenRepository;
+import kr.hhplus.be.server.domain.reservation.ReservationRepository;
+import kr.hhplus.be.server.domain.seat.SeatHoldRepository;
+import kr.hhplus.be.server.domain.user.UserRepository;
 
 @ExtendWith(MockitoExtension.class)
 class PaymentInteractorTest {
@@ -70,6 +72,9 @@ class PaymentInteractorTest {
 	@Mock
 	private PaymentDomainService paymentDomainService;
 
+	@Mock
+	private EventPublisher eventPublisher;
+
 	private UUID reservationId;
 	private UUID queueTokenId;
 	private UUID userId;
@@ -97,7 +102,7 @@ class PaymentInteractorTest {
 		LocalDateTime now = LocalDateTime.now();
 		paymentCommand = new PaymentCommand(reservationId, queueTokenId.toString());
 		queueToken = QueueToken.activeTokenOf(queueTokenId, userId, concertId, 1000000);
-		reservation = new Reservation(reservationId, userId, seatId, ReservationStatus.PENDING, now, now);
+		reservation = new Reservation(reservationId, userId, seatId, ReservationStatus.PENDING, now.plusMinutes(5), now, now);
 		user = new User(userId, BigDecimal.valueOf(100000), now, now);
 		payment = new Payment(paymentId, userId, reservationId, BigDecimal.valueOf(10000), PaymentStatus.PENDING, null, now, now);
 		seat = new Seat(seatId, concertDateId, 10, BigDecimal.valueOf(10000), SeatClass.VIP, SeatStatus.RESERVED, now, now);
@@ -107,7 +112,7 @@ class PaymentInteractorTest {
 	@DisplayName("결제_성공")
 	void payment_Success() throws CustomException {
 		Payment successPayment = new Payment(paymentId, userId, reservationId, BigDecimal.valueOf(10000), PaymentStatus.SUCCESS, null, LocalDateTime.now(), LocalDateTime.now());
-		Reservation successReservation = new Reservation(reservationId, userId, seatId, ReservationStatus.SUCCESS, LocalDateTime.now(), LocalDateTime.now());
+		Reservation successReservation = new Reservation(reservationId, userId, seatId, ReservationStatus.SUCCESS, LocalDateTime.now().plusMinutes(5), LocalDateTime.now(), LocalDateTime.now());
 		Seat successSeat = new Seat(seatId, concertDateId, 10, BigDecimal.valueOf(10000), SeatClass.VIP, SeatStatus.ASSIGNED, LocalDateTime.now(), LocalDateTime.now());
 		User successUser = new User(userId, BigDecimal.valueOf(90000), LocalDateTime.now(), LocalDateTime.now());
 
@@ -140,7 +145,7 @@ class PaymentInteractorTest {
 		verify(seatRepository, times(1)).save(successSeat);
 		verify(seatHoldRepository, times(1)).deleteHold(seat.id(), user.id());
 		verify(queueTokenRepository, times(1)).expiresQueueToken(queueToken.tokenId().toString());
-		verify(paymentDomainService, times(1)).handlePaymentSuccess(successPayment, successReservation, successSeat, successUser);
+		verify(eventPublisher, times(1)).publish(any(PaymentSuccessEvent.class));
 		verify(paymentOutput, times(1)).ok(any(PaymentResult.class));
 	}
 
@@ -167,7 +172,7 @@ class PaymentInteractorTest {
 		verify(seatRepository, never()).save(any());
 		verify(seatHoldRepository, never()).deleteHold(any(), any());
 		verify(queueTokenRepository, never()).expiresQueueToken(any());
-		verify(paymentDomainService, never()).handlePaymentSuccess(any(), any(), any(), any());
+		verify(eventPublisher, never()).publish(any(PaymentSuccessEvent.class));
 		verify(paymentOutput, never()).ok(any());
 
 		assertThat(customException.getErrorCode()).isEqualTo(ErrorCode.INVALID_QUEUE_TOKEN);
@@ -210,6 +215,14 @@ class PaymentInteractorTest {
 		verify(userRepository, never()).findById(any());
 		verify(seatHoldRepository, never()).isHoldSeat(any(), any());
 		verify(paymentDomainService, never()).processPayment(any(), any(), any(), any());
+		verify(userRepository, never()).save(any());
+		verify(paymentRepository, never()).save(any());
+		verify(reservationRepository, never()).save(any());
+		verify(seatRepository, never()).save(any());
+		verify(seatHoldRepository, never()).deleteHold(any(), any());
+		verify(queueTokenRepository, never()).expiresQueueToken(any());
+		verify(eventPublisher, never()).publish(any(PaymentSuccessEvent.class));
+		verify(paymentOutput, never()).ok(any());
 
 		assertThat(customException.getErrorCode()).isEqualTo(ErrorCode.PAYMENT_NOT_FOUND);
 	}
@@ -231,7 +244,16 @@ class PaymentInteractorTest {
 		verify(seatRepository, times(1)).findById(reservation.seatId());
 		verify(userRepository, never()).findById(any());
 		verify(seatHoldRepository, never()).isHoldSeat(any(), any());
+		verify(eventPublisher, never()).publish(any(PaymentSuccessEvent.class));
 		verify(paymentDomainService, never()).processPayment(any(), any(), any(), any());
+		verify(userRepository, never()).save(any());
+		verify(paymentRepository, never()).save(any());
+		verify(reservationRepository, never()).save(any());
+		verify(seatRepository, never()).save(any());
+		verify(seatHoldRepository, never()).deleteHold(any(), any());
+		verify(queueTokenRepository, never()).expiresQueueToken(any());
+		verify(eventPublisher, never()).publish(any(PaymentSuccessEvent.class));
+		verify(paymentOutput, never()).ok(any());
 
 		assertThat(customException.getErrorCode()).isEqualTo(ErrorCode.SEAT_NOT_FOUND);
 	}
@@ -255,6 +277,14 @@ class PaymentInteractorTest {
 		verify(userRepository, times(1)).findById(queueToken.userId());
 		verify(seatHoldRepository, never()).isHoldSeat(any(), any());
 		verify(paymentDomainService, never()).processPayment(any(), any(), any(), any());
+		verify(userRepository, never()).save(any());
+		verify(paymentRepository, never()).save(any());
+		verify(reservationRepository, never()).save(any());
+		verify(seatRepository, never()).save(any());
+		verify(seatHoldRepository, never()).deleteHold(any(), any());
+		verify(queueTokenRepository, never()).expiresQueueToken(any());
+		verify(eventPublisher, never()).publish(any(PaymentSuccessEvent.class));
+		verify(paymentOutput, never()).ok(any());
 
 		assertThat(customException.getErrorCode()).isEqualTo(ErrorCode.USER_NOT_FOUND);
 	}
@@ -285,7 +315,7 @@ class PaymentInteractorTest {
 		verify(seatRepository, never()).save(any());
 		verify(seatHoldRepository, never()).deleteHold(any(), any());
 		verify(queueTokenRepository, never()).expiresQueueToken(any());
-		verify(paymentDomainService, never()).handlePaymentSuccess(any(), any(), any(), any());
+		verify(eventPublisher, never()).publish(any(PaymentSuccessEvent.class));
 		verify(paymentOutput, never()).ok(any());
 
 		assertThat(customException.getErrorCode()).isEqualTo(ErrorCode.SEAT_NOT_HOLD);

@@ -5,26 +5,28 @@ import java.util.UUID;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import kr.hhplus.be.server.domain.concert.Seat;
+import kr.hhplus.be.server.domain.seat.Seat;
+import kr.hhplus.be.server.domain.event.payment.PaymentSuccessEvent;
 import kr.hhplus.be.server.domain.payment.Payment;
 import kr.hhplus.be.server.domain.payment.PaymentDomainResult;
 import kr.hhplus.be.server.domain.payment.PaymentDomainService;
 import kr.hhplus.be.server.domain.queue.QueueToken;
 import kr.hhplus.be.server.domain.reservation.Reservation;
 import kr.hhplus.be.server.domain.user.User;
-import kr.hhplus.be.server.usecase.concert.SeatRepository;
-import kr.hhplus.be.server.usecase.exception.CustomException;
-import kr.hhplus.be.server.usecase.exception.ErrorCode;
-import kr.hhplus.be.server.usecase.payment.PaymentRepository;
+import kr.hhplus.be.server.domain.seat.SeatRepository;
+import kr.hhplus.be.server.usecase.event.EventPublisher;
+import kr.hhplus.be.server.framework.exception.CustomException;
+import kr.hhplus.be.server.framework.exception.ErrorCode;
+import kr.hhplus.be.server.domain.payment.PaymentRepository;
 import kr.hhplus.be.server.usecase.payment.input.PaymentCommand;
 import kr.hhplus.be.server.usecase.payment.input.PaymentInput;
 import kr.hhplus.be.server.usecase.payment.output.PaymentOutput;
 import kr.hhplus.be.server.usecase.payment.output.PaymentResult;
-import kr.hhplus.be.server.usecase.queue.QueueTokenRepository;
+import kr.hhplus.be.server.domain.queue.QueueTokenRepository;
 import kr.hhplus.be.server.usecase.queue.QueueTokenUtil;
-import kr.hhplus.be.server.usecase.reservation.ReservationRepository;
-import kr.hhplus.be.server.usecase.reservation.SeatHoldRepository;
-import kr.hhplus.be.server.usecase.user.UserRepository;
+import kr.hhplus.be.server.domain.reservation.ReservationRepository;
+import kr.hhplus.be.server.domain.seat.SeatHoldRepository;
+import kr.hhplus.be.server.domain.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -42,6 +44,7 @@ public class PaymentInteractor implements PaymentInput {
 	private final PaymentRepository paymentRepository;
 	private final PaymentOutput paymentOutput;
 	private final PaymentDomainService paymentDomainService;
+	private final EventPublisher eventPublisher;
 
 	@Override
 	@Transactional
@@ -66,7 +69,7 @@ public class PaymentInteractor implements PaymentInput {
 			seatHoldRepository.deleteHold(savedSeat.id(), savedUser.id());
 			queueTokenRepository.expiresQueueToken(queueToken.tokenId().toString());
 
-			paymentDomainService.handlePaymentSuccess(savedPayment, savedReservation, savedSeat, savedUser);
+			eventPublisher.publish(PaymentSuccessEvent.of(savedPayment, savedReservation, savedSeat, savedUser));
 			paymentOutput.ok(PaymentResult.of(savedPayment, savedSeat, savedReservation.id(), savedUser.id()));
 		} catch (CustomException e) {
 			log.warn("결제 진행 중 비즈니스 예외 발생 - {}", e.getErrorCode(), e);

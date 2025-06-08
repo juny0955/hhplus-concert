@@ -3,7 +3,6 @@ package kr.hhplus.be.server.domain.reservation;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import kr.hhplus.be.server.interfaces.gateway.repository.reservation.ReservationEntity;
 import lombok.Builder;
 
 @Builder
@@ -12,6 +11,7 @@ public record Reservation(
 	UUID userId,
 	UUID seatId,
 	ReservationStatus status,
+	LocalDateTime expireAt,
 	LocalDateTime createdAt,
 	LocalDateTime updatedAt
 ) {
@@ -20,6 +20,7 @@ public record Reservation(
 			.userId(userId)
 			.seatId(seatId)
 			.status(ReservationStatus.PENDING)
+			.expireAt(LocalDateTime.now().plusMinutes(5))
 			.build();
 	}
 
@@ -31,5 +32,9 @@ public record Reservation(
 			.status(ReservationStatus.SUCCESS)
 			.updatedAt(LocalDateTime.now())
 			.build();
+	}
+
+	public boolean isExpired() {
+		return expireAt.isBefore(LocalDateTime.now());
 	}
 }

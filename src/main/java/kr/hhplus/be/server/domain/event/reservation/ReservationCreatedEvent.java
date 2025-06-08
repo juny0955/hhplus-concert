@@ -4,8 +4,11 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import kr.hhplus.be.server.domain.seat.Seat;
 import kr.hhplus.be.server.domain.event.Event;
 import kr.hhplus.be.server.domain.event.EventTopic;
+import kr.hhplus.be.server.domain.payment.Payment;
+import kr.hhplus.be.server.domain.reservation.Reservation;
 import lombok.Builder;
 
 @Builder
@@ -26,6 +29,20 @@ public record ReservationCreatedEvent(
 			.paymentId(paymentId)
 			.seatId(seatId)
 			.amount(amount)
+			.expiresAt(now.plusMinutes(5))
+			.occurredAt(now)
+			.build();
+	}
+
+	public static ReservationCreatedEvent of(Payment savedPayment, Reservation savedReservation, Seat savedSeat, UUID userId) {
+		LocalDateTime now = LocalDateTime.now();
+
+		return ReservationCreatedEvent.builder()
+			.reservationId(savedReservation.id())
+			.userId(userId)
+			.paymentId(savedPayment.id())
+			.seatId(savedSeat.id())
+			.amount(savedPayment.amount())
 			.expiresAt(now.plusMinutes(5))
 			.occurredAt(now)
 			.build();

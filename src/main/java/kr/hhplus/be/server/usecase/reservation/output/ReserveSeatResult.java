@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import kr.hhplus.be.server.domain.concert.Seat;
+import kr.hhplus.be.server.domain.seat.Seat;
 import kr.hhplus.be.server.domain.reservation.Reservation;
 import kr.hhplus.be.server.domain.reservation.ReservationStatus;
 import lombok.Builder;

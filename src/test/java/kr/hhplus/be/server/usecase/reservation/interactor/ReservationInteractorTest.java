@@ -17,10 +17,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import kr.hhplus.be.server.domain.concert.ConcertDate;
-import kr.hhplus.be.server.domain.concert.Seat;
-import kr.hhplus.be.server.domain.concert.SeatClass;
-import kr.hhplus.be.server.domain.concert.SeatStatus;
+import kr.hhplus.be.server.domain.concertDate.ConcertDate;
+import kr.hhplus.be.server.domain.seat.Seat;
+import kr.hhplus.be.server.domain.seat.SeatClass;
+import kr.hhplus.be.server.domain.seat.SeatStatus;
+import kr.hhplus.be.server.domain.event.reservation.ReservationCreatedEvent;
 import kr.hhplus.be.server.domain.payment.Payment;
 import kr.hhplus.be.server.domain.payment.PaymentStatus;
 import kr.hhplus.be.server.domain.queue.QueueToken;
@@ -28,16 +29,17 @@ import kr.hhplus.be.server.domain.reservation.Reservation;
 import kr.hhplus.be.server.domain.reservation.ReservationDomainResult;
 import kr.hhplus.be.server.domain.reservation.ReservationDomainService;
 import kr.hhplus.be.server.domain.reservation.ReservationStatus;
-import kr.hhplus.be.server.usecase.concert.ConcertDateRepository;
-import kr.hhplus.be.server.usecase.concert.ConcertRepository;
-import kr.hhplus.be.server.usecase.concert.SeatRepository;
-import kr.hhplus.be.server.usecase.exception.CustomException;
-import kr.hhplus.be.server.usecase.exception.ErrorCode;
-import kr.hhplus.be.server.usecase.payment.PaymentRepository;
-import kr.hhplus.be.server.usecase.queue.QueueTokenRepository;
-import kr.hhplus.be.server.usecase.reservation.ReservationRepository;
-import kr.hhplus.be.server.usecase.reservation.SeatHoldRepository;
-import kr.hhplus.be.server.usecase.reservation.SeatLockRepository;
+import kr.hhplus.be.server.domain.concertDate.ConcertDateRepository;
+import kr.hhplus.be.server.domain.concert.ConcertRepository;
+import kr.hhplus.be.server.domain.seat.SeatRepository;
+import kr.hhplus.be.server.usecase.event.EventPublisher;
+import kr.hhplus.be.server.framework.exception.CustomException;
+import kr.hhplus.be.server.framework.exception.ErrorCode;
+import kr.hhplus.be.server.domain.payment.PaymentRepository;
+import kr.hhplus.be.server.domain.queue.QueueTokenRepository;
+import kr.hhplus.be.server.domain.reservation.ReservationRepository;
+import kr.hhplus.be.server.domain.seat.SeatHoldRepository;
+import kr.hhplus.be.server.domain.seat.SeatLockRepository;
 import kr.hhplus.be.server.usecase.reservation.input.ReserveSeatCommand;
 import kr.hhplus.be.server.usecase.reservation.output.ReservationOutput;
 import kr.hhplus.be.server.usecase.reservation.output.ReserveSeatResult;
@@ -78,6 +80,9 @@ class ReservationInteractorTest {
 	@Mock
 	private ReservationDomainService reservationDomainService;
 
+	@Mock
+	private EventPublisher eventPublisher;
+
 	private UUID concertId;
 	private UUID concertDateId;
 	private UUID seatId;
@@ -110,7 +115,7 @@ class ReservationInteractorTest {
 		seat = new Seat(seatId, concertDateId, 10, BigDecimal.valueOf(10000), SeatClass.VIP, SeatStatus.AVAILABLE, now, now);
 		reservedSeat = seat.reserve();
 		concertDate = new ConcertDate(concertDateId, concertId, null, now.plusDays(7), now.plusDays(5), now, now);
-		reservation = new Reservation(reservationId, userId, seatId, ReservationStatus.PENDING, now, now);
+		reservation = new Reservation(reservationId, userId, seatId, ReservationStatus.PENDING, now.plusMinutes(5), now, now);
 		payment = new Payment(paymentId, userId, reservationId, BigDecimal.valueOf(10000), PaymentStatus.PENDING, null, now, now);
 		domainResult = new ReservationDomainResult(reservedSeat, payment, reservation);
 	}
@@ -142,7 +147,7 @@ class ReservationInteractorTest {
 		verify(reservationRepository, times(1)).save(reservation);
 		verify(paymentRepository, times(1)).save(payment);
 		verify(seatHoldRepository, times(1)).hold(seatId, userId);
-		verify(reservationDomainService, times(1)).handleReservationSuccess(reservation, queueToken, payment, reservedSeat);
+		verify(eventPublisher, times(1)).publish(any(ReservationCreatedEvent.class));
 		verify(seatLockRepository, times(1)).releaseLock(seatId);
 		verify(reservationOutput, times(1)).ok(any(ReserveSeatResult.class));
 	}
@@ -166,7 +171,7 @@ class ReservationInteractorTest {
 		verify(reservationRepository, never()).save(any());
 		verify(paymentRepository, never()).save(any());
 		verify(seatHoldRepository, never()).hold(any(), any());
-		verify(reservationDomainService, never()).handleReservationSuccess(any(), any(), any(), any());
+		verify(eventPublisher, never()).publish(any(ReservationCreatedEvent.class));
 		verify(seatLockRepository, never()).releaseLock(any());
 		verify(reservationOutput, never()).ok(any());
 
@@ -192,7 +197,7 @@ class ReservationInteractorTest {
 		verify(reservationRepository, never()).save(any());
 		verify(paymentRepository, never()).save(any());
 		verify(seatHoldRepository, never()).hold(any(), any());
-		verify(reservationDomainService, never()).handleReservationSuccess(any(), any(), any(), any());
+		verify(eventPublisher, never()).publish(any(ReservationCreatedEvent.class));
 		verify(seatLockRepository, never()).releaseLock(any());
 		verify(reservationOutput, never()).ok(any());
 
@@ -219,7 +224,7 @@ class ReservationInteractorTest {
 		verify(reservationRepository, never()).save(any());
 		verify(paymentRepository, never()).save(any());
 		verify(seatHoldRepository, never()).hold(any(), any());
-		verify(reservationDomainService, never()).handleReservationSuccess(any(), any(), any(), any());
+		verify(eventPublisher, never()).publish(any(ReservationCreatedEvent.class));
 		verify(seatLockRepository, never()).releaseLock(any());
 		verify(reservationOutput, never()).ok(any());
 
@@ -247,7 +252,7 @@ class ReservationInteractorTest {
 		verify(reservationRepository, never()).save(any());
 		verify(paymentRepository, never()).save(any());
 		verify(seatHoldRepository, never()).hold(any(), any());
-		verify(reservationDomainService, never()).handleReservationSuccess(any(), any(), any(), any());
+		verify(eventPublisher, never()).publish(any(ReservationCreatedEvent.class));
 		verify(seatLockRepository, never()).releaseLock(any());
 		verify(reservationOutput, never()).ok(any());
 
@@ -278,7 +283,7 @@ class ReservationInteractorTest {
 		verify(reservationRepository, never()).save(any());
 		verify(paymentRepository, never()).save(any());
 		verify(seatHoldRepository, never()).hold(any(), any());
-		verify(reservationDomainService, never()).handleReservationSuccess(any(), any(), any(), any());
+		verify(eventPublisher, never()).publish(any(ReservationCreatedEvent.class));
 		verify(seatLockRepository, never()).releaseLock(any());
 		verify(reservationOutput, never()).ok(any());
 	}

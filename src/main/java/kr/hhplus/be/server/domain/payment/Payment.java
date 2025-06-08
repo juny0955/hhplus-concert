@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import kr.hhplus.be.server.framework.exception.CustomException;
+import kr.hhplus.be.server.framework.exception.ErrorCode;
 import lombok.Builder;
 
 @Builder
@@ -35,5 +37,13 @@ public record Payment(
 			.status(PaymentStatus.SUCCESS)
 			.updatedAt(LocalDateTime.now())
 			.build();
+	}
+
+	public boolean isPaid() {
+		return status.equals(PaymentStatus.SUCCESS);
+	}
+
+	public boolean checkAmount() {
+		return amount().compareTo(BigDecimal.ZERO) > 0;
 	}
 }
