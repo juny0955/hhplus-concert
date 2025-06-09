@@ -66,7 +66,7 @@ public class QueueController {
 	public ResponseEntity<QueueTokenResponse> getQueueInfo(
 		@PathVariable UUID concertId,
 		@RequestHeader(value = "Authorization") String queueToken
-	) {
+	) throws CustomException {
 		QueueToken result = queueService.getQueueInfo(concertId, queueToken);
 
 		return ResponseEntity.ok(QueueTokenResponse.from(result));

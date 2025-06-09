@@ -48,4 +48,8 @@ public record QueueToken(
 	public boolean isActive() {
 		return status.equals(QueueStatus.ACTIVE);
 	}
+
+	public boolean isExpired() {
+		return expiresAt.isBefore(LocalDateTime.now());
+	}
 }

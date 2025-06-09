@@ -23,7 +23,7 @@ import kr.hhplus.be.server.usecase.payment.input.PaymentInput;
 import kr.hhplus.be.server.usecase.payment.output.PaymentOutput;
 import kr.hhplus.be.server.usecase.payment.output.PaymentResult;
 import kr.hhplus.be.server.domain.queue.QueueTokenRepository;
-import kr.hhplus.be.server.usecase.queue.QueueTokenUtil;
+import kr.hhplus.be.server.domain.queue.QueueTokenUtil;
 import kr.hhplus.be.server.domain.reservation.ReservationRepository;
 import kr.hhplus.be.server.domain.seat.SeatHoldRepository;
 import kr.hhplus.be.server.domain.user.UserRepository;
@@ -72,7 +72,7 @@ public class PaymentInteractor implements PaymentInput {
 			eventPublisher.publish(PaymentSuccessEvent.of(savedPayment, savedReservation, savedSeat, savedUser));
 			paymentOutput.ok(PaymentResult.of(savedPayment, savedSeat, savedReservation.id(), savedUser.id()));
 		} catch (CustomException e) {
-			log.warn("결제 진행 중 비즈니스 예외 발생 - {}", e.getErrorCode(), e);
+			log.warn("결제 진행 중 비즈니스 예외 발생 - {}", e.getErrorCode().name());
 			throw e;
 		} catch (Exception e) {
 			log.error("결제 진행 중 예외 발생 - {}", ErrorCode.INTERNAL_SERVER_ERROR, e);
@@ -102,7 +102,7 @@ public class PaymentInteractor implements PaymentInput {
 
 	private QueueToken getQueueTokenAndValid(PaymentCommand command) throws CustomException {
 		QueueToken queueToken = queueTokenRepository.findQueueTokenByTokenId(command.queueTokenId());
-		QueueTokenUtil.validateQueueToken(queueToken);
+		QueueTokenUtil.validateActiveQueueToken(queueToken);
 		return queueToken;
 	}
 

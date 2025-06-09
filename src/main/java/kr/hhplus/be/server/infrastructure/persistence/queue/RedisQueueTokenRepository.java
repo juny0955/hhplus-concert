@@ -1,12 +1,17 @@
 package kr.hhplus.be.server.infrastructure.persistence.queue;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.UUID;
 
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
+import kr.hhplus.be.server.domain.queue.QueueStatus;
 import kr.hhplus.be.server.domain.queue.QueueToken;
 import kr.hhplus.be.server.domain.queue.QueueTokenRepository;
+import kr.hhplus.be.server.domain.queue.QueueTokenUtil;
 import lombok.RequiredArgsConstructor;
 
 @Repository
@@ -17,30 +22,97 @@ public class RedisQueueTokenRepository implements QueueTokenRepository {
 
 	@Override
 	public void save(QueueToken queueToken) {
+		String tokenInfoKey = QueueTokenUtil.formattingTokenInfoKey(queueToken.tokenId());
+		String tokenIdKey = QueueTokenUtil.formattingTokenIdKey(queueToken.userId(), queueToken.concertId());
+
+		redisTemplate.opsForValue().set(tokenInfoKey, queueToken);
+		redisTemplate.opsForValue().set(tokenIdKey, tokenInfoKey);
+
+		if (queueToken.status().equals(QueueStatus.ACTIVE))
+			saveActiveToken(queueToken, tokenInfoKey, tokenIdKey);
+		else
+			saveWaitingToken(queueToken, tokenInfoKey, tokenIdKey);
 	}
 
 	@Override
 	public String findTokenIdByUserIdAndConcertId(UUID userId, UUID concertId) {
-		return null;
+		String tokenIdKey = QueueTokenUtil.formattingTokenIdKey(userId, concertId);
+		Object tokenId = redisTemplate.opsForValue().get(tokenIdKey);
+
+		if (tokenId == null)
+			return null;
+
+		return tokenId.toString().substring("token:info:".length());
 	}
 
 	@Override
 	public QueueToken findQueueTokenByTokenId(String tokenId) {
-		return null;
+		String tokenInfoKey = QueueTokenUtil.formattingTokenInfoKey(UUID.fromString(tokenId));
+		Object tokenInfo = redisTemplate.opsForValue().get(tokenInfoKey);
+		return tokenInfo != null ? (QueueToken) tokenInfo : null;
+	}
+
+	@Override
+	public Integer findWaitingPosition(QueueToken queueToken) {
+		String waitingTokenKey = QueueTokenUtil.formattingWaitingTokenKey(queueToken.concertId());
+		String tokenIdKey = QueueTokenUtil.formattingTokenIdKey(queueToken.userId(), queueToken.concertId());
+
+		Long rank = redisTemplate.opsForZSet().rank(waitingTokenKey, tokenIdKey);
+
+		return rank != null ? rank.intValue() + 1 : null;
 	}
 
 	@Override
 	public Integer countWaitingTokens(UUID concertId) {
-		return null;
+		Long count = redisTemplate.opsForZSet().count(QueueTokenUtil.formattingWaitingTokenKey(concertId), Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+		return count != null ? count.intValue() : 0;
 	}
 
 	@Override
 	public Integer countActiveTokens(UUID concertId) {
-		return null;
+		Object count = redisTemplate.opsForValue().get(QueueTokenUtil.formattingActiveCountKey(concertId));
+		if (count == null) return 0;
+		return Integer.parseInt(count.toString());
 	}
 
 	@Override
 	public void expiresQueueToken(String tokenId) {
+		QueueToken queueToken = findQueueTokenByTokenId(tokenId);
+		if (queueToken == null) return;
 
+		String tokenInfoKey = QueueTokenUtil.formattingTokenInfoKey(queueToken.tokenId());
+		String tokenIdKey = QueueTokenUtil.formattingTokenIdKey(queueToken.userId(), queueToken.concertId());
+
+		redisTemplate.delete(tokenInfoKey);
+		redisTemplate.delete(tokenIdKey);
+
+		if (queueToken.status().equals(QueueStatus.ACTIVE))
+			redisTemplate.opsForValue().decrement(QueueTokenUtil.formattingActiveCountKey(queueToken.concertId()));
+		else
+			redisTemplate.opsForZSet().remove(QueueTokenUtil.formattingWaitingTokenKey(queueToken.concertId()), tokenIdKey);
+	}
+
+	private void saveWaitingToken(QueueToken queueToken, String tokenInfoKey, String tokenIdKey) {
+		String waitingTokenKey = QueueTokenUtil.formattingWaitingTokenKey(queueToken.concertId());
+		Instant issuedInstant = queueToken.issuedAt()
+			.atZone(ZoneOffset.UTC)
+			.toInstant();
+		double score = issuedInstant.getEpochSecond();
+		redisTemplate.opsForZSet().add(waitingTokenKey, tokenIdKey, score);
+
+		redisTemplate.expire(tokenInfoKey, Duration.ofHours(24));
+		redisTemplate.expire(tokenIdKey, Duration.ofHours(24));
+	}
+
+	private void saveActiveToken(QueueToken queueToken, String tokenInfoKey, String tokenIdKey) {
+		String activeCountKey = QueueTokenUtil.formattingActiveCountKey(queueToken.concertId());
+		Instant expiresInstant = queueToken.expiresAt()
+			.atZone(ZoneOffset.UTC)
+			.toInstant();
+		double score = expiresInstant.getEpochSecond();
+		redisTemplate.opsForZSet().add(activeCountKey, tokenIdKey, score);
+
+		redisTemplate.expireAt(tokenInfoKey, expiresInstant);
+		redisTemplate.expireAt(tokenIdKey, expiresInstant);
 	}
 }

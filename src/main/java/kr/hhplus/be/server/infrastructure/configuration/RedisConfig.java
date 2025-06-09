@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.infrastructure.configuration;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -19,11 +20,13 @@ public class RedisConfig {
 	private int port;
 
 	@Bean
+	@ConditionalOnMissingBean(name = "redisConnectionFactory")
 	public RedisConnectionFactory redisConnectionFactory() {
 		return new LettuceConnectionFactory(host, port);
 	}
 
 	@Bean
+	@ConditionalOnMissingBean(RedisTemplate.class)
 	public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
 		RedisTemplate<String, Object> template = new RedisTemplate<>();
 		template.setConnectionFactory(connectionFactory);

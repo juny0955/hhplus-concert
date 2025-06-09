@@ -41,7 +41,7 @@ public class UserEntity extends BaseTimeEntity {
 
 	public static UserEntity from(User user) {
 		return UserEntity.builder()
-			.id(user.id().toString())
+			.id(user.id() != null ? user.id().toString() : null)
 			.amount(user.amount())
 			.build();
 	}

@@ -43,8 +43,14 @@ public class QueueService {
 		return queueToken;
 	}
 
-	public QueueToken getQueueInfo(UUID concertId, String queueToken) {
-		return null;
+	public QueueToken getQueueInfo(UUID concertId, String tokenId) throws CustomException {
+		validateConcertId(concertId);
+
+		QueueToken queueToken = queueTokenRepository.findQueueTokenByTokenId(tokenId);
+		if (queueToken == null || queueToken.isExpired())
+			throw new CustomException(ErrorCode.INVALID_QUEUE_TOKEN);
+
+		return queueToken;
 	}
 
 	private void validateUserId(UUID userId) throws CustomException {

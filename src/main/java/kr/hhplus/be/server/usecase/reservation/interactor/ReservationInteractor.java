@@ -21,7 +21,7 @@ import kr.hhplus.be.server.framework.exception.CustomException;
 import kr.hhplus.be.server.framework.exception.ErrorCode;
 import kr.hhplus.be.server.domain.payment.PaymentRepository;
 import kr.hhplus.be.server.domain.queue.QueueTokenRepository;
-import kr.hhplus.be.server.usecase.queue.QueueTokenUtil;
+import kr.hhplus.be.server.domain.queue.QueueTokenUtil;
 import kr.hhplus.be.server.domain.reservation.ReservationRepository;
 import kr.hhplus.be.server.domain.seat.SeatHoldRepository;
 import kr.hhplus.be.server.domain.seat.SeatLockRepository;
@@ -111,7 +111,7 @@ public class ReservationInteractor implements ReservationInput {
 
 	private QueueToken getQueueTokenAndValid(ReserveSeatCommand command) throws CustomException {
 		QueueToken queueToken = queueTokenRepository.findQueueTokenByTokenId(command.queueTokenId());
-		QueueTokenUtil.validateQueueToken(queueToken);
+		QueueTokenUtil.validateActiveQueueToken(queueToken);
 		return queueToken;
 	}
 }
