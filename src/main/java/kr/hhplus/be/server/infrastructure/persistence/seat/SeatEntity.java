@@ -60,7 +60,7 @@ public class SeatEntity extends BaseTimeEntity {
 
 	public static SeatEntity from(Seat seat) {
 		return SeatEntity.builder()
-			.id(seat.id().toString())
+			.id(seat.id() != null ? seat.id().toString() : null)
 			.concertDateId(seat.concertDateId().toString())
 			.seatNo(seat.seatNo())
 			.price(seat.price())

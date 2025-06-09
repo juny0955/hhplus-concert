@@ -16,6 +16,12 @@ public class ConcertJpaGateway implements ConcertRepository {
 	private final JpaConcertRepository jpaConcertRepository;
 
 	@Override
+	public Concert save(Concert concert) {
+		ConcertEntity concertEntity = jpaConcertRepository.save(ConcertEntity.from(concert));
+		return concertEntity.toDomain();
+	}
+
+	@Override
 	public boolean existsById(UUID concertId) {
 		return jpaConcertRepository.existsById(concertId.toString());
 	}

@@ -23,9 +23,11 @@ public record ConcertDateResponse(
 
 	public static ConcertDateResponse from(ConcertDate concertDate) {
 		return ConcertDateResponse.builder()
+			.concertId(concertDate.concertId())
 			.concertDateId(concertDate.id())
 			.date(concertDate.date())
 			.deadline(concertDate.deadline())
+			.remainingSeatCount(concertDate.remainingSeatCount())
 			.build();
 	}
 }

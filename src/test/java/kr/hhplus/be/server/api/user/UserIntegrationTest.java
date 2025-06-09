@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import kr.hhplus.be.server.api.user.dto.request.ChargePointRequest;
 import kr.hhplus.be.server.domain.user.User;
 import kr.hhplus.be.server.domain.user.UserRepository;
+import kr.hhplus.be.server.framework.exception.ErrorCode;
 
 @SpringBootTest(properties = {
 	"spring.jpa.hibernate.ddl-auto=create-drop"
@@ -73,7 +74,10 @@ class UserIntegrationTest {
 
 		mockMvc.perform(get("/api/v1/users/{userId}/points", userId)
 				.contentType(MediaType.APPLICATION_JSON))
-			.andExpect(status().isNotFound());
+			.andExpect(status().isNotFound())
+			.andExpect(jsonPath("$.code").value(ErrorCode.USER_NOT_FOUND.getCode()))
+			.andExpect(jsonPath("$.message").value(ErrorCode.USER_NOT_FOUND.getMessage()))
+		;
 	}
 
 	@Test
@@ -88,7 +92,8 @@ class UserIntegrationTest {
 			.andExpect(status().isOk())
 			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 			.andExpect(jsonPath("$.userId").value(userId.toString()))
-			.andExpect(jsonPath("$.amount").value(initPoint.add(chargePoint)));
+			.andExpect(jsonPath("$.amount").value(initPoint.add(chargePoint)))
+		;
 	}
 
 	@Test
@@ -101,7 +106,10 @@ class UserIntegrationTest {
 		mockMvc.perform(post("/api/v1/users/{userId}/points", userId)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request)))
-			.andExpect(status().isNotFound());
+			.andExpect(status().isNotFound())
+			.andExpect(jsonPath("$.code").value(ErrorCode.USER_NOT_FOUND.getCode()))
+			.andExpect(jsonPath("$.message").value(ErrorCode.USER_NOT_FOUND.getMessage()))
+		;
 	}
 
 	@Test
@@ -114,7 +122,10 @@ class UserIntegrationTest {
 		mockMvc.perform(post("/api/v1/users/{userId}/points", userId)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request)))
-			.andExpect(status().isBadRequest());
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.code").value(ErrorCode.NOT_ENOUGH_MIN_CHARGE_POINT.getCode()))
+			.andExpect(jsonPath("$.message").value(ErrorCode.NOT_ENOUGH_MIN_CHARGE_POINT.getMessage()))
+		;
 	}
 
 	@Test

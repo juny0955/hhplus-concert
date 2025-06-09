@@ -10,4 +10,6 @@ public interface ConcertDateRepository {
 	List<ConcertDate> findAvailableDates(UUID concertId);
 
 	Optional<ConcertDate> findAvailableDate(UUID concertId, UUID concertDateId);
+
+	ConcertDate save(ConcertDate concertDate);
 }

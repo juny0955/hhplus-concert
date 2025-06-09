@@ -17,6 +17,12 @@ public class ConcertDateJpaGateway implements ConcertDateRepository {
 	private final JpaConcertDateRepository jpaConcertDateRepository;
 
 	@Override
+	public ConcertDate save(ConcertDate concertDate) {
+		ConcertDateEntity concertDateEntity = jpaConcertDateRepository.save(ConcertDateEntity.from(concertDate));
+		return concertDateEntity.toDomain();
+	}
+
+	@Override
 	public Optional<ConcertDate> findById(UUID concertDateId) {
 		return jpaConcertDateRepository.findById(concertDateId.toString())
 			.map(ConcertDateEntity::toDomain);
