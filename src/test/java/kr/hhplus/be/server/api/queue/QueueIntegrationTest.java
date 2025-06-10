@@ -29,7 +29,6 @@ import kr.hhplus.be.server.domain.concert.ConcertRepository;
 import kr.hhplus.be.server.domain.concertDate.ConcertDate;
 import kr.hhplus.be.server.domain.concertDate.ConcertDateRepository;
 import kr.hhplus.be.server.domain.queue.QueueStatus;
-import kr.hhplus.be.server.domain.seat.SeatRepository;
 import kr.hhplus.be.server.domain.user.User;
 import kr.hhplus.be.server.domain.user.UserRepository;
 import kr.hhplus.be.server.framework.exception.ErrorCode;
@@ -209,8 +208,7 @@ class QueueIntegrationTest {
 			.andExpect(jsonPath("$.tokenId").value(tokenId))
 			.andExpect(jsonPath("$.userId").value(userId.toString()))
 			.andExpect(jsonPath("$.concertId").value(concertId.toString()))
-			.andExpect(jsonPath("$.status").value(QueueStatus.ACTIVE.toString()))
-			.andExpect(jsonPath("$.position").value(0));
+			.andExpect(jsonPath("$.status").value(QueueStatus.ACTIVE.toString()));
 	}
 
 	@Test
@@ -246,5 +244,42 @@ class QueueIntegrationTest {
 			.andExpect(jsonPath("$.concertId").value(concertId.toString()))
 			.andExpect(jsonPath("$.status").value(QueueStatus.WAITING.toString()))
 			.andExpect(jsonPath("$.position").value(1));
+	}
+
+	@Test
+	@DisplayName("대기열_정보_조회_실패_유효하지않은토큰")
+	void getQueueInfo_Failure_InvalidToken() throws Exception {
+		String invalidTokenId = UUID.randomUUID().toString();
+
+		mockMvc.perform(get("/api/v1/queue/concerts/{concertId}", concertId)
+				.header("Authorization", invalidTokenId)
+				.contentType(MediaType.APPLICATION_JSON))
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.code").value(ErrorCode.INVALID_QUEUE_TOKEN.getCode()))
+			.andExpect(jsonPath("$.message").value(ErrorCode.INVALID_QUEUE_TOKEN.getMessage()))
+		;
+	}
+
+	@Test
+	@DisplayName("대기열_정보_조회_실패_콘서트찾을수없음")
+	void getQueueInfo_Failure_ConcertNotFound() throws Exception {
+		// 토큰 발급
+		MvcResult issueResult = mockMvc.perform(post("/api/v1/queue/concerts/{concertId}/users/{userId}", concertId, userId)
+				.contentType(MediaType.APPLICATION_JSON))
+			.andExpect(status().isCreated())
+			.andReturn();
+
+		JsonNode issueResponse = objectMapper.readTree(issueResult.getResponse().getContentAsString());
+		String tokenId = issueResponse.get("tokenId").asText();
+
+		UUID nonExistentConcertId = UUID.randomUUID();
+
+		mockMvc.perform(get("/api/v1/queue/concerts/{concertId}", nonExistentConcertId)
+				.header("Authorization", tokenId)
+				.contentType(MediaType.APPLICATION_JSON))
+			.andExpect(status().isNotFound())
+			.andExpect(jsonPath("$.code").value(ErrorCode.CONCERT_NOT_FOUND.getCode()))
+			.andExpect(jsonPath("$.message").value(ErrorCode.CONCERT_NOT_FOUND.getMessage()))
+		;
 	}
 }

@@ -50,7 +50,7 @@ public record QueueToken(
 			.tokenId(tokenId)
 			.userId(userId)
 			.concertId(concertId)
-			.status(QueueStatus.WAITING)
+			.status(status)
 			.position(waitingPosition)
 			.issuedAt(LocalDateTime.now())
 			.enteredAt(null)
@@ -63,9 +63,10 @@ public record QueueToken(
 	}
 
 	public boolean isExpired() {
-		if (status.equals(QueueStatus.ACTIVE))
+		if (status.equals(QueueStatus.ACTIVE) && expiresAt != null) {
 			return expiresAt.isBefore(LocalDateTime.now());
+		}
 
-		return true;
+		return false;
 	}
 }

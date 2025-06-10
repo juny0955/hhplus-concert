@@ -28,13 +28,15 @@ public class RedisConfig {
 	private int port;
 
 	@Bean
-	@ConditionalOnMissingBean(name = "redisConnectionFactory")
 	public RedisConnectionFactory redisConnectionFactory() {
 		return new LettuceConnectionFactory(host, port);
 	}
 
+	/**
+	 * QueueToken 직렬화 용 redisTemplate
+	 */
 	@Bean
-	public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
+	public RedisTemplate<String, Object> queueTokenRedisTemplate(RedisConnectionFactory connectionFactory) {
 		RedisTemplate<String, Object> template = new RedisTemplate<>();
 		template.setConnectionFactory(connectionFactory);
 
@@ -46,6 +48,26 @@ public class RedisConfig {
 
 		// QueueToken 직렬화 설정
 		Jackson2JsonRedisSerializer<QueueToken> serializer = new Jackson2JsonRedisSerializer<>(objectMapper, QueueToken.class);
+
+		template.setKeySerializer(new StringRedisSerializer());
+		template.setValueSerializer(serializer);
+
+		template.setHashKeySerializer(new StringRedisSerializer());
+		template.setHashValueSerializer(serializer);
+
+		template.afterPropertiesSet();
+		return template;
+	}
+
+	/**
+	 * 기본 redisTemplate
+	 */
+	@Bean
+	public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
+		RedisTemplate<String, Object> template = new RedisTemplate<>();
+		template.setConnectionFactory(connectionFactory);
+
+		GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer();
 
 		template.setKeySerializer(new StringRedisSerializer());
 		template.setValueSerializer(serializer);

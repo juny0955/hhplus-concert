@@ -19,14 +19,15 @@ import lombok.RequiredArgsConstructor;
 public class RedisQueueTokenRepository implements QueueTokenRepository {
 
 	private final RedisTemplate<String, Object> redisTemplate;
+	private final RedisTemplate<String, Object> queueTokenRedisTemplate;
 
 	@Override
 	public void save(QueueToken queueToken) {
 		String tokenInfoKey = QueueTokenUtil.formattingTokenInfoKey(queueToken.tokenId());
 		String tokenIdKey = QueueTokenUtil.formattingTokenIdKey(queueToken.userId(), queueToken.concertId());
 
-		redisTemplate.opsForValue().set(tokenInfoKey, queueToken);
-		redisTemplate.opsForValue().set(tokenIdKey, tokenInfoKey);
+		queueTokenRedisTemplate.opsForValue().set(tokenInfoKey, queueToken);
+		redisTemplate.opsForValue().set(tokenIdKey, queueToken.tokenId().toString());
 
 		if (queueToken.status().equals(QueueStatus.ACTIVE))
 			saveActiveToken(queueToken, tokenInfoKey, tokenIdKey);
@@ -38,17 +39,13 @@ public class RedisQueueTokenRepository implements QueueTokenRepository {
 	public String findTokenIdByUserIdAndConcertId(UUID userId, UUID concertId) {
 		String tokenIdKey = QueueTokenUtil.formattingTokenIdKey(userId, concertId);
 		Object tokenId = redisTemplate.opsForValue().get(tokenIdKey);
-
-		if (tokenId == null)
-			return null;
-
-		return tokenId.toString().substring("token:info:".length());
+		return tokenId != null ? tokenId.toString() : null;
 	}
 
 	@Override
 	public QueueToken findQueueTokenByTokenId(String tokenId) {
 		String tokenInfoKey = QueueTokenUtil.formattingTokenInfoKey(UUID.fromString(tokenId));
-		Object tokenInfo = redisTemplate.opsForValue().get(tokenInfoKey);
+		Object tokenInfo = queueTokenRedisTemplate.opsForValue().get(tokenInfoKey);
 		return tokenInfo != null ? (QueueToken) tokenInfo : null;
 	}
 

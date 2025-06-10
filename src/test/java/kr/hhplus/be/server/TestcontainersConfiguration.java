@@ -36,14 +36,6 @@ class TestcontainersConfiguration {
 		System.setProperty("spring.redis.port", String.valueOf(REDIS_CONTAINER.getMappedPort(6379)));
 	}
 
-	@Bean
-	public RedisConnectionFactory redisConnectionFactory() {
-		return new LettuceConnectionFactory(
-			REDIS_CONTAINER.getHost(),
-			REDIS_CONTAINER.getMappedPort(6379)
-		);
-	}
-
 	@PreDestroy
 	public void preDestroy() {
 		if (MYSQL_CONTAINER.isRunning()) {
