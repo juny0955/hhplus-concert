@@ -45,11 +45,27 @@ public record QueueToken(
 			.build();
 	}
 
+	public QueueToken withWaitingPosition(int waitingPosition) {
+		return QueueToken.builder()
+			.tokenId(tokenId)
+			.userId(userId)
+			.concertId(concertId)
+			.status(QueueStatus.WAITING)
+			.position(waitingPosition)
+			.issuedAt(LocalDateTime.now())
+			.enteredAt(null)
+			.expiresAt(null)
+			.build();
+	}
+
 	public boolean isActive() {
 		return status.equals(QueueStatus.ACTIVE);
 	}
 
 	public boolean isExpired() {
-		return expiresAt.isBefore(LocalDateTime.now());
+		if (status.equals(QueueStatus.ACTIVE))
+			return expiresAt.isBefore(LocalDateTime.now());
+
+		return true;
 	}
 }

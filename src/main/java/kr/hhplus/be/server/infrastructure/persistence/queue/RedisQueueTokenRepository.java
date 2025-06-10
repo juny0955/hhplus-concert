@@ -70,7 +70,7 @@ public class RedisQueueTokenRepository implements QueueTokenRepository {
 
 	@Override
 	public Integer countActiveTokens(UUID concertId) {
-		Object count = redisTemplate.opsForValue().get(QueueTokenUtil.formattingActiveCountKey(concertId));
+		Object count = redisTemplate.opsForZSet().count(QueueTokenUtil.formattingActiveCountKey(concertId), Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 		if (count == null) return 0;
 		return Integer.parseInt(count.toString());
 	}

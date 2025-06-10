@@ -15,7 +15,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.utility.TestcontainersConfiguration;
@@ -35,7 +34,6 @@ import kr.hhplus.be.server.framework.exception.ErrorCode;
 })
 @AutoConfigureMockMvc
 @Import(TestcontainersConfiguration.class)
-@ActiveProfiles("test")
 @Transactional
 class ConcertIntegrationTest {
 

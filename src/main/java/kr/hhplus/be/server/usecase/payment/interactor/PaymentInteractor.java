@@ -5,6 +5,8 @@ import java.util.UUID;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 import kr.hhplus.be.server.domain.seat.Seat;
 import kr.hhplus.be.server.domain.event.payment.PaymentSuccessEvent;
 import kr.hhplus.be.server.domain.payment.Payment;
@@ -100,7 +102,7 @@ public class PaymentInteractor implements PaymentInput {
 			.orElseThrow(() -> new CustomException(ErrorCode.RESERVATION_NOT_FOUND));
 	}
 
-	private QueueToken getQueueTokenAndValid(PaymentCommand command) throws CustomException {
+	private QueueToken getQueueTokenAndValid(PaymentCommand command) throws CustomException, JsonProcessingException {
 		QueueToken queueToken = queueTokenRepository.findQueueTokenByTokenId(command.queueTokenId());
 		QueueTokenUtil.validateActiveQueueToken(queueToken);
 		return queueToken;

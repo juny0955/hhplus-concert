@@ -7,7 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,8 +17,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import kr.hhplus.be.server.api.concert.dto.request.QueueTokenRequest;
-import kr.hhplus.be.server.api.concert.dto.response.QueueTokenResponse;
+import kr.hhplus.be.server.api.queue.dto.response.QueueTokenResponse;
 import kr.hhplus.be.server.domain.queue.QueueToken;
 import kr.hhplus.be.server.framework.exception.CustomException;
 import kr.hhplus.be.server.usecase.queue.QueueService;
@@ -52,12 +50,12 @@ public class QueueController {
 			description = "콘서트 찾을 수 없음"
 		)
 	})
-	@PostMapping("/concerts/{concertId}")
+	@PostMapping("/concerts/{concertId}/users/{userId}")
 	public ResponseEntity<QueueTokenResponse> issueQueueToken(
 		@PathVariable UUID concertId,
-		@RequestBody QueueTokenRequest request
+		@PathVariable UUID userId
 	) throws CustomException {
-		QueueToken queueToken = queueService.issueQueueToken(request.userId(), concertId);
+		QueueToken queueToken = queueService.issueQueueToken(userId, concertId);
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(QueueTokenResponse.from(queueToken));
 	}

@@ -5,6 +5,8 @@ import java.util.UUID;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
 import kr.hhplus.be.server.domain.concertDate.ConcertDate;
 import kr.hhplus.be.server.domain.seat.Seat;
 import kr.hhplus.be.server.domain.event.reservation.ReservationCreatedEvent;
@@ -109,7 +111,8 @@ public class ReservationInteractor implements ReservationInput {
 			throw new CustomException(ErrorCode.CONCERT_NOT_FOUND);
 	}
 
-	private QueueToken getQueueTokenAndValid(ReserveSeatCommand command) throws CustomException {
+	private QueueToken getQueueTokenAndValid(ReserveSeatCommand command) throws CustomException,
+		JsonProcessingException {
 		QueueToken queueToken = queueTokenRepository.findQueueTokenByTokenId(command.queueTokenId());
 		QueueTokenUtil.validateActiveQueueToken(queueToken);
 		return queueToken;
