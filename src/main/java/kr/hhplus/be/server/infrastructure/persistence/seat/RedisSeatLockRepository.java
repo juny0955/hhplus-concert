@@ -16,7 +16,7 @@ public class RedisSeatLockRepository implements SeatLockRepository {
 
 	@Override
 	public boolean acquisitionLock(UUID seatId) {
-		return false;
+		return true;
 	}
 
 	@Override

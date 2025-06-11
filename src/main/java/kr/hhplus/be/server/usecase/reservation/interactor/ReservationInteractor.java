@@ -70,7 +70,7 @@ public class ReservationInteractor implements ReservationInput {
 
 			Seat 		savedSeat		 = seatRepository.save(result.seat());
 			Reservation savedReservation = reservationRepository.save(result.reservation());
-			Payment 	savedPayment 	 = paymentRepository.save(result.payment());
+			Payment 	savedPayment 	 = paymentRepository.save(Payment.of(savedSeat.id(), savedReservation.id(), savedSeat.price()));
 
 			seatHoldRepository.hold(seat.id(), queueToken.userId());
 
@@ -78,7 +78,7 @@ public class ReservationInteractor implements ReservationInput {
 			reservationOutput.ok(ReserveSeatResult.of(savedReservation, savedSeat));
 		} catch (CustomException e) {
 			ErrorCode errorCode = e.getErrorCode();
-			log.warn("좌석 예약중 비즈니스 예외 발생 - {}", errorCode.getCode());
+			log.warn("좌석 예약중 비즈니스 예외 발생 - {}, {}", errorCode.getCode(), errorCode.getMessage());
 			throw e;
 		} catch (Exception e) {
 			log.error("좌석 예약중 예외 발생 - {}", ErrorCode.INTERNAL_SERVER_ERROR, e);
@@ -111,8 +111,7 @@ public class ReservationInteractor implements ReservationInput {
 			throw new CustomException(ErrorCode.CONCERT_NOT_FOUND);
 	}
 
-	private QueueToken getQueueTokenAndValid(ReserveSeatCommand command) throws CustomException,
-		JsonProcessingException {
+	private QueueToken getQueueTokenAndValid(ReserveSeatCommand command) throws CustomException {
 		QueueToken queueToken = queueTokenRepository.findQueueTokenByTokenId(command.queueTokenId());
 		QueueTokenUtil.validateActiveQueueToken(queueToken);
 		return queueToken;

@@ -1,6 +1,9 @@
 package kr.hhplus.be.server.api.reservation;
 
+import java.util.UUID;
+
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -68,12 +71,13 @@ public class ReservationController implements ReservationOutput {
 			description = "락 획득 실패 (다른 사용자 점유중)"
 		)
 	})
-	@PostMapping("/seats")
+	@PostMapping("/seats/{seatId}")
 	public ResponseEntity<ReservationResponse> reservationConcert(
+		@PathVariable UUID seatId,
 		@RequestBody ReservationRequest request,
 		@RequestHeader(value = "Authorization") String queueToken
 	) throws CustomException {
-		reservationInput.reserveSeat(ReserveSeatCommand.of(request, queueToken));
+		reservationInput.reserveSeat(ReserveSeatCommand.of(request, seatId, queueToken));
 
 		return ResponseEntity.ok(reservationResponse);
 	}
