@@ -30,6 +30,7 @@ public record Reservation(
 			.userId(userId)
 			.seatId(seatId)
 			.status(ReservationStatus.SUCCESS)
+			.createdAt(createdAt)
 			.updatedAt(LocalDateTime.now())
 			.build();
 	}

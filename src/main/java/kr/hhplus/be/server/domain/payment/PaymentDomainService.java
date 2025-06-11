@@ -18,10 +18,10 @@ public class PaymentDomainService {
 		validatePayment(payment);
 		validateUserBalance(payment, user);
 
-		User paidUser = user.payment(payment.amount());
+		User paidUser 				= user.payment(payment.amount());
 		Reservation paidReservation = reservation.payment();
-		Payment paidPayment = payment.success();
-		Seat paidSeat = seat.payment();
+		Payment paidPayment 		= payment.success();
+		Seat paidSeat 				= seat.payment();
 
 		return new PaymentDomainResult(paidUser, paidReservation, paidPayment, paidSeat);
 	}

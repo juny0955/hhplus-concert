@@ -23,6 +23,12 @@ public record PaymentResponse(
 	LocalDateTime createdAt
 ) {
 	public static PaymentResponse from(PaymentResult paymentResult) {
-		return null;
+		return PaymentResponse.builder()
+			.paymentId(paymentResult.paymentId())
+			.reservationId(paymentResult.reservationId())
+			.amount(paymentResult.price())
+			.status(paymentResult.status())
+			.createdAt(paymentResult.createdAt())
+			.build();
 	}
 }

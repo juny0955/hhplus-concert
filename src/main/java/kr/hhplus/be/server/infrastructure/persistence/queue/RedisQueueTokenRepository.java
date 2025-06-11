@@ -67,7 +67,7 @@ public class RedisQueueTokenRepository implements QueueTokenRepository {
 
 	@Override
 	public Integer countActiveTokens(UUID concertId) {
-		Object count = redisTemplate.opsForZSet().count(QueueTokenUtil.formattingActiveCountKey(concertId), Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+		Object count = redisTemplate.opsForZSet().count(QueueTokenUtil.formattingActiveTokenKey(concertId), Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 		if (count == null) return 0;
 		return Integer.parseInt(count.toString());
 	}
@@ -80,11 +80,11 @@ public class RedisQueueTokenRepository implements QueueTokenRepository {
 		String tokenInfoKey = QueueTokenUtil.formattingTokenInfoKey(queueToken.tokenId());
 		String tokenIdKey = QueueTokenUtil.formattingTokenIdKey(queueToken.userId(), queueToken.concertId());
 
-		redisTemplate.delete(tokenInfoKey);
+		queueTokenRedisTemplate.delete(tokenInfoKey);
 		redisTemplate.delete(tokenIdKey);
 
 		if (queueToken.status().equals(QueueStatus.ACTIVE))
-			redisTemplate.opsForValue().decrement(QueueTokenUtil.formattingActiveCountKey(queueToken.concertId()));
+			redisTemplate.opsForZSet().remove(QueueTokenUtil.formattingActiveTokenKey(queueToken.concertId()), tokenIdKey);
 		else
 			redisTemplate.opsForZSet().remove(QueueTokenUtil.formattingWaitingTokenKey(queueToken.concertId()), tokenIdKey);
 	}
@@ -102,12 +102,12 @@ public class RedisQueueTokenRepository implements QueueTokenRepository {
 	}
 
 	private void saveActiveToken(QueueToken queueToken, String tokenInfoKey, String tokenIdKey) {
-		String activeCountKey = QueueTokenUtil.formattingActiveCountKey(queueToken.concertId());
+		String activeTokenKey = QueueTokenUtil.formattingActiveTokenKey(queueToken.concertId());
 		Instant expiresInstant = queueToken.expiresAt()
 			.atZone(ZoneOffset.UTC)
 			.toInstant();
 		double score = expiresInstant.getEpochSecond();
-		redisTemplate.opsForZSet().add(activeCountKey, tokenIdKey, score);
+		redisTemplate.opsForZSet().add(activeTokenKey, tokenIdKey, score);
 
 		redisTemplate.expireAt(tokenInfoKey, expiresInstant);
 		redisTemplate.expireAt(tokenIdKey, expiresInstant);

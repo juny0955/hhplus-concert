@@ -46,7 +46,7 @@ public class ReservationEntity extends BaseTimeEntity {
 	@Column(name = "seat_id", length = 36, nullable = false)
 	private String seatId;
 
-	@Column(name = "expire_at", nullable = false)
+	@Column(name = "expire_at")
 	private LocalDateTime expireAt;
 
 	@Enumerated(EnumType.STRING)

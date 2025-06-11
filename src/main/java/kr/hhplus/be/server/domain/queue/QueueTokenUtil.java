@@ -28,7 +28,7 @@ public final class QueueTokenUtil {
 		return String.format(TOKEN_INFO_KEY, tokenId);
 	}
 
-	public static String formattingActiveCountKey(UUID concertId) {
+	public static String formattingActiveTokenKey(UUID concertId) {
 		return String.format(ACTIVE_TOKEN_KEY, concertId);
 	}
 

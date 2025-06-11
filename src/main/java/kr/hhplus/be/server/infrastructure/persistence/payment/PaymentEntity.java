@@ -72,6 +72,7 @@ public class PaymentEntity extends BaseTimeEntity {
 			.userId(UUID.fromString(userId))
 			.reservationId(UUID.fromString(reservationId))
 			.status(status)
+			.amount(amount)
 			.failureReason(failureReason)
 			.createdAt(getCreatedAt())
 			.updatedAt(getUpdatedAt())
