@@ -136,7 +136,6 @@ class PaymentIntegrationTest {
 			.userId(userId)
 			.seatId(seatId)
 			.status(ReservationStatus.PENDING)
-			.expireAt(LocalDateTime.now().plusMinutes(5))
 			.build();
 		Reservation savedReservation = reservationRepository.save(reservation);
 		reservationId = savedReservation.id();
@@ -241,7 +240,6 @@ class PaymentIntegrationTest {
 			.userId(userId)
 			.seatId(seatId)
 			.status(ReservationStatus.PENDING)
-			.expireAt(LocalDateTime.now().plusMinutes(5))
 			.build();
 		Reservation savedOtherReservation = reservationRepository.save(otherReservation);
 
@@ -265,7 +263,6 @@ class PaymentIntegrationTest {
 			.userId(savedPoorUser.id())
 			.seatId(seatId)
 			.status(ReservationStatus.PENDING)
-			.expireAt(LocalDateTime.now().plusMinutes(5))
 			.build();
 		Reservation savedPoorUserReservation = reservationRepository.save(poorUserReservation);
 
@@ -289,33 +286,6 @@ class PaymentIntegrationTest {
 			.andExpect(status().isBadRequest())
 			.andExpect(jsonPath("$.code").value(ErrorCode.INSUFFICIENT_BALANCE.getCode()))
 			.andExpect(jsonPath("$.message").value(ErrorCode.INSUFFICIENT_BALANCE.getMessage()));
-	}
-
-	@Test
-	@DisplayName("결제_실패_예약만료")
-	void payment_Failure_ReservationExpired() throws Exception {
-		Reservation expiredReservation = Reservation.builder()
-			.userId(userId)
-			.seatId(seatId)
-			.status(ReservationStatus.PENDING)
-			.expireAt(LocalDateTime.now().minusMinutes(1)) // 1분 전에 만료
-			.build();
-		Reservation savedExpiredReservation = reservationRepository.save(expiredReservation);
-
-		Payment expiredPayment = Payment.builder()
-			.userId(userId)
-			.reservationId(savedExpiredReservation.id())
-			.amount(BigDecimal.valueOf(50000))
-			.status(PaymentStatus.PENDING)
-			.build();
-		paymentRepository.save(expiredPayment);
-
-		mockMvc.perform(post("/api/v1/payments/{reservationId}", savedExpiredReservation.id())
-				.contentType(MediaType.APPLICATION_JSON)
-				.header("Authorization", activeTokenId))
-			.andExpect(status().isBadRequest())
-			.andExpect(jsonPath("$.code").value(ErrorCode.RESERVATION_EXPIRED.getCode()))
-			.andExpect(jsonPath("$.message").value(ErrorCode.RESERVATION_EXPIRED.getMessage()));
 	}
 
 	@Test
@@ -363,7 +333,6 @@ class PaymentIntegrationTest {
 			.userId(otherUserId)
 			.seatId(seatId)
 			.status(ReservationStatus.PENDING)
-			.expireAt(LocalDateTime.now().plusMinutes(5))
 			.build();
 		Reservation savedNonUserReservation = reservationRepository.save(otherReservation);
 
@@ -393,7 +362,6 @@ class PaymentIntegrationTest {
 			.userId(userId)
 			.seatId(otherSeatId)
 			.status(ReservationStatus.PENDING)
-			.expireAt(LocalDateTime.now().plusMinutes(5))
 			.build();
 		Reservation savedInvalidSeatReservation = reservationRepository.save(invalidSeatReservation);
 

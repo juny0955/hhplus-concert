@@ -115,7 +115,7 @@ class ReservationInteractorTest {
 		seat = new Seat(seatId, concertDateId, 10, BigDecimal.valueOf(10000), SeatClass.VIP, SeatStatus.AVAILABLE, now, now);
 		reservedSeat = seat.reserve();
 		concertDate = new ConcertDate(concertDateId, concertId, null, now.plusDays(7), now.plusDays(5), now, now);
-		reservation = new Reservation(reservationId, userId, seatId, ReservationStatus.PENDING, now.plusMinutes(5), now, now);
+		reservation = new Reservation(reservationId, userId, seatId, ReservationStatus.PENDING, now, now);
 		payment = new Payment(paymentId, userId, reservationId, BigDecimal.valueOf(10000), PaymentStatus.PENDING, null, now, now);
 		domainResult = new ReservationDomainResult(reservedSeat, reservation);
 	}

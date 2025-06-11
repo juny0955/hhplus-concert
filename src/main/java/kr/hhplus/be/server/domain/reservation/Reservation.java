@@ -11,7 +11,6 @@ public record Reservation(
 	UUID userId,
 	UUID seatId,
 	ReservationStatus status,
-	LocalDateTime expireAt,
 	LocalDateTime createdAt,
 	LocalDateTime updatedAt
 ) {
@@ -20,7 +19,6 @@ public record Reservation(
 			.userId(userId)
 			.seatId(seatId)
 			.status(ReservationStatus.PENDING)
-			.expireAt(LocalDateTime.now().plusMinutes(5))
 			.build();
 	}
 
@@ -33,9 +31,5 @@ public record Reservation(
 			.createdAt(createdAt)
 			.updatedAt(LocalDateTime.now())
 			.build();
-	}
-
-	public boolean isExpired() {
-		return expireAt.isBefore(LocalDateTime.now());
 	}
 }

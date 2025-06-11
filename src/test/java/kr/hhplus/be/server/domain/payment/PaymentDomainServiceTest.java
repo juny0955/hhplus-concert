@@ -50,7 +50,7 @@ class PaymentDomainServiceTest {
 		concertDateId = UUID.randomUUID();
 
 		user = new User(userId, BigDecimal.valueOf(100000), now, now);
-		reservation = new Reservation(reservationId, userId, seatId, ReservationStatus.PENDING, now.plusMinutes(5), now, now);
+		reservation = new Reservation(reservationId, userId, seatId, ReservationStatus.PENDING, now, now);
 		payment = new Payment(paymentId, userId, reservationId, BigDecimal.valueOf(10000), PaymentStatus.PENDING, null, now, now);
 		seat = new Seat(seatId, concertDateId, 10, BigDecimal.valueOf(10000), SeatClass.VIP, SeatStatus.RESERVED, now, now);
 	}
@@ -65,18 +65,6 @@ class PaymentDomainServiceTest {
 		assertThat(result.reservation().status()).isEqualTo(ReservationStatus.SUCCESS);
 		assertThat(result.payment().status()).isEqualTo(PaymentStatus.SUCCESS);
 		assertThat(result.seat().status()).isEqualTo(SeatStatus.ASSIGNED);
-	}
-
-	@Test
-	@DisplayName("결제_처리_실패_예약만료")
-	void processPayment_Failure_ReservationExpired() {
-		Reservation expiredReservation = mock(Reservation.class);
-		when(expiredReservation.isExpired()).thenReturn(true);
-
-		CustomException customException = assertThrows(CustomException.class,
-			() -> paymentDomainService.processPayment(expiredReservation, payment, seat, user));
-
-		assertThat(customException.getErrorCode()).isEqualTo(ErrorCode.RESERVATION_EXPIRED);
 	}
 
 	@Test

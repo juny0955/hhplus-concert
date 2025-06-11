@@ -56,9 +56,9 @@ public class ReservationEntity extends BaseTimeEntity {
 
 	public static ReservationEntity from(Reservation reservation) {
 		return ReservationEntity.builder()
+			.id(reservation.id() != null ? reservation.id().toString() : null)
 			.userId(reservation.userId().toString())
 			.seatId(reservation.seatId().toString())
-			.expireAt(reservation.expireAt())
 			.status(reservation.status())
 			.build();
 	}
@@ -69,7 +69,6 @@ public class ReservationEntity extends BaseTimeEntity {
 			.userId(UUID.fromString(userId))
 			.seatId(UUID.fromString(seatId))
 			.status(status)
-			.expireAt(expireAt)
 			.createdAt(getCreatedAt())
 			.updatedAt(getUpdatedAt())
 			.build();
