@@ -60,6 +60,25 @@ public class QueueController {
 		return ResponseEntity.status(HttpStatus.CREATED).body(QueueTokenResponse.from(queueToken));
 	}
 
+	@Operation(
+		summary = "콘서트 대기열 토큰 조회",
+		description = "대기열 토큰 정보 조회 (Pooling)"
+	)
+	@ApiResponses(value = {
+		@ApiResponse(
+			responseCode = "200",
+			description = "토큰 조회 성공",
+			content = @Content(schema = @Schema(implementation = QueueTokenResponse.class))
+		),
+		@ApiResponse(
+			responseCode = "400",
+			description = "유효하지 않은 토큰"
+		),
+		@ApiResponse(
+			responseCode = "404",
+			description = "콘서트 찾을 수 없음"
+		)
+	})
 	@GetMapping("/concerts/{concertId}")
 	public ResponseEntity<QueueTokenResponse> getQueueInfo(
 		@PathVariable UUID concertId,

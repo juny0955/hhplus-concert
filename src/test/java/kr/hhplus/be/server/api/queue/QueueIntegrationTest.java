@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.api.queue;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -29,6 +30,8 @@ import kr.hhplus.be.server.domain.concert.ConcertRepository;
 import kr.hhplus.be.server.domain.concertDate.ConcertDate;
 import kr.hhplus.be.server.domain.concertDate.ConcertDateRepository;
 import kr.hhplus.be.server.domain.queue.QueueStatus;
+import kr.hhplus.be.server.domain.queue.QueueToken;
+import kr.hhplus.be.server.domain.queue.QueueTokenRepository;
 import kr.hhplus.be.server.domain.user.User;
 import kr.hhplus.be.server.domain.user.UserRepository;
 import kr.hhplus.be.server.framework.exception.ErrorCode;
@@ -46,6 +49,9 @@ class QueueIntegrationTest {
 
 	@Autowired
 	private ConcertRepository concertRepository;
+
+	@Autowired
+	private QueueTokenRepository queueTokenRepository;
 
 	@Autowired
 	private RedisTemplate<String, Object> redisTemplate;
@@ -119,10 +125,9 @@ class QueueIntegrationTest {
 				.amount(BigDecimal.valueOf(10000))
 				.build();
 			User savedTempUser = userRepository.save(tempUser);
+			UUID tokenId = UUID.randomUUID();
 
-			mockMvc.perform(post("/api/v1/queue/concerts/{concertId}/users/{userId}", concertId, savedTempUser.id())
-					.contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isCreated());
+			queueTokenRepository.save(QueueToken.activeTokenOf(tokenId, savedTempUser.id(), concertId, 10000000000L));
 		}
 
 		// 51번째 토큰은 대기 상태
@@ -144,23 +149,18 @@ class QueueIntegrationTest {
 	@Test
 	@DisplayName("대기열_토큰_발급_성공(기존토큰반환)")
 	void issueQueueToken_Success_ReturnExistingToken() throws Exception {
-		MvcResult firstResult = mockMvc.perform(post("/api/v1/queue/concerts/{concertId}/users/{userId}", concertId, userId)
+		UUID tokenId = UUID.randomUUID();
+		queueTokenRepository.save(QueueToken.activeTokenOf(tokenId, userId, concertId, 100000000L));
+
+		MvcResult result = mockMvc.perform(post("/api/v1/queue/concerts/{concertId}/users/{userId}", concertId, userId)
 				.contentType(MediaType.APPLICATION_JSON))
 			.andExpect(status().isCreated())
 			.andReturn();
 
-		JsonNode firstResponse = objectMapper.readTree(firstResult.getResponse().getContentAsString());
-		String firstTokenId = firstResponse.get("tokenId").asText();
+		JsonNode response = objectMapper.readTree(result.getResponse().getContentAsString());
+		String responseTokenId = response.get("tokenId").asText();
 
-		MvcResult secondResult = mockMvc.perform(post("/api/v1/queue/concerts/{concertId}/users/{userId}", concertId, userId)
-				.contentType(MediaType.APPLICATION_JSON))
-			.andExpect(status().isCreated())
-			.andReturn();
-
-		JsonNode secondResponse = objectMapper.readTree(secondResult.getResponse().getContentAsString());
-		String secondTokenId = secondResponse.get("tokenId").asText();
-
-		assert firstTokenId.equals(secondTokenId);
+		assertThat(tokenId.toString()).isEqualTo(responseTokenId);
 	}
 
 	@Test
@@ -192,20 +192,14 @@ class QueueIntegrationTest {
 	@Test
 	@DisplayName("대기열_토큰_조회_성공(활성상태)")
 	void getQueueToken_Success_Active() throws Exception {
-		MvcResult issueResult = mockMvc.perform(post("/api/v1/queue/concerts/{concertId}/users/{userId}", concertId, userId)
-				.contentType(MediaType.APPLICATION_JSON))
-			.andExpect(status().isCreated())
-			.andReturn();
+		UUID tokenId = UUID.randomUUID();
+		queueTokenRepository.save(QueueToken.activeTokenOf(tokenId, userId, concertId, 100000000L));
 
-		JsonNode issueResponse = objectMapper.readTree(issueResult.getResponse().getContentAsString());
-		String tokenId = issueResponse.get("tokenId").asText();
-
-		// 대기열 정보 조회
 		mockMvc.perform(get("/api/v1/queue/concerts/{concertId}", concertId)
 				.header("Authorization", tokenId)
 				.contentType(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.tokenId").value(tokenId))
+			.andExpect(jsonPath("$.tokenId").value(tokenId.toString()))
 			.andExpect(jsonPath("$.userId").value(userId.toString()))
 			.andExpect(jsonPath("$.concertId").value(concertId.toString()))
 			.andExpect(jsonPath("$.status").value(QueueStatus.ACTIVE.toString()));
@@ -214,32 +208,14 @@ class QueueIntegrationTest {
 	@Test
 	@DisplayName("대기열_정보_조회_성공(대기상태)")
 	void getQueueInfo_Success_Waiting() throws Exception {
-		for (int i = 0; i < 50; i++) {
-			User tempUser = User.builder()
-				.amount(BigDecimal.valueOf(10000))
-				.build();
-			User savedTempUser = userRepository.save(tempUser);
+		UUID tokenId = UUID.randomUUID();
+		queueTokenRepository.save(QueueToken.waitingTokenOf(tokenId, userId, concertId, 1));
 
-			mockMvc.perform(post("/api/v1/queue/concerts/{concertId}/users/{userId}", concertId, savedTempUser.id())
-					.contentType(MediaType.APPLICATION_JSON))
-				.andExpect(status().isCreated());
-		}
-
-		// 대기 토큰 발급
-		MvcResult issueResult = mockMvc.perform(post("/api/v1/queue/concerts/{concertId}/users/{userId}", concertId, userId)
-				.contentType(MediaType.APPLICATION_JSON))
-			.andExpect(status().isCreated())
-			.andReturn();
-
-		JsonNode issueResponse = objectMapper.readTree(issueResult.getResponse().getContentAsString());
-		String tokenId = issueResponse.get("tokenId").asText();
-
-		// 대기열 정보 조회
 		mockMvc.perform(get("/api/v1/queue/concerts/{concertId}", concertId)
 				.header("Authorization", tokenId)
 				.contentType(MediaType.APPLICATION_JSON))
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.tokenId").value(tokenId))
+			.andExpect(jsonPath("$.tokenId").value(tokenId.toString()))
 			.andExpect(jsonPath("$.userId").value(userId.toString()))
 			.andExpect(jsonPath("$.concertId").value(concertId.toString()))
 			.andExpect(jsonPath("$.status").value(QueueStatus.WAITING.toString()))
@@ -263,18 +239,12 @@ class QueueIntegrationTest {
 	@Test
 	@DisplayName("대기열_정보_조회_실패_콘서트찾을수없음")
 	void getQueueInfo_Failure_ConcertNotFound() throws Exception {
-		// 토큰 발급
-		MvcResult issueResult = mockMvc.perform(post("/api/v1/queue/concerts/{concertId}/users/{userId}", concertId, userId)
-				.contentType(MediaType.APPLICATION_JSON))
-			.andExpect(status().isCreated())
-			.andReturn();
+		UUID tokenId = UUID.randomUUID();
+		queueTokenRepository.save(QueueToken.activeTokenOf(tokenId, userId, concertId, 100000000L));
 
-		JsonNode issueResponse = objectMapper.readTree(issueResult.getResponse().getContentAsString());
-		String tokenId = issueResponse.get("tokenId").asText();
+		UUID otherConcertId = UUID.randomUUID();
 
-		UUID nonExistentConcertId = UUID.randomUUID();
-
-		mockMvc.perform(get("/api/v1/queue/concerts/{concertId}", nonExistentConcertId)
+		mockMvc.perform(get("/api/v1/queue/concerts/{concertId}", otherConcertId)
 				.header("Authorization", tokenId)
 				.contentType(MediaType.APPLICATION_JSON))
 			.andExpect(status().isNotFound())
