@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.api.user;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -92,6 +93,9 @@ class UserIntegrationTest {
 			.andExpect(jsonPath("$.userId").value(userId.toString()))
 			.andExpect(jsonPath("$.amount").value(initPoint.add(chargePoint)))
 		;
+
+		User findUser = userRepository.findById(userId).get();
+		assertThat(findUser.amount()).isEqualTo(initPoint.add(chargePoint));
 	}
 
 	@Test
@@ -113,17 +117,20 @@ class UserIntegrationTest {
 	@Test
 	@DisplayName("유저_포인트_충전_실패_최소충전금액미만(1000원)")
 	void chargeUserPoint_Failure_NotEnoughMinChargePoint() throws Exception {
-		UUID userId = UUID.randomUUID();
+		UUID otherUserId = UUID.randomUUID();
 		BigDecimal chargePoint = BigDecimal.valueOf(500);
 		ChargePointRequest request = new ChargePointRequest(chargePoint);
 
-		mockMvc.perform(post("/api/v1/users/{userId}/points", userId)
+		mockMvc.perform(post("/api/v1/users/{userId}/points", otherUserId)
 				.contentType(MediaType.APPLICATION_JSON)
 				.content(objectMapper.writeValueAsString(request)))
 			.andExpect(status().isBadRequest())
 			.andExpect(jsonPath("$.code").value(ErrorCode.NOT_ENOUGH_MIN_CHARGE_POINT.getCode()))
 			.andExpect(jsonPath("$.message").value(ErrorCode.NOT_ENOUGH_MIN_CHARGE_POINT.getMessage()))
 		;
+
+		User findUser = userRepository.findById(userId).get();
+		assertThat(findUser.amount()).isEqualTo(initPoint);
 	}
 
 	@Test
@@ -139,6 +146,9 @@ class UserIntegrationTest {
 			.andExpect(content().contentType(MediaType.APPLICATION_JSON))
 			.andExpect(jsonPath("$.userId").value(userId.toString()))
 			.andExpect(jsonPath("$.amount").value(initPoint.add(chargePoint)));
+
+		User findUser = userRepository.findById(userId).get();
+		assertThat(findUser.amount()).isEqualTo(initPoint.add(chargePoint));
 	}
 
 }
