@@ -9,7 +9,11 @@ public interface ConcertDateRepository {
 
 	List<ConcertDate> findAvailableDates(UUID concertId);
 
+	List<ConcertDate> findAvailableDatesWithAvailableSeatCount(UUID concertId);
+
 	Optional<ConcertDate> findAvailableDate(UUID concertId, UUID concertDateId);
 
 	ConcertDate save(ConcertDate concertDate);
+
+	boolean existsById(UUID concertDateId);
 }

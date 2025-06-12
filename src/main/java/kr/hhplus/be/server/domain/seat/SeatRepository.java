@@ -9,7 +9,7 @@ public interface SeatRepository {
 	Seat save(Seat seat);
 	Optional<Seat> findBySeatIdAndConcertDateId(UUID seatId, UUID concertDateId);
 	Integer countRemainingSeat(UUID concertDateId);
-	List<Seat> findAvailableSeats(UUID concertDateId);
+	List<Seat> findAvailableSeats(UUID concertId, UUID concertDateId);
 
 	Optional<Seat> findById(UUID seatId);
 }

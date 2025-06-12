@@ -1,6 +1,5 @@
 package kr.hhplus.be.server.infrastructure.persistence.reservation;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.hibernate.annotations.ColumnDefault;
@@ -45,9 +44,6 @@ public class ReservationEntity extends BaseTimeEntity {
 	@JdbcTypeCode(SqlTypes.VARCHAR)
 	@Column(name = "seat_id", length = 36, nullable = false)
 	private String seatId;
-
-	@Column(name = "expire_at")
-	private LocalDateTime expireAt;
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "status", nullable = false)
