@@ -46,6 +46,9 @@ dependencies {
 	// DB
 	runtimeOnly("com.mysql:mysql-connector-j")
 
+	// 더미 데이터 생성 라이브러리
+	implementation("net.datafaker:datafaker:2.4.2")
+
     // Test
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.springframework.boot:spring-boot-testcontainers")
