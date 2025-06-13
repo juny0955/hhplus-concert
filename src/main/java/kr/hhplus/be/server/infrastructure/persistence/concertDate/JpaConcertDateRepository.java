@@ -24,16 +24,21 @@ public interface JpaConcertDateRepository extends JpaRepository<ConcertDateEntit
 			cd.deadline,
 			cd.createdAt,
 			cd.updatedAt,
-			sc.availableSeatCount
-		from ConcertDateEntity cd
-			inner join (
-				select s.concertDateId, COUNT(*) as availableSeatCount
+			(
+				select count(s.id)
 				from SeatEntity s
-				where s.status = 'AVAILABLE'
-				group by s.concertDateId
-			) sc on cd.id = sc.concertDateId
+				where s.concertDateId = cd.id
+					and s.status = 'AVAILABLE'
+			) as remainingSeatCount
+		from ConcertDateEntity cd
 		where cd.concertId = 'xxx'
 			and cd.deadline > CURRENT_TIMESTAMP
+			and exists (
+				select 1
+				from SeatEntity s
+				where s.concertDateId = cd.id
+					and s.status = 'AVAILABLE'
+			)
 	""")
 	List<Object[]> findAvailableDatesWithAvailableSeatCount(String concertId);
 
