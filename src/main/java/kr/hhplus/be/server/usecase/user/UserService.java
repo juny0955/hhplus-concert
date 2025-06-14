@@ -34,7 +34,7 @@ public class UserService {
 			throw new CustomException(ErrorCode.NOT_ENOUGH_MIN_CHARGE_POINT);
 		}
 
-		User user = findUser(userId);
+		User user = findUserWithLock(userId);
 
 		User charged = user.charge(point);
 		User saved = userRepository.save(charged);
@@ -46,6 +46,19 @@ public class UserService {
 	private User findUser(UUID userId) throws CustomException {
 		try {
 			User user = userRepository.findById(userId)
+				.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+			log.debug("유저 조회: USER_ID - {}", userId);
+			return user;
+		} catch (CustomException e) {
+			log.warn("유저 조회 실패: USER_ID - {}", userId);
+			throw e;
+		}
+	}
+
+	private User findUserWithLock(UUID userId) throws CustomException {
+		try {
+			User user = userRepository.findByIdWithLock(userId)
 				.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
 			log.debug("유저 조회: USER_ID - {}", userId);

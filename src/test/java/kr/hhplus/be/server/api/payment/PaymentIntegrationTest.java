@@ -21,6 +21,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.utility.TestcontainersConfiguration;
 
+import kr.hhplus.be.server.api.TestDataFactory;
 import kr.hhplus.be.server.domain.concert.Concert;
 import kr.hhplus.be.server.domain.concert.ConcertRepository;
 import kr.hhplus.be.server.domain.concertDate.ConcertDate;
@@ -35,7 +36,6 @@ import kr.hhplus.be.server.domain.reservation.Reservation;
 import kr.hhplus.be.server.domain.reservation.ReservationRepository;
 import kr.hhplus.be.server.domain.reservation.ReservationStatus;
 import kr.hhplus.be.server.domain.seat.Seat;
-import kr.hhplus.be.server.domain.seat.SeatClass;
 import kr.hhplus.be.server.domain.seat.SeatHoldRepository;
 import kr.hhplus.be.server.domain.seat.SeatRepository;
 import kr.hhplus.be.server.domain.seat.SeatStatus;
@@ -101,51 +101,27 @@ class PaymentIntegrationTest {
 	void beforeEach() {
 		redisTemplate.getConnectionFactory().getConnection().flushAll();
 
-		user = User.builder()
-			.amount(BigDecimal.valueOf(100000))
-			.build();
+		user = TestDataFactory.createUser();
 		User savedUser = userRepository.save(user);
 		userId = savedUser.id();
 
-		concert = Concert.builder()
-			.title("GD 콘서트")
-			.artist("GD")
-			.build();
+		concert = TestDataFactory.createConcert();
 		Concert savedConcert = concertRepository.save(concert);
 		concertId = savedConcert.id();
 
-		concertDate = ConcertDate.builder()
-			.concertId(concertId)
-			.date(LocalDateTime.now().plusDays(7))
-			.deadline(LocalDateTime.now().plusDays(5))
-			.build();
+		concertDate = TestDataFactory.createConcertDate(concertId);
 		ConcertDate savedConcertDate = concertDateRepository.save(concertDate);
 		concertDateId = savedConcertDate.id();
 
-		seat = Seat.builder()
-			.concertDateId(concertDateId)
-			.seatNo(1)
-			.price(BigDecimal.valueOf(50000))
-			.seatClass(SeatClass.VIP)
-			.status(SeatStatus.RESERVED)
-			.build();
+		seat = TestDataFactory.createSeat(concertDateId);
 		Seat savedSeat = seatRepository.save(seat);
 		seatId = savedSeat.id();
 
-		reservation = Reservation.builder()
-			.userId(userId)
-			.seatId(seatId)
-			.status(ReservationStatus.PENDING)
-			.build();
+		reservation = TestDataFactory.createReservation(userId, seatId);
 		Reservation savedReservation = reservationRepository.save(reservation);
 		reservationId = savedReservation.id();
 
-		payment = Payment.builder()
-			.userId(userId)
-			.reservationId(reservationId)
-			.amount(BigDecimal.valueOf(50000))
-			.status(PaymentStatus.PENDING)
-			.build();
+		payment = TestDataFactory.createPayment(userId, reservationId);
 		Payment savedPayment = paymentRepository.save(payment);
 		paymentId = savedPayment.id();
 
@@ -236,11 +212,7 @@ class PaymentIntegrationTest {
 	@Test
 	@DisplayName("결제_실패_결제정보찾지못함")
 	void payment_Failure_PaymentNotFound() throws Exception {
-		Reservation otherReservation = Reservation.builder()
-			.userId(userId)
-			.seatId(seatId)
-			.status(ReservationStatus.PENDING)
-			.build();
+		Reservation otherReservation = TestDataFactory.createReservation(userId, seatId);
 		Reservation savedOtherReservation = reservationRepository.save(otherReservation);
 
 		mockMvc.perform(post("/api/v1/payments/{reservationId}", savedOtherReservation.id())
@@ -254,24 +226,13 @@ class PaymentIntegrationTest {
 	@Test
 	@DisplayName("결제_실패_사용자잔액부족")
 	void payment_Failure_InsufficientBalance() throws Exception {
-		User poorUser = User.builder()
-			.amount(BigDecimal.valueOf(10000)) // 좌석 가격(50000)보다 적은 금액
-			.build();
+		User poorUser = TestDataFactory.createPoorUser();
 		User savedPoorUser = userRepository.save(poorUser);
 
-		Reservation poorUserReservation = Reservation.builder()
-			.userId(savedPoorUser.id())
-			.seatId(seatId)
-			.status(ReservationStatus.PENDING)
-			.build();
+		Reservation poorUserReservation = TestDataFactory.createReservation(savedPoorUser.id(), seatId);
 		Reservation savedPoorUserReservation = reservationRepository.save(poorUserReservation);
 
-		Payment poorUserPayment = Payment.builder()
-			.userId(savedPoorUser.id())
-			.reservationId(savedPoorUserReservation.id())
-			.amount(BigDecimal.valueOf(50000))
-			.status(PaymentStatus.PENDING)
-			.build();
+		Payment poorUserPayment = TestDataFactory.createPayment(savedPoorUser.id(), savedPoorUserReservation.id());
 		paymentRepository.save(poorUserPayment);
 
 		UUID poorUserTokenId = UUID.randomUUID();
@@ -304,13 +265,8 @@ class PaymentIntegrationTest {
 	@Test
 	@DisplayName("결제_실패_이미결제됨")
 	void payment_Failure_AlreadyPaid() throws Exception {
-		Payment paidPayment = Payment.builder()
-			.id(paymentId)
-			.userId(userId)
-			.reservationId(reservationId)
-			.amount(BigDecimal.valueOf(50000))
-			.status(PaymentStatus.SUCCESS)
-			.build();
+		Payment existingPayment = paymentRepository.findByReservationId(reservationId).get();
+		Payment paidPayment = existingPayment.success();
 		paymentRepository.save(paidPayment);
 
 		mockMvc.perform(post("/api/v1/payments/{reservationId}", reservationId)
@@ -329,19 +285,10 @@ class PaymentIntegrationTest {
 		QueueToken otherQueueToken = QueueToken.activeTokenOf(otherTokenId, otherUserId, concertId, 1000000L);
 		queueTokenRepository.save(otherQueueToken);
 
-		Reservation otherReservation = Reservation.builder()
-			.userId(otherUserId)
-			.seatId(seatId)
-			.status(ReservationStatus.PENDING)
-			.build();
+		Reservation otherReservation = TestDataFactory.createReservation(otherUserId, seatId);
 		Reservation savedNonUserReservation = reservationRepository.save(otherReservation);
 
-		Payment otherPayment = Payment.builder()
-			.userId(otherUserId)
-			.reservationId(savedNonUserReservation.id())
-			.amount(BigDecimal.valueOf(50000))
-			.status(PaymentStatus.PENDING)
-			.build();
+		Payment otherPayment = TestDataFactory.createPayment(otherUserId, savedNonUserReservation.id());
 		paymentRepository.save(otherPayment);
 
 		seatHoldRepository.hold(seatId, otherUserId);
@@ -358,19 +305,10 @@ class PaymentIntegrationTest {
 	@DisplayName("결제_실패_좌석정보찾지못함")
 	void payment_Failure_SeatNotFound() throws Exception {
 		UUID otherSeatId = UUID.randomUUID();
-		Reservation invalidSeatReservation = Reservation.builder()
-			.userId(userId)
-			.seatId(otherSeatId)
-			.status(ReservationStatus.PENDING)
-			.build();
+		Reservation invalidSeatReservation = TestDataFactory.createReservation(userId, otherSeatId);
 		Reservation savedInvalidSeatReservation = reservationRepository.save(invalidSeatReservation);
 
-		Payment invalidSeatPayment = Payment.builder()
-			.userId(userId)
-			.reservationId(savedInvalidSeatReservation.id())
-			.amount(BigDecimal.valueOf(50000))
-			.status(PaymentStatus.PENDING)
-			.build();
+		Payment invalidSeatPayment = TestDataFactory.createPayment(otherSeatId, savedInvalidSeatReservation.id());
 		paymentRepository.save(invalidSeatPayment);
 
 		seatHoldRepository.hold(otherSeatId, userId);

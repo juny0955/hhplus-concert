@@ -3,7 +3,6 @@ package kr.hhplus.be.server.api.concert;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -19,12 +18,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.utility.TestcontainersConfiguration;
 
+import kr.hhplus.be.server.api.TestDataFactory;
 import kr.hhplus.be.server.domain.concert.Concert;
 import kr.hhplus.be.server.domain.concert.ConcertRepository;
 import kr.hhplus.be.server.domain.concertDate.ConcertDate;
 import kr.hhplus.be.server.domain.concertDate.ConcertDateRepository;
 import kr.hhplus.be.server.domain.seat.Seat;
-import kr.hhplus.be.server.domain.seat.SeatClass;
 import kr.hhplus.be.server.domain.seat.SeatRepository;
 import kr.hhplus.be.server.domain.seat.SeatStatus;
 import kr.hhplus.be.server.framework.exception.ErrorCode;
@@ -59,28 +58,15 @@ class ConcertIntegrationTest {
 
 	@BeforeEach
 	void beforeEach() {
-		concert = Concert.builder()
-			.title("GD 콘서트")
-			.artist("GD")
-			.build();
+		concert = TestDataFactory.createConcert();
 		Concert savedConcert = concertRepository.save(concert);
 		concertId = savedConcert.id();
 
-		concertDate = ConcertDate.builder()
-			.concertId(concertId)
-			.date(LocalDateTime.now().plusDays(7))
-			.deadline(LocalDateTime.now().plusDays(3))
-			.build();
+		concertDate = TestDataFactory.createConcertDate(concertId);
 		ConcertDate savedConcertDate = concertDateRepository.save(concertDate);
 		concertDateId = savedConcertDate.id();
 
-		seat = Seat.builder()
-			.concertDateId(concertDateId)
-			.price(BigDecimal.valueOf(50000))
-			.seatClass(SeatClass.VIP)
-			.seatNo(1)
-			.status(SeatStatus.AVAILABLE)
-			.build();
+		seat = TestDataFactory.createSeat(concertDateId);
 		Seat savedSeat = seatRepository.save(seat);
 		seatId = savedSeat.id();
 	}
@@ -200,5 +186,4 @@ class ConcertIntegrationTest {
 			.andExpect(jsonPath("$").isEmpty())
 		;
 	}
-
 }

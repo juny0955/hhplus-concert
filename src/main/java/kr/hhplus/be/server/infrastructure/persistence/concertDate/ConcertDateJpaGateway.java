@@ -30,13 +30,6 @@ public class ConcertDateJpaGateway implements ConcertDateRepository {
 	}
 
 	@Override
-	public List<ConcertDate> findAvailableDates(UUID concertId) {
-		return jpaConcertDateRepository.findAvailableDates(concertId.toString()).stream()
-			.map(ConcertDateEntity::toDomain)
-			.toList();
-	}
-
-	@Override
 	public List<ConcertDate> findAvailableDatesWithAvailableSeatCount(UUID concertId) {
 		List<Object[]> results = jpaConcertDateRepository.findAvailableDatesWithAvailableSeatCount(concertId.toString());
 
@@ -61,12 +54,6 @@ public class ConcertDateJpaGateway implements ConcertDateRepository {
 					.build();
 			})
 			.toList();
-	}
-
-	@Override
-	public Optional<ConcertDate> findAvailableDate(UUID concertId, UUID concertDateId) {
-		return jpaConcertDateRepository.findAvailableDate(concertId.toString(), concertDateId.toString())
-			.map(ConcertDateEntity::toDomain);
 	}
 
 	@Override

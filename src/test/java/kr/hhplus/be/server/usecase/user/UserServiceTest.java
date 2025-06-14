@@ -59,7 +59,7 @@ class UserServiceTest {
 
 	@Test
 	@DisplayName("유저_조회_실패_유저못찾음")
-	void getUser_Failure_UserNotFound() throws CustomException {
+	void getUser_Failure_UserNotFound() {
 		when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
 		CustomException customException = assertThrows(CustomException.class,
@@ -75,12 +75,12 @@ class UserServiceTest {
 		BigDecimal chargePoint = BigDecimal.valueOf(5000);
 		User charged = user.charge(chargePoint);
 
-		when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+		when(userRepository.findByIdWithLock(userId)).thenReturn(Optional.of(user));
 		when(userRepository.save(any(User.class))).thenReturn(charged);
 
 		User user = userService.chargePoint(userId, chargePoint);
 
-		verify(userRepository, times(1)).findById(userId);
+		verify(userRepository, times(1)).findByIdWithLock(userId);
 
 		assertThat(user).isNotNull();
 		assertThat(user.amount()).isEqualTo(initAmount.add(chargePoint));
@@ -88,15 +88,15 @@ class UserServiceTest {
 
 	@Test
 	@DisplayName("유저_포인트_충전_실패_유저못찾음")
-	void chargePoint_Failure_UserNotFound() throws CustomException {
+	void chargePoint_Failure_UserNotFound() {
 		BigDecimal chargePoint = BigDecimal.valueOf(5000);
 
-		when(userRepository.findById(userId)).thenReturn(Optional.empty());
+		when(userRepository.findByIdWithLock(userId)).thenReturn(Optional.empty());
 
 		CustomException customException = assertThrows(CustomException.class,
 			() -> userService.chargePoint(userId, chargePoint));
 
-		verify(userRepository, times(1)).findById(userId);
+		verify(userRepository, times(1)).findByIdWithLock(userId);
 
 		assertThat(customException.getErrorCode()).isEqualTo(ErrorCode.USER_NOT_FOUND);
 	}

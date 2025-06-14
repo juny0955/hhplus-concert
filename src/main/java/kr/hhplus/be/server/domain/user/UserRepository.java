@@ -6,6 +6,7 @@ import java.util.UUID;
 public interface UserRepository {
 	User save(User user);
 	Optional<User> findById(UUID userId);
+	Optional<User> findByIdWithLock(UUID userId);
 
 	boolean existsById(UUID userId);
 }

@@ -5,8 +5,6 @@ import java.util.UUID;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-
 import kr.hhplus.be.server.domain.concertDate.ConcertDate;
 import kr.hhplus.be.server.domain.seat.Seat;
 import kr.hhplus.be.server.domain.event.reservation.ReservationCreatedEvent;
@@ -26,7 +24,6 @@ import kr.hhplus.be.server.domain.queue.QueueTokenRepository;
 import kr.hhplus.be.server.domain.queue.QueueTokenUtil;
 import kr.hhplus.be.server.domain.reservation.ReservationRepository;
 import kr.hhplus.be.server.domain.seat.SeatHoldRepository;
-import kr.hhplus.be.server.domain.seat.SeatLockRepository;
 import kr.hhplus.be.server.usecase.reservation.input.ReservationInput;
 import kr.hhplus.be.server.usecase.reservation.input.ReserveSeatCommand;
 import kr.hhplus.be.server.usecase.reservation.output.ReservationOutput;
@@ -45,7 +42,6 @@ public class ReservationInteractor implements ReservationInput {
 	private final ConcertRepository concertRepository;
 	private final ConcertDateRepository concertDateRepository;
 	private final SeatHoldRepository seatHoldRepository;
-	private final SeatLockRepository seatLockRepository;
 	private final SeatRepository seatRepository;
 	private final PaymentRepository paymentRepository;
 	private final ReservationOutput reservationOutput;
@@ -55,16 +51,12 @@ public class ReservationInteractor implements ReservationInput {
 	@Override
 	@Transactional
 	public void reserveSeat(ReserveSeatCommand command) throws CustomException {
-		boolean lock = false;
-
 		try {
 			QueueToken queueToken = getQueueTokenAndValid(command);
 			checkExistsConcert(command.concertId());
 
 			ConcertDate concertDate = getConcertDate(command.concertDateId());
 			Seat seat = getSeat(command.seatId(), command.concertDateId());
-
-			lock = acquisitionSeatLock(command.seatId());
 
 			ReservationDomainResult result = reservationDomainService.processReservation(concertDate, seat, queueToken.userId());
 
@@ -83,17 +75,7 @@ public class ReservationInteractor implements ReservationInput {
 		} catch (Exception e) {
 			log.error("좌석 예약중 예외 발생 - {}", ErrorCode.INTERNAL_SERVER_ERROR, e);
 			throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
-		} finally {
-			if (lock)
-				seatLockRepository.releaseLock(command.seatId());
 		}
-	}
-
-	private boolean acquisitionSeatLock(UUID seatId) throws CustomException {
-		if (!seatLockRepository.acquisitionLock(seatId))
-			throw new CustomException(ErrorCode.SEAT_LOCK_CONFLICT);
-
-		return true;
 	}
 
 	private Seat getSeat(UUID seatId, UUID concertDateId) throws CustomException {
