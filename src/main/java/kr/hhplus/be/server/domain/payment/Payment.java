@@ -4,8 +4,6 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import kr.hhplus.be.server.framework.exception.CustomException;
-import kr.hhplus.be.server.framework.exception.ErrorCode;
 import lombok.Builder;
 
 @Builder
@@ -35,6 +33,7 @@ public record Payment(
 			.reservationId(reservationId)
 			.amount(amount)
 			.status(PaymentStatus.SUCCESS)
+			.createdAt(createdAt)
 			.updatedAt(LocalDateTime.now())
 			.build();
 	}

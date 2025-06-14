@@ -59,6 +59,7 @@ public class PaymentEntity extends BaseTimeEntity {
 
 	public static PaymentEntity from(Payment payment) {
 		return PaymentEntity.builder()
+			.id(payment.id() != null ? payment.id().toString() : null)
 			.userId(payment.userId().toString())
 			.reservationId(payment.reservationId().toString())
 			.amount(payment.amount())
@@ -72,6 +73,7 @@ public class PaymentEntity extends BaseTimeEntity {
 			.userId(UUID.fromString(userId))
 			.reservationId(UUID.fromString(reservationId))
 			.status(status)
+			.amount(amount)
 			.failureReason(failureReason)
 			.createdAt(getCreatedAt())
 			.updatedAt(getUpdatedAt())

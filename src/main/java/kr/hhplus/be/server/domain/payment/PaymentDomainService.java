@@ -14,14 +14,13 @@ import lombok.RequiredArgsConstructor;
 public class PaymentDomainService {
 
 	public PaymentDomainResult processPayment(Reservation reservation, Payment payment, Seat seat, User user) throws CustomException {
-		validateReservationExpired(reservation);
 		validatePayment(payment);
 		validateUserBalance(payment, user);
 
-		User paidUser = user.payment(payment.amount());
+		User paidUser 				= user.payment(payment.amount());
 		Reservation paidReservation = reservation.payment();
-		Payment paidPayment = payment.success();
-		Seat paidSeat = seat.payment();
+		Payment paidPayment 		= payment.success();
+		Seat paidSeat 				= seat.payment();
 
 		return new PaymentDomainResult(paidUser, paidReservation, paidPayment, paidSeat);
 	}
@@ -37,10 +36,5 @@ public class PaymentDomainService {
 
 		if (payment.isPaid())
 			throw new CustomException(ErrorCode.ALREADY_PAID);
-	}
-
-	private void validateReservationExpired(Reservation reservation) throws CustomException {
-		if (reservation.isExpired())
-			throw new CustomException(ErrorCode.RESERVATION_EXPIRED);
 	}
 }

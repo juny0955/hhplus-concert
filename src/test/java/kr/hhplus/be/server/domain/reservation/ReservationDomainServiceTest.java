@@ -78,10 +78,6 @@ class ReservationDomainServiceTest {
 		assertThat(result.reservation().userId()).isEqualTo(userId);
 		assertThat(result.reservation().seatId()).isEqualTo(seatId);
 		assertThat(result.reservation().status()).isEqualTo(ReservationStatus.PENDING);
-
-		assertThat(result.payment().userId()).isEqualTo(userId);
-		assertThat(result.payment().amount()).isEqualTo(BigDecimal.valueOf(50000));
-		assertThat(result.payment().status()).isEqualTo(PaymentStatus.PENDING);
 	}
 
 	@Test

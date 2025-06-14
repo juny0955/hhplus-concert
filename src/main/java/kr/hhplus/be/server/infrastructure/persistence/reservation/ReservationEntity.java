@@ -1,6 +1,5 @@
 package kr.hhplus.be.server.infrastructure.persistence.reservation;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.hibernate.annotations.ColumnDefault;
@@ -46,9 +45,6 @@ public class ReservationEntity extends BaseTimeEntity {
 	@Column(name = "seat_id", length = 36, nullable = false)
 	private String seatId;
 
-	@Column(name = "expire_at", nullable = false)
-	private LocalDateTime expireAt;
-
 	@Enumerated(EnumType.STRING)
 	@Column(name = "status", nullable = false)
 	@ColumnDefault("'PENDING'")
@@ -56,9 +52,9 @@ public class ReservationEntity extends BaseTimeEntity {
 
 	public static ReservationEntity from(Reservation reservation) {
 		return ReservationEntity.builder()
+			.id(reservation.id() != null ? reservation.id().toString() : null)
 			.userId(reservation.userId().toString())
 			.seatId(reservation.seatId().toString())
-			.expireAt(reservation.expireAt())
 			.status(reservation.status())
 			.build();
 	}
@@ -69,7 +65,6 @@ public class ReservationEntity extends BaseTimeEntity {
 			.userId(UUID.fromString(userId))
 			.seatId(UUID.fromString(seatId))
 			.status(status)
-			.expireAt(expireAt)
 			.createdAt(getCreatedAt())
 			.updatedAt(getUpdatedAt())
 			.build();

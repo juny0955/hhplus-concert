@@ -102,7 +102,7 @@ class PaymentInteractorTest {
 		LocalDateTime now = LocalDateTime.now();
 		paymentCommand = new PaymentCommand(reservationId, queueTokenId.toString());
 		queueToken = QueueToken.activeTokenOf(queueTokenId, userId, concertId, 1000000);
-		reservation = new Reservation(reservationId, userId, seatId, ReservationStatus.PENDING, now.plusMinutes(5), now, now);
+		reservation = new Reservation(reservationId, userId, seatId, ReservationStatus.PENDING, now, now);
 		user = new User(userId, BigDecimal.valueOf(100000), now, now);
 		payment = new Payment(paymentId, userId, reservationId, BigDecimal.valueOf(10000), PaymentStatus.PENDING, null, now, now);
 		seat = new Seat(seatId, concertDateId, 10, BigDecimal.valueOf(10000), SeatClass.VIP, SeatStatus.RESERVED, now, now);
@@ -112,7 +112,7 @@ class PaymentInteractorTest {
 	@DisplayName("결제_성공")
 	void payment_Success() throws CustomException {
 		Payment successPayment = new Payment(paymentId, userId, reservationId, BigDecimal.valueOf(10000), PaymentStatus.SUCCESS, null, LocalDateTime.now(), LocalDateTime.now());
-		Reservation successReservation = new Reservation(reservationId, userId, seatId, ReservationStatus.SUCCESS, LocalDateTime.now().plusMinutes(5), LocalDateTime.now(), LocalDateTime.now());
+		Reservation successReservation = new Reservation(reservationId, userId, seatId, ReservationStatus.SUCCESS, LocalDateTime.now(), LocalDateTime.now());
 		Seat successSeat = new Seat(seatId, concertDateId, 10, BigDecimal.valueOf(10000), SeatClass.VIP, SeatStatus.ASSIGNED, LocalDateTime.now(), LocalDateTime.now());
 		User successUser = new User(userId, BigDecimal.valueOf(90000), LocalDateTime.now(), LocalDateTime.now());
 

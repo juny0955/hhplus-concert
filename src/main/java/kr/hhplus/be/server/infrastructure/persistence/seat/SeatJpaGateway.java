@@ -18,8 +18,8 @@ public class SeatJpaGateway implements SeatRepository {
 
 	@Override
 	public Seat save(Seat seat) {
-		SeatEntity seatEntity = SeatEntity.from(seat);
-		return jpaSeatRepository.save(seatEntity).toDomain();
+		SeatEntity seatEntity = jpaSeatRepository.save(SeatEntity.from(seat));
+		return seatEntity.toDomain();
 	}
 
 	@Override
@@ -34,8 +34,8 @@ public class SeatJpaGateway implements SeatRepository {
 	}
 
 	@Override
-	public List<Seat> findAvailableSeats(UUID concertDateId) {
-		return jpaSeatRepository.findAvailableSeats(concertDateId.toString()).stream()
+	public List<Seat> findAvailableSeats(UUID concertId, UUID concertDateId) {
+		return jpaSeatRepository.findAvailableSeats(concertId.toString(), concertDateId.toString()).stream()
 			.map(SeatEntity::toDomain)
 			.toList();
 	}

@@ -10,7 +10,7 @@ public record ReserveSeatCommand(
 	UUID seatId,
 	String queueTokenId
 ){
-	public static ReserveSeatCommand of(ReservationRequest request, String queueToken) {
-		return new ReserveSeatCommand(request.concertId(), request.seatId(), request.concertDateId(), queueToken);
+	public static ReserveSeatCommand of(ReservationRequest request, UUID seatId, String queueToken) {
+		return new ReserveSeatCommand(request.concertId(), request.concertDateId(), seatId, queueToken);
 	}
 }

@@ -19,11 +19,10 @@ public class ReservationDomainService {
 		validateSeatAvailable(seat);
 		validateConcertDateDeadline(concertDate);
 
-		Seat reservedSeat = seat.reserve();
-		Reservation reservation = Reservation.of(userId, seat.id());
-		Payment payment = Payment.of(userId, reservation.id(), seat.price());
+		Seat 		reservedSeat 	= 	seat.reserve();
+		Reservation reservation 	= 	Reservation.of(userId, seat.id());
 
-		return new ReservationDomainResult(reservedSeat, payment, reservation);
+		return new ReservationDomainResult(reservedSeat, reservation);
 	}
 
 	private void validateSeatAvailable(Seat seat) throws CustomException {

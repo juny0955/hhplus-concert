@@ -43,8 +43,19 @@ public class QueueService {
 		return queueToken;
 	}
 
-	public QueueToken getQueueInfo(UUID concertId, String queueToken) {
-		return null;
+	public QueueToken getQueueInfo(UUID concertId, String tokenId) throws CustomException {
+		validateConcertId(concertId);
+
+		QueueToken queueToken = queueTokenRepository.findQueueTokenByTokenId(tokenId);
+		if (queueToken == null || queueToken.isExpired())
+			throw new CustomException(ErrorCode.INVALID_QUEUE_TOKEN);
+
+		if (queueToken.isActive())
+			return queueToken;
+
+		Integer waitingPosition = queueTokenRepository.findWaitingPosition(queueToken);
+
+		return queueToken.withWaitingPosition(waitingPosition);
 	}
 
 	private void validateUserId(UUID userId) throws CustomException {

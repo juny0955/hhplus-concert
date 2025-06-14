@@ -44,6 +44,15 @@ public class ConcertDateEntity extends BaseTimeEntity {
 	@Column(name = "deadline", nullable = false)
 	private LocalDateTime deadline;
 
+	public static ConcertDateEntity from(ConcertDate concertDate) {
+		return ConcertDateEntity.builder()
+			.id(concertDate.id() != null ? concertDate.id().toString() : null)
+			.concertId(concertDate.concertId().toString())
+			.date(concertDate.date())
+			.deadline(concertDate.deadline())
+			.build();
+	}
+
 	public ConcertDate toDomain() {
 		return ConcertDate.builder()
 			.id(UUID.fromString(id))

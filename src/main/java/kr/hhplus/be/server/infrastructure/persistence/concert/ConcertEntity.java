@@ -39,6 +39,14 @@ public class ConcertEntity extends BaseTimeEntity {
 	@Column(name = "artist", length = 50, nullable = false)
 	private String artist;
 
+	public static ConcertEntity from(Concert concert) {
+		return ConcertEntity.builder()
+			.id(concert.id() != null ? concert.id().toString() : null)
+			.title(concert.title())
+			.artist(concert.artist())
+			.build();
+	}
+
 	public Concert toDomain() {
 		return Concert.builder()
 			.id(UUID.fromString(id))

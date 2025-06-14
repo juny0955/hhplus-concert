@@ -45,7 +45,28 @@ public record QueueToken(
 			.build();
 	}
 
+	public QueueToken withWaitingPosition(int waitingPosition) {
+		return QueueToken.builder()
+			.tokenId(tokenId)
+			.userId(userId)
+			.concertId(concertId)
+			.status(status)
+			.position(waitingPosition)
+			.issuedAt(LocalDateTime.now())
+			.enteredAt(null)
+			.expiresAt(null)
+			.build();
+	}
+
 	public boolean isActive() {
 		return status.equals(QueueStatus.ACTIVE);
+	}
+
+	public boolean isExpired() {
+		if (status.equals(QueueStatus.ACTIVE) && expiresAt != null) {
+			return expiresAt.isBefore(LocalDateTime.now());
+		}
+
+		return false;
 	}
 }

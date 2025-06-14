@@ -115,9 +115,9 @@ class ReservationInteractorTest {
 		seat = new Seat(seatId, concertDateId, 10, BigDecimal.valueOf(10000), SeatClass.VIP, SeatStatus.AVAILABLE, now, now);
 		reservedSeat = seat.reserve();
 		concertDate = new ConcertDate(concertDateId, concertId, null, now.plusDays(7), now.plusDays(5), now, now);
-		reservation = new Reservation(reservationId, userId, seatId, ReservationStatus.PENDING, now.plusMinutes(5), now, now);
+		reservation = new Reservation(reservationId, userId, seatId, ReservationStatus.PENDING, now, now);
 		payment = new Payment(paymentId, userId, reservationId, BigDecimal.valueOf(10000), PaymentStatus.PENDING, null, now, now);
-		domainResult = new ReservationDomainResult(reservedSeat, payment, reservation);
+		domainResult = new ReservationDomainResult(reservedSeat, reservation);
 	}
 
 	@Test
@@ -130,8 +130,8 @@ class ReservationInteractorTest {
 		when(seatLockRepository.acquisitionLock(command.seatId())).thenReturn(true);
 		when(reservationDomainService.processReservation(concertDate, seat, userId)).thenReturn(domainResult);
 		when(seatRepository.save(reservedSeat)).thenReturn(reservedSeat);
-		when(reservationRepository.save(reservation)).thenReturn(reservation);
-		when(paymentRepository.save(payment)).thenReturn(payment);
+		when(reservationRepository.save(any(Reservation.class))).thenReturn(reservation);
+		when(paymentRepository.save(any(Payment.class))).thenReturn(payment);
 
 		// When
 		reservationInteractor.reserveSeat(command);
@@ -144,8 +144,8 @@ class ReservationInteractorTest {
 		verify(seatLockRepository, times(1)).acquisitionLock(command.seatId());
 		verify(reservationDomainService, times(1)).processReservation(concertDate, seat, userId);
 		verify(seatRepository, times(1)).save(reservedSeat);
-		verify(reservationRepository, times(1)).save(reservation);
-		verify(paymentRepository, times(1)).save(payment);
+		verify(reservationRepository, times(1)).save(any(Reservation.class));
+		verify(paymentRepository, times(1)).save(any(Payment.class));
 		verify(seatHoldRepository, times(1)).hold(seatId, userId);
 		verify(eventPublisher, times(1)).publish(any(ReservationCreatedEvent.class));
 		verify(seatLockRepository, times(1)).releaseLock(seatId);

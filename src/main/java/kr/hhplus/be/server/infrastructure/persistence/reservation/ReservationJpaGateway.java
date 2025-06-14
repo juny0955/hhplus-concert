@@ -24,7 +24,7 @@ public class ReservationJpaGateway implements ReservationRepository {
 
 	@Override
 	public Optional<Reservation> findById(UUID reservationId) throws CustomException {
-		return jpaReservationRepository.findById(reservationId)
+		return jpaReservationRepository.findById(reservationId.toString())
 			.map(ReservationEntity::toDomain);
 	}
 }

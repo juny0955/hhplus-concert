@@ -11,5 +11,5 @@ public enum EventTopic {
 	PAYMENT_SUCCESS("payment.success")
 	;
 
-	private String topicName;
+	private final String topicName;
 }
