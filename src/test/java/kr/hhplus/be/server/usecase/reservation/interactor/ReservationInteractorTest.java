@@ -122,7 +122,7 @@ class ReservationInteractorTest {
 		when(queueTokenRepository.findQueueTokenByTokenId(queueTokenId.toString())).thenReturn(queueToken);
 		when(concertRepository.existsById(command.concertId())).thenReturn(true);
 		when(concertDateRepository.findById(command.concertDateId())).thenReturn(Optional.of(concertDate));
-		when(seatRepository.findBySeatIdAndConcertDateId(command.seatId(), command.concertDateId())).thenReturn(Optional.of(seat));
+		when(seatRepository.findBySeatIdAndConcertDateIdWithLock(command.seatId(), command.concertDateId())).thenReturn(Optional.of(seat));
 		when(reservationDomainService.processReservation(concertDate, seat, userId)).thenReturn(domainResult);
 		when(seatRepository.save(reservedSeat)).thenReturn(reservedSeat);
 		when(reservationRepository.save(any(Reservation.class))).thenReturn(reservation);
@@ -135,7 +135,7 @@ class ReservationInteractorTest {
 		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(queueTokenId.toString());
 		verify(concertRepository, times(1)).existsById(command.concertId());
 		verify(concertDateRepository, times(1)).findById(command.concertDateId());
-		verify(seatRepository, times(1)).findBySeatIdAndConcertDateId(command.seatId(), command.concertDateId());
+		verify(seatRepository, times(1)).findBySeatIdAndConcertDateIdWithLock(command.seatId(), command.concertDateId());
 		verify(reservationDomainService, times(1)).processReservation(concertDate, seat, userId);
 		verify(seatRepository, times(1)).save(reservedSeat);
 		verify(reservationRepository, times(1)).save(any(Reservation.class));
@@ -157,7 +157,7 @@ class ReservationInteractorTest {
 		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(queueTokenId.toString());
 		verify(concertRepository, never()).existsById(any());
 		verify(concertDateRepository, never()).findById(any());
-		verify(seatRepository, never()).findBySeatIdAndConcertDateId(any(), any());
+		verify(seatRepository, never()).findBySeatIdAndConcertDateIdWithLock(any(), any());
 		verify(reservationDomainService, never()).processReservation(any(), any(), any());
 		verify(seatRepository, never()).save(any());
 		verify(reservationRepository, never()).save(any());
@@ -181,7 +181,7 @@ class ReservationInteractorTest {
 		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(queueTokenId.toString());
 		verify(concertRepository, times(1)).existsById(command.concertId());
 		verify(concertDateRepository, never()).findById(any());
-		verify(seatRepository, never()).findBySeatIdAndConcertDateId(any(), any());
+		verify(seatRepository, never()).findBySeatIdAndConcertDateIdWithLock(any(), any());
 		verify(reservationDomainService, never()).processReservation(any(), any(), any());
 		verify(seatRepository, never()).save(any());
 		verify(reservationRepository, never()).save(any());
@@ -206,7 +206,7 @@ class ReservationInteractorTest {
 		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(queueTokenId.toString());
 		verify(concertRepository, times(1)).existsById(command.concertId());
 		verify(concertDateRepository, times(1)).findById(command.concertDateId());
-		verify(seatRepository, never()).findBySeatIdAndConcertDateId(any(), any());
+		verify(seatRepository, never()).findBySeatIdAndConcertDateIdWithLock(any(), any());
 		verify(reservationDomainService, never()).processReservation(any(), any(), any());
 		verify(seatRepository, never()).save(any());
 		verify(reservationRepository, never()).save(any());
@@ -224,7 +224,7 @@ class ReservationInteractorTest {
 		when(queueTokenRepository.findQueueTokenByTokenId(queueTokenId.toString())).thenReturn(queueToken);
 		when(concertRepository.existsById(command.concertId())).thenReturn(true);
 		when(concertDateRepository.findById(command.concertDateId())).thenReturn(Optional.of(concertDate));
-		when(seatRepository.findBySeatIdAndConcertDateId(command.seatId(), command.concertDateId())).thenReturn(Optional.empty());
+		when(seatRepository.findBySeatIdAndConcertDateIdWithLock(command.seatId(), command.concertDateId())).thenReturn(Optional.empty());
 
 		CustomException customException = assertThrows(CustomException.class,
 			() -> reservationInteractor.reserveSeat(command));
@@ -232,7 +232,7 @@ class ReservationInteractorTest {
 		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(queueTokenId.toString());
 		verify(concertRepository, times(1)).existsById(command.concertId());
 		verify(concertDateRepository, times(1)).findById(command.concertDateId());
-		verify(seatRepository, times(1)).findBySeatIdAndConcertDateId(command.seatId(), command.concertDateId());
+		verify(seatRepository, times(1)).findBySeatIdAndConcertDateIdWithLock(command.seatId(), command.concertDateId());
 		verify(reservationDomainService, never()).processReservation(any(), any(), any());
 		verify(seatRepository, never()).save(any());
 		verify(reservationRepository, never()).save(any());

@@ -56,7 +56,7 @@ public class ReservationInteractor implements ReservationInput {
 			checkExistsConcert(command.concertId());
 
 			ConcertDate concertDate = getConcertDate(command.concertDateId());
-			Seat seat = getSeat(command.seatId(), command.concertDateId());
+			Seat seat = getSeatWithLock(command.seatId(), command.concertDateId());
 
 			ReservationDomainResult result = reservationDomainService.processReservation(concertDate, seat, queueToken.userId());
 
@@ -78,8 +78,8 @@ public class ReservationInteractor implements ReservationInput {
 		}
 	}
 
-	private Seat getSeat(UUID seatId, UUID concertDateId) throws CustomException {
-		return seatRepository.findBySeatIdAndConcertDateId(seatId, concertDateId)
+	private Seat getSeatWithLock(UUID seatId, UUID concertDateId) throws CustomException {
+		return seatRepository.findBySeatIdAndConcertDateIdWithLock(seatId, concertDateId)
 			.orElseThrow(() -> new CustomException(ErrorCode.SEAT_NOT_FOUND));
 	}
 

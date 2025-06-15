@@ -4,7 +4,10 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
+
+import jakarta.persistence.LockModeType;
 
 public interface JpaSeatRepository extends JpaRepository<SeatEntity, String> {
 
@@ -21,18 +24,11 @@ public interface JpaSeatRepository extends JpaRepository<SeatEntity, String> {
 	List<SeatEntity> findAvailableSeats(String concertId, String concertDateId);
 
 	@Query("""
-		select count(s)
-		from SeatEntity s
-		where s.concertDateId = :concertDateId
-			and s.status = "AVAILABLE"
-	""")
-	Integer countRemainingSeat(String concertDateId);
-
-	@Query("""
 		select s
 		from SeatEntity s
 		where s.id = :seatId
 			and s.concertDateId = :concertDateId
 	""")
-	Optional<SeatEntity> findBySeatIdAndConcertDateId(String seatId, String concertDateId);
+	@Lock(LockModeType.PESSIMISTIC_WRITE)
+	Optional<SeatEntity> findBySeatIdAndConcertDateIdWithLock(String seatId, String concertDateId);
 }

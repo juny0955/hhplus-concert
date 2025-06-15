@@ -7,8 +7,7 @@ import java.util.UUID;
 public interface SeatRepository {
 
 	Seat save(Seat seat);
-	Optional<Seat> findBySeatIdAndConcertDateId(UUID seatId, UUID concertDateId);
-	Integer countRemainingSeat(UUID concertDateId);
+	Optional<Seat> findBySeatIdAndConcertDateIdWithLock(UUID seatId, UUID concertDateId);
 	List<Seat> findAvailableSeats(UUID concertId, UUID concertDateId);
 
 	Optional<Seat> findById(UUID seatId);
