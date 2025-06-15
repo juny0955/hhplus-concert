@@ -16,6 +16,11 @@ import kr.hhplus.be.server.domain.seat.SeatStatus;
 import kr.hhplus.be.server.domain.user.User;
 
 public class TestDataFactory {
+
+	public static final BigDecimal INIT_USER_POINT = BigDecimal.valueOf(100_000);
+	public static final BigDecimal INIT_POOR_USER_POINT = BigDecimal.valueOf(10_000);
+	public static final BigDecimal INIT_SEAT_PRICE = BigDecimal.valueOf(50_000);
+
 	public static Concert createConcert() {
 		return Concert.builder()
 			.title("GD 콘서트")
@@ -35,7 +40,7 @@ public class TestDataFactory {
 		return Seat.builder()
 			.concertDateId(concertDateId)
 			.seatNo(1)
-			.price(BigDecimal.valueOf(50000))
+			.price(INIT_SEAT_PRICE)
 			.seatClass(SeatClass.VIP)
 			.status(SeatStatus.AVAILABLE)
 			.build();
@@ -43,13 +48,13 @@ public class TestDataFactory {
 
 	public static User createUser() {
 		return User.builder()
-			.amount(BigDecimal.valueOf(100000))
+			.amount(INIT_USER_POINT)
 			.build();
 	}
 
 	public static User createPoorUser() {
 		return User.builder()
-			.amount(BigDecimal.valueOf(10000)) // 좌석 가격(50000)보다 적은 금액
+			.amount(INIT_POOR_USER_POINT) // 좌석 가격(50000)보다 적은 금액
 			.build();
 	}
 
@@ -65,9 +70,28 @@ public class TestDataFactory {
 		return Payment.builder()
 			.userId(userId)
 			.reservationId(reservationId)
-			.amount(BigDecimal.valueOf(50000))
+			.amount(INIT_SEAT_PRICE)
 			.status(PaymentStatus.PENDING)
 			.build();
 	}
 
+	public static Seat createSeatWithSeatNo(UUID concertDateId, int seatNo) {
+		return Seat.builder()
+			.concertDateId(concertDateId)
+			.seatNo(seatNo)
+			.price(INIT_SEAT_PRICE)
+			.seatClass(SeatClass.VIP)
+			.status(SeatStatus.AVAILABLE)
+			.build();
+	}
+
+	public static Seat createReservedSeat(UUID concertDateId) {
+		return Seat.builder()
+			.concertDateId(concertDateId)
+			.seatNo(1)
+			.price(INIT_SEAT_PRICE)
+			.seatClass(SeatClass.VIP)
+			.status(SeatStatus.RESERVED)
+			.build();
+	}
 }

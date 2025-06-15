@@ -20,12 +20,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.utility.TestcontainersConfiguration;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import kr.hhplus.be.server.api.TestDataFactory;
 import kr.hhplus.be.server.api.user.dto.request.ChargePointRequest;
 import kr.hhplus.be.server.domain.user.User;
 import kr.hhplus.be.server.domain.user.UserRepository;
@@ -50,13 +49,10 @@ public class UserConcurrencyTest {
 
 	private UUID userId;
 	private User user;
-	private BigDecimal initPoint = BigDecimal.valueOf(10000);
 
 	@BeforeEach
 	void setUp() {
-		user = User.builder()
-			.amount(initPoint)
-			.build();
+		user = TestDataFactory.createUser();
 		User save = userRepository.save(user);
 		userId = save.id();
 	}
@@ -85,7 +81,7 @@ public class UserConcurrencyTest {
 		CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).get(10, TimeUnit.SECONDS);
 
 		User chargedUser = userRepository.findById(userId).get();
-		assertThat(chargedUser.amount()).isEqualTo(initPoint.add(chargePoint.multiply(BigDecimal.valueOf(THREAD_SIZE))));
+		assertThat(chargedUser.amount()).isEqualTo(user.amount().add(chargePoint.multiply(BigDecimal.valueOf(THREAD_SIZE))));
 	}
 
 }
