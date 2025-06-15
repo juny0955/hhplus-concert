@@ -56,18 +56,18 @@ public class ReservationInteractor implements ReservationInput {
 			checkExistsConcert(command.concertId());
 
 			ConcertDate concertDate = getConcertDate(command.concertDateId());
-			Seat seat = getSeatWithLock(command.seatId(), command.concertDateId());
+			Seat seat = getSeat(command.seatId(), command.concertDateId());
 
 			ReservationDomainResult result = reservationDomainService.processReservation(concertDate, seat, queueToken.userId());
 
-			Seat 		savedSeat		 = seatRepository.save(result.seat());
+			updateSeatStatusReserved(result.seat());
 			Reservation savedReservation = reservationRepository.save(result.reservation());
-			Payment 	savedPayment 	 = paymentRepository.save(Payment.of(savedSeat.id(), savedReservation.id(), savedSeat.price()));
+			Payment 	savedPayment 	 = paymentRepository.save(Payment.of(seat.id(), savedReservation.id(), seat.price()));
 
 			seatHoldRepository.hold(seat.id(), queueToken.userId());
 
-			eventPublisher.publish(ReservationCreatedEvent.of(savedPayment, savedReservation, savedSeat, queueToken.userId()));
-			reservationOutput.ok(ReserveSeatResult.of(savedReservation, savedSeat));
+			eventPublisher.publish(ReservationCreatedEvent.of(savedPayment, savedReservation, seat, queueToken.userId()));
+			reservationOutput.ok(ReserveSeatResult.of(savedReservation, seat));
 		} catch (CustomException e) {
 			ErrorCode errorCode = e.getErrorCode();
 			log.warn("좌석 예약중 비즈니스 예외 발생 - {}, {}", errorCode.getCode(), errorCode.getMessage());
@@ -78,10 +78,17 @@ public class ReservationInteractor implements ReservationInput {
 		}
 	}
 
-	private Seat getSeatWithLock(UUID seatId, UUID concertDateId) throws CustomException {
-		return seatRepository.findBySeatIdAndConcertDateIdWithLock(seatId, concertDateId)
+	private void updateSeatStatusReserved(Seat seat) throws CustomException {
+		int updateSeat = seatRepository.updateStatusReserved(seat.id());
+		if (updateSeat <= 0)
+			throw new CustomException(ErrorCode.ALREADY_RESERVED_SEAT);
+	}
+
+	private Seat getSeat(UUID seatId, UUID concertDateId) throws CustomException {
+		return seatRepository.findBySeatIdAndConcertDateId(seatId, concertDateId)
 			.orElseThrow(() -> new CustomException(ErrorCode.SEAT_NOT_FOUND));
 	}
+
 
 	private ConcertDate getConcertDate(UUID concertDateId) throws CustomException {
 		return concertDateRepository.findById(concertDateId)

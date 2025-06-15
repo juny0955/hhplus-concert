@@ -16,6 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.transaction.TestTransaction;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.utility.TestcontainersConfiguration;
@@ -123,11 +124,17 @@ class ReservationIntegrationTest {
 			.andExpect(jsonPath("$.status").value(ReservationStatus.PENDING.toString()))
 			.andExpect(jsonPath("$.createdAt").exists());
 
+		TestTransaction.flagForCommit();
+		TestTransaction.end();
+		TestTransaction.start();
+
 		Seat seat = seatRepository.findById(seatId).get();
 		assertThat(seat.status()).isEqualTo(SeatStatus.RESERVED);
 
 		boolean isHoldSeat = seatHoldRepository.isHoldSeat(seatId, userId);
 		assertThat(isHoldSeat).isTrue();
+
+		TestTransaction.end();
 	}
 
 	@Test

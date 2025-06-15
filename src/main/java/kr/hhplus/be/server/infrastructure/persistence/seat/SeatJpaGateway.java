@@ -23,8 +23,13 @@ public class SeatJpaGateway implements SeatRepository {
 	}
 
 	@Override
-	public Optional<Seat> findBySeatIdAndConcertDateIdWithLock(UUID seatId, UUID concertDateId) {
-		return jpaSeatRepository.findBySeatIdAndConcertDateIdWithLock(seatId.toString(), concertDateId.toString())
+	public int updateStatusReserved(UUID seatId) {
+		return jpaSeatRepository.updateStatusReserved(seatId.toString());
+	}
+
+	@Override
+	public Optional<Seat> findBySeatIdAndConcertDateId(UUID seatId, UUID concertDateId) {
+		return jpaSeatRepository.findBySeatIdAndConcertDateId(seatId.toString(), concertDateId.toString())
 			.map(SeatEntity::toDomain);
 	}
 
