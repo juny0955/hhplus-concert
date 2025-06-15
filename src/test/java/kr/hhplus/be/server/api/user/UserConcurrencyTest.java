@@ -19,6 +19,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.web.servlet.MockMvc;
 import org.testcontainers.utility.TestcontainersConfiguration;
 
@@ -52,13 +53,20 @@ public class UserConcurrencyTest {
 
 	@BeforeEach
 	void setUp() {
+		cleanUp();
+
 		user = TestDataFactory.createUser();
 		User save = userRepository.save(user);
 		userId = save.id();
 	}
 
+	private void cleanUp() {
+		userRepository.deleteAll();
+	}
+
 	@Test
 	@DisplayName("유저_포인트_동시충전")
+	@Rollback
 	void chargePoint_concurrency_test() throws Exception {
 		BigDecimal chargePoint = BigDecimal.valueOf(5000);
 		ChargePointRequest request = new ChargePointRequest(chargePoint);

@@ -2,13 +2,13 @@ package kr.hhplus.be.server.api.reservation;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -30,6 +30,7 @@ import kr.hhplus.be.server.domain.concert.Concert;
 import kr.hhplus.be.server.domain.concert.ConcertRepository;
 import kr.hhplus.be.server.domain.concertDate.ConcertDate;
 import kr.hhplus.be.server.domain.concertDate.ConcertDateRepository;
+import kr.hhplus.be.server.domain.payment.PaymentRepository;
 import kr.hhplus.be.server.domain.queue.QueueToken;
 import kr.hhplus.be.server.domain.queue.QueueTokenRepository;
 import kr.hhplus.be.server.domain.reservation.Reservation;
@@ -63,6 +64,9 @@ class ReservationConcurrencyTest {
 	private ReservationRepository reservationRepository;
 
 	@Autowired
+	private PaymentRepository paymentRepository;
+
+	@Autowired
 	private UserRepository userRepository;
 
 	@Autowired
@@ -83,6 +87,7 @@ class ReservationConcurrencyTest {
 
 	@BeforeEach
 	void setUp() {
+		cleanUp();
 		redisTemplate.getConnectionFactory().getConnection().flushAll();
 
 		Concert concert = TestDataFactory.createConcert();
@@ -100,11 +105,19 @@ class ReservationConcurrencyTest {
 		request = new ReservationRequest(concertId, concertDateId);
 	}
 
+	private void cleanUp() {
+		userRepository.deleteAll();
+		reservationRepository.deleteAll();
+		paymentRepository.deleteAll();
+		seatRepository.deleteAll();
+		concertDateRepository.deleteAll();
+		concertRepository.deleteAll();
+	}
+
 	@Test
 	@DisplayName("동시_예약")
 	void reserveSeat_Concurrency_Test() throws Exception {
 		List<UUID> tokenIds = new ArrayList<>();
-
 		for (int i = 0; i < THREAD_SIZE; i++) {
 			User user = TestDataFactory.createUser();
 			User savedUser = userRepository.save(user);
@@ -116,14 +129,22 @@ class ReservationConcurrencyTest {
 		}
 
 		List<CompletableFuture<Void>> futures = new ArrayList<>();
+		AtomicInteger successCount = new AtomicInteger(0);
 
 		for (UUID tokenId : tokenIds) {
 			futures.add(CompletableFuture.runAsync(() -> {
 				try {
-					mockMvc.perform(post("/api/v1/reservations/seats/{seatId}", seatId)
+					int status = mockMvc.perform(post("/api/v1/reservations/seats/{seatId}", seatId)
 							.contentType(MediaType.APPLICATION_JSON)
 							.header("Authorization", tokenId)
-							.content(objectMapper.writeValueAsString(request)));
+							.content(objectMapper.writeValueAsString(request)))
+						.andReturn()
+						.getResponse()
+						.getStatus();
+
+					if (status == 200)
+						successCount.incrementAndGet();
+
 				} catch (Exception e) {
 					throw new RuntimeException(e);
 				}
@@ -138,6 +159,8 @@ class ReservationConcurrencyTest {
 		// 에약은 하나만 생성되어야함
 		List<Reservation> reservations = reservationRepository.findAll();
 		assertThat(reservations.size()).isEqualTo(1);
+
+		assertThat(successCount.get()).isEqualTo(1);
 	}
 
 	@Test
@@ -162,16 +185,23 @@ class ReservationConcurrencyTest {
 		}
 
 		List<CompletableFuture<Void>> futures = new ArrayList<>();
+		AtomicInteger successCount = new AtomicInteger(0);
 
 		for (int i = 0; i < THREAD_SIZE; i++) {
 			final int index = i;
 			futures.add(CompletableFuture.runAsync(() -> {
 				try {
-					mockMvc.perform(post("/api/v1/reservations/seats/{seatId}", seatIds.get(index))
+					int status = mockMvc.perform(post("/api/v1/reservations/seats/{seatId}", seatIds.get(index))
 							.contentType(MediaType.APPLICATION_JSON)
 							.header("Authorization", tokenIds.get(index))
 							.content(objectMapper.writeValueAsString(request)))
-						.andExpect(status().isOk());
+						.andReturn()
+						.getResponse()
+						.getStatus();
+
+					if (status == 200)
+						successCount.incrementAndGet();
+
 				} catch (Exception e) {
 					throw new RuntimeException(e);
 				}
@@ -189,10 +219,12 @@ class ReservationConcurrencyTest {
 		// THREAD_SIZE 만큼 예약 생성되어야함
 		List<Reservation> reservations = reservationRepository.findAll();
 		assertThat(reservations.size()).isEqualTo(THREAD_SIZE);
+
+		assertThat(successCount.get()).isEqualTo(THREAD_SIZE);
 	}
 
 	@Test
-	@DisplayName("동시_같은사용자_여러좌석_예약_테스트")
+	@DisplayName("동시_예약(여러좌석)")
 	void reserveSeat_Concurrency_Test_SameUser_OtherSeats() throws Exception {
 		// 여러 좌석 생성
 		List<UUID> seatIds = new ArrayList<>();
@@ -211,16 +243,23 @@ class ReservationConcurrencyTest {
 		queueTokenRepository.save(token);
 
 		List<CompletableFuture<Void>> futures = new ArrayList<>();
+		AtomicInteger successCount = new AtomicInteger(0);
 
 		for (int i = 0; i < THREAD_SIZE; i++) {
 			final int index = i;
 			futures.add(CompletableFuture.runAsync(() -> {
 				try {
-					mockMvc.perform(post("/api/v1/reservations/seats/{seatId}", seatIds.get(index))
+					int status = mockMvc.perform(post("/api/v1/reservations/seats/{seatId}", seatIds.get(index))
 							.contentType(MediaType.APPLICATION_JSON)
 							.header("Authorization", tokenId)
 							.content(objectMapper.writeValueAsString(request)))
-						.andExpect(status().isOk());
+						.andReturn()
+						.getResponse()
+						.getStatus();
+
+					if (status == 200)
+						successCount.incrementAndGet();
+
 				} catch (Exception e) {
 					throw new RuntimeException(e);
 				}
@@ -238,5 +277,7 @@ class ReservationConcurrencyTest {
 		// THREAD_SIZE 만큼 예약 생성되어야함
 		List<Reservation> reservations = reservationRepository.findAll();
 		assertThat(reservations.size()).isEqualTo(THREAD_SIZE);
+
+		assertThat(successCount.get()).isEqualTo(THREAD_SIZE);
 	}
 }

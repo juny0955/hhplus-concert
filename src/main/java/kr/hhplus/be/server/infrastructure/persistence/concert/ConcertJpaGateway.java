@@ -31,4 +31,9 @@ public class ConcertJpaGateway implements ConcertRepository {
 		return jpaConcertRepository.findById(concertId.toString())
 			.map(ConcertEntity::toDomain);
 	}
+
+	@Override
+	public void deleteAll() {
+		jpaConcertRepository.deleteAll();
+	}
 }

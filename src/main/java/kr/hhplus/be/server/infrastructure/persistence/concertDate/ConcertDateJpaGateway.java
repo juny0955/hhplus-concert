@@ -60,4 +60,9 @@ public class ConcertDateJpaGateway implements ConcertDateRepository {
 	public boolean existsById(UUID concertDateId) {
 		return jpaConcertDateRepository.existsById(concertDateId.toString());
 	}
+
+	@Override
+	public void deleteAll() {
+		jpaConcertDateRepository.deleteAll();
+	}
 }

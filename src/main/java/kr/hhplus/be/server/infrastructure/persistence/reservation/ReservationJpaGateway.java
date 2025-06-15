@@ -35,4 +35,9 @@ public class ReservationJpaGateway implements ReservationRepository {
 			.map(ReservationEntity::toDomain)
 			.toList();
 	}
+
+	@Override
+	public void deleteAll() {
+		jpaReservationRepository.deleteAll();
+	}
 }

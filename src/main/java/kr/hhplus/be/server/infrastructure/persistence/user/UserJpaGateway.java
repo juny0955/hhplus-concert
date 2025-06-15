@@ -37,4 +37,9 @@ public class UserJpaGateway implements UserRepository {
 	public boolean existsById(UUID userId) {
 		return jpaUserRepository.existsById(userId.toString());
 	}
+
+	@Override
+	public void deleteAll() {
+		jpaUserRepository.deleteAll();
+	}
 }

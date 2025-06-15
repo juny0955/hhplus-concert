@@ -12,4 +12,6 @@ public interface ConcertDateRepository {
 	ConcertDate save(ConcertDate concertDate);
 
 	boolean existsById(UUID concertDateId);
+
+	void deleteAll();
 }

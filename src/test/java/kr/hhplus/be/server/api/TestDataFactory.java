@@ -58,6 +58,12 @@ public class TestDataFactory {
 			.build();
 	}
 
+	public static User createUserWithAmount(BigDecimal amount) {
+		return User.builder()
+			.amount(amount)
+			.build();
+	}
+
 	public static Reservation createReservation(UUID userId, UUID seatId) {
 		return Reservation.builder()
 			.userId(userId)

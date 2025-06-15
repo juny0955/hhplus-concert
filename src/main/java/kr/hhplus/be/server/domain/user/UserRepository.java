@@ -9,4 +9,6 @@ public interface UserRepository {
 	Optional<User> findByIdWithLock(UUID userId);
 
 	boolean existsById(UUID userId);
+
+	void deleteAll();
 }
