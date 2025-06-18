@@ -50,27 +50,27 @@ public class PaymentInteractor implements PaymentInput {
 	@Transactional
 	public void payment(PaymentCommand command) throws CustomException {
 		try {
-			QueueToken queueToken = getQueueTokenAndValid(command);
+			QueueToken queueToken = getQueueTokenAndValid(command.queueTokenId());
 
-			Reservation reservation = getReservation(command);
-			Payment payment = getPayment(reservation);
-			Seat seat = getSeat(reservation);
-			User user = getUserWithLock(queueToken.userId());
+			Reservation reservation = getReservation(command.reservationId());
+			Seat seat = getSeat(reservation.seatId());
+			User user = getUser(queueToken.userId());
 
 			validateSeatHold(seat.id(), user.id());
 
+			Payment payment = getPaymentWithLock(reservation.id());
 			PaymentDomainResult result = paymentDomainService.processPayment(reservation, payment, seat, user);
 
+			Payment 	savedPayment	= paymentRepository.save(result.payment());
 			User        savedUser        = userRepository.save(result.user());
 			Reservation savedReservation = reservationRepository.save(result.reservation());
-			Payment     savedPayment     = paymentRepository.save(result.payment());
 			Seat        savedSeat        = seatRepository.save(result.seat());
 
 			seatHoldRepository.deleteHold(savedSeat.id(), savedUser.id());
 			queueTokenRepository.expiresQueueToken(queueToken.tokenId().toString());
 
-			eventPublisher.publish(PaymentSuccessEvent.of(savedPayment, savedReservation, savedSeat, savedUser));
-			paymentOutput.ok(PaymentResult.of(savedPayment, savedSeat, savedReservation.id(), savedUser.id()));
+			eventPublisher.publish(PaymentSuccessEvent.of(savedPayment.id(), savedReservation.id(), savedSeat.id(), savedUser.id()));
+			paymentOutput.ok(PaymentResult.of(savedPayment, savedSeat, savedReservation, savedUser));
 		} catch (CustomException e) {
 			log.warn("결제 진행 중 비즈니스 예외 발생 - {}", e.getErrorCode().name());
 			throw e;
@@ -80,28 +80,28 @@ public class PaymentInteractor implements PaymentInput {
 		}
 	}
 
-	private User getUserWithLock(UUID userId) throws CustomException {
-		return userRepository.findByIdWithLock(userId)
+	private User getUser(UUID userId) throws CustomException {
+		return userRepository.findById(userId)
 			.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 	}
 
-	private Seat getSeat(Reservation reservation) throws CustomException {
-		return seatRepository.findById(reservation.seatId())
+	private Seat getSeat(UUID seatId) throws CustomException {
+		return seatRepository.findById(seatId)
 			.orElseThrow(() -> new CustomException(ErrorCode.SEAT_NOT_FOUND));
 	}
 
-	private Payment getPayment(Reservation reservation) throws CustomException {
-		return paymentRepository.findByReservationId(reservation.id())
+	private Payment getPaymentWithLock(UUID reservationId) throws CustomException {
+		return paymentRepository.findByReservationIdForUpdate(reservationId)
 			.orElseThrow(() -> new CustomException(ErrorCode.PAYMENT_NOT_FOUND));
 	}
 
-	private Reservation getReservation(PaymentCommand command) throws CustomException {
-		return reservationRepository.findById(command.reservationId())
+	private Reservation getReservation(UUID reservationId) throws CustomException {
+		return reservationRepository.findById(reservationId)
 			.orElseThrow(() -> new CustomException(ErrorCode.RESERVATION_NOT_FOUND));
 	}
 
-	private QueueToken getQueueTokenAndValid(PaymentCommand command) throws CustomException {
-		QueueToken queueToken = queueTokenRepository.findQueueTokenByTokenId(command.queueTokenId());
+	private QueueToken getQueueTokenAndValid(String tokenId) throws CustomException {
+		QueueToken queueToken = queueTokenRepository.findQueueTokenByTokenId(tokenId);
 		QueueTokenUtil.validateActiveQueueToken(queueToken);
 		return queueToken;
 	}
