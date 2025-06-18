@@ -221,8 +221,21 @@ class QueueIntegrationTest {
 				.contentType(MediaType.APPLICATION_JSON))
 			.andExpect(status().isBadRequest())
 			.andExpect(jsonPath("$.code").value(ErrorCode.INVALID_QUEUE_TOKEN.getCode()))
-			.andExpect(jsonPath("$.message").value(ErrorCode.INVALID_QUEUE_TOKEN.getMessage()))
-		;
+			.andExpect(jsonPath("$.message").value(ErrorCode.INVALID_QUEUE_TOKEN.getMessage()));
+	}
+
+	@Test
+	@DisplayName("대기열_정보_조회_실패_유효하지않은토큰(만료)")
+	void getQueueInfo_Failure_InvalidToken_ExpiredToken() throws Exception {
+		UUID tokenId = UUID.randomUUID();
+		queueTokenRepository.save(QueueToken.activeTokenOf(tokenId, userId, concertId, 0L));
+
+		mockMvc.perform(get("/api/v1/queue/concerts/{concertId}", concertId)
+				.header("Authorization", tokenId.toString())
+				.contentType(MediaType.APPLICATION_JSON))
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.code").value(ErrorCode.INVALID_QUEUE_TOKEN.getCode()))
+			.andExpect(jsonPath("$.message").value(ErrorCode.INVALID_QUEUE_TOKEN.getMessage()));
 	}
 
 	@Test
