@@ -28,7 +28,7 @@ public class UserJpaGateway implements UserRepository {
 	}
 
 	@Override
-	public Optional<User> findByIdWithLock(UUID userId) {
+	public Optional<User> findByIdForUpdate(UUID userId) {
 		return jpaUserRepository.findByIdWithLock(userId.toString())
 			.map(UserEntity::toDomain);
 	}

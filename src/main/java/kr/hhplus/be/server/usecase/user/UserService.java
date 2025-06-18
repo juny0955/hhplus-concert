@@ -24,7 +24,7 @@ public class UserService {
 	private final UserRepository userRepository;
 
 	public User getUser(UUID userId) throws CustomException {
-		return findUser(userId);
+		return findUser(userId, false);
 	}
 
 	@Transactional
@@ -34,7 +34,7 @@ public class UserService {
 			throw new CustomException(ErrorCode.NOT_ENOUGH_MIN_CHARGE_POINT);
 		}
 
-		User user = findUserWithLock(userId);
+		User user = findUser(userId, true);
 
 		User charged = user.charge(point);
 		User saved = userRepository.save(charged);
@@ -43,23 +43,16 @@ public class UserService {
 		return saved;
 	}
 
-	private User findUser(UUID userId) throws CustomException {
+	private User findUser(UUID userId, boolean withLock) throws CustomException {
 		try {
-			User user = userRepository.findById(userId)
-				.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+			User user;
 
-			log.debug("유저 조회: USER_ID - {}", userId);
-			return user;
-		} catch (CustomException e) {
-			log.warn("유저 조회 실패: USER_ID - {}", userId);
-			throw e;
-		}
-	}
-
-	private User findUserWithLock(UUID userId) throws CustomException {
-		try {
-			User user = userRepository.findByIdWithLock(userId)
-				.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+			if (withLock)
+				user = userRepository.findByIdForUpdate(userId)
+					.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+			else
+				user = userRepository.findById(userId)
+					.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
 			log.debug("유저 조회: USER_ID - {}", userId);
 			return user;
