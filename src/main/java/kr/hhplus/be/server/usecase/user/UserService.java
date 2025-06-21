@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import kr.hhplus.be.server.domain.user.User;
@@ -24,17 +25,17 @@ public class UserService {
 	private final UserRepository userRepository;
 
 	public User getUser(UUID userId) throws CustomException {
-		return findUser(userId);
+		return findUser(userId, false);
 	}
 
-	@Transactional
+	@Transactional(isolation = Isolation.READ_COMMITTED)
 	public User chargePoint(UUID userId, BigDecimal point) throws CustomException {
 		if (point.compareTo(MIN_CHARGE_POINT) < 0) {
 			log.warn("유저 포인트 충전 실패 - 최소 충전 금액 미만: USER_ID - {}, CHARGE_POINT - {}", userId, point);
 			throw new CustomException(ErrorCode.NOT_ENOUGH_MIN_CHARGE_POINT);
 		}
 
-		User user = findUser(userId);
+		User user = findUser(userId, true);
 
 		User charged = user.charge(point);
 		User saved = userRepository.save(charged);
@@ -43,10 +44,16 @@ public class UserService {
 		return saved;
 	}
 
-	private User findUser(UUID userId) throws CustomException {
+	private User findUser(UUID userId, boolean withLock) throws CustomException {
 		try {
-			User user = userRepository.findById(userId)
-				.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+			User user;
+
+			if (withLock)
+				user = userRepository.findByIdForUpdate(userId)
+					.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+			else
+				user = userRepository.findById(userId)
+					.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
 			log.debug("유저 조회: USER_ID - {}", userId);
 			return user;

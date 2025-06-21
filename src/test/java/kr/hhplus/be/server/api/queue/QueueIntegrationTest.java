@@ -5,7 +5,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -25,6 +24,7 @@ import org.testcontainers.utility.TestcontainersConfiguration;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import kr.hhplus.be.server.api.TestDataFactory;
 import kr.hhplus.be.server.domain.concert.Concert;
 import kr.hhplus.be.server.domain.concert.ConcertRepository;
 import kr.hhplus.be.server.domain.concertDate.ConcertDate;
@@ -77,24 +77,15 @@ class QueueIntegrationTest {
 	void beforeEach() {
 		redisTemplate.getConnectionFactory().getConnection().flushAll();
 
-		concert = Concert.builder()
-			.title("GD 콘서트")
-			.artist("GD")
-			.build();
+		concert = TestDataFactory.createConcert();
 		Concert savedConcert = concertRepository.save(concert);
 		concertId = savedConcert.id();
 
-		concertDate = ConcertDate.builder()
-			.concertId(concertId)
-			.date(LocalDateTime.now().plusDays(7))
-			.deadline(LocalDateTime.now().plusDays(5))
-			.build();
+		concertDate = TestDataFactory.createConcertDate(concertId);
 		ConcertDate savedConcertDate = concertDateRepository.save(concertDate);
 		concertDateId = savedConcertDate.id();
 
-		user = User.builder()
-			.amount(BigDecimal.valueOf(10000))
-			.build();
+		user = TestDataFactory.createUser();
 		User savedUser = userRepository.save(user);
 		userId = savedUser.id();
 	}
@@ -114,7 +105,6 @@ class QueueIntegrationTest {
 			.andExpect(jsonPath("$.expiresAt").exists())
 			.andExpect(jsonPath("$.enteredAt").exists())
 			.andExpect(jsonPath("$.waitTime").value(0));
-			;
 	}
 
 	@Test
@@ -143,7 +133,6 @@ class QueueIntegrationTest {
 			.andExpect(jsonPath("$.expiresAt").doesNotExist())
 			.andExpect(jsonPath("$.enteredAt").doesNotExist())
 			.andExpect(jsonPath("$.waitTime").value(3));
-		;
 	}
 
 	@Test
@@ -232,8 +221,21 @@ class QueueIntegrationTest {
 				.contentType(MediaType.APPLICATION_JSON))
 			.andExpect(status().isBadRequest())
 			.andExpect(jsonPath("$.code").value(ErrorCode.INVALID_QUEUE_TOKEN.getCode()))
-			.andExpect(jsonPath("$.message").value(ErrorCode.INVALID_QUEUE_TOKEN.getMessage()))
-		;
+			.andExpect(jsonPath("$.message").value(ErrorCode.INVALID_QUEUE_TOKEN.getMessage()));
+	}
+
+	@Test
+	@DisplayName("대기열_정보_조회_실패_유효하지않은토큰(만료)")
+	void getQueueInfo_Failure_InvalidToken_ExpiredToken() throws Exception {
+		UUID tokenId = UUID.randomUUID();
+		queueTokenRepository.save(QueueToken.activeTokenOf(tokenId, userId, concertId, 0L));
+
+		mockMvc.perform(get("/api/v1/queue/concerts/{concertId}", concertId)
+				.header("Authorization", tokenId.toString())
+				.contentType(MediaType.APPLICATION_JSON))
+			.andExpect(status().isBadRequest())
+			.andExpect(jsonPath("$.code").value(ErrorCode.INVALID_QUEUE_TOKEN.getCode()))
+			.andExpect(jsonPath("$.message").value(ErrorCode.INVALID_QUEUE_TOKEN.getMessage()));
 	}
 
 	@Test

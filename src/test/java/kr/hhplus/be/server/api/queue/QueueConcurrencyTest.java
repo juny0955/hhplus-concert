@@ -4,16 +4,12 @@ import static org.assertj.core.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -31,12 +27,11 @@ import org.testcontainers.utility.TestcontainersConfiguration;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import kr.hhplus.be.server.api.TestDataFactory;
 import kr.hhplus.be.server.domain.concert.Concert;
 import kr.hhplus.be.server.domain.concert.ConcertRepository;
 import kr.hhplus.be.server.domain.concertDate.ConcertDate;
 import kr.hhplus.be.server.domain.concertDate.ConcertDateRepository;
-import kr.hhplus.be.server.domain.queue.QueueStatus;
-import kr.hhplus.be.server.domain.queue.QueueTokenRepository;
 import kr.hhplus.be.server.domain.user.User;
 import kr.hhplus.be.server.domain.user.UserRepository;
 
@@ -79,24 +74,15 @@ public class QueueConcurrencyTest {
 	void beforeEach() {
 		redisTemplate.getConnectionFactory().getConnection().flushAll();
 
-		concert = Concert.builder()
-			.title("GD 콘서트")
-			.artist("GD")
-			.build();
+		concert = TestDataFactory.createConcert();
 		Concert savedConcert = concertRepository.save(concert);
 		concertId = savedConcert.id();
 
-		concertDate = ConcertDate.builder()
-			.concertId(concertId)
-			.date(LocalDateTime.now().plusDays(7))
-			.deadline(LocalDateTime.now().plusDays(5))
-			.build();
+		concertDate = TestDataFactory.createConcertDate(concertId);
 		ConcertDate savedConcertDate = concertDateRepository.save(concertDate);
 		concertDateId = savedConcertDate.id();
 
-		user = User.builder()
-			.amount(BigDecimal.valueOf(10000))
-			.build();
+		user = TestDataFactory.createUser();
 		User savedUser = userRepository.save(user);
 		userId = savedUser.id();
 	}

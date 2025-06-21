@@ -8,4 +8,6 @@ public interface ConcertRepository {
 	boolean existsById(UUID concertId);
 
 	Optional<Concert> findById(UUID concertId);
+
+	void deleteAll();
 }

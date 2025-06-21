@@ -7,4 +7,8 @@ public interface PaymentRepository {
 	Payment save(Payment payment);
 
 	Optional<Payment> findByReservationId(UUID reservationId);
+
+	void deleteAll();
+
+	Optional<Payment> findByReservationIdForUpdate(UUID reservationId);
 }

@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -17,26 +16,24 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.transaction.TestTransaction;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.utility.TestcontainersConfiguration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import kr.hhplus.be.server.api.TestDataFactory;
 import kr.hhplus.be.server.api.reservation.dto.request.ReservationRequest;
 import kr.hhplus.be.server.domain.concert.Concert;
 import kr.hhplus.be.server.domain.concert.ConcertRepository;
 import kr.hhplus.be.server.domain.concertDate.ConcertDate;
 import kr.hhplus.be.server.domain.concertDate.ConcertDateRepository;
-import kr.hhplus.be.server.domain.payment.PaymentRepository;
 import kr.hhplus.be.server.domain.queue.QueueToken;
 import kr.hhplus.be.server.domain.queue.QueueTokenRepository;
-import kr.hhplus.be.server.domain.reservation.ReservationRepository;
 import kr.hhplus.be.server.domain.reservation.ReservationStatus;
 import kr.hhplus.be.server.domain.seat.Seat;
-import kr.hhplus.be.server.domain.seat.SeatClass;
 import kr.hhplus.be.server.domain.seat.SeatHoldRepository;
-import kr.hhplus.be.server.domain.seat.SeatLockRepository;
 import kr.hhplus.be.server.domain.seat.SeatRepository;
 import kr.hhplus.be.server.domain.seat.SeatStatus;
 import kr.hhplus.be.server.domain.user.User;
@@ -58,19 +55,10 @@ class ReservationIntegrationTest {
 	private RedisTemplate<String, Object> redisTemplate;
 
 	@Autowired
-	private ReservationRepository reservationRepository;
-
-	@Autowired
-	private PaymentRepository paymentRepository;
-
-	@Autowired
 	private QueueTokenRepository queueTokenRepository;
 
 	@Autowired
 	private SeatHoldRepository seatHoldRepository;
-
-	@Autowired
-	private SeatLockRepository seatLockRepository;
 
 	@Autowired
 	private UserRepository userRepository;
@@ -99,34 +87,19 @@ class ReservationIntegrationTest {
 	void beforeEach() {
 		redisTemplate.getConnectionFactory().getConnection().flushAll();
 
-		Concert concert = Concert.builder()
-			.title("GD 콘서트")
-			.artist("GD")
-			.build();
+		Concert concert = TestDataFactory.createConcert();
 		Concert savedConcert = concertRepository.save(concert);
 		concertId = savedConcert.id();
 
-		ConcertDate concertDate = ConcertDate.builder()
-			.concertId(concertId)
-			.date(LocalDateTime.now().plusDays(7))
-			.deadline(LocalDateTime.now().plusDays(5))
-			.build();
+		ConcertDate concertDate = TestDataFactory.createConcertDate(concertId);
 		ConcertDate savedConcertDate = concertDateRepository.save(concertDate);
 		concertDateId = savedConcertDate.id();
 
-		Seat seat = Seat.builder()
-			.concertDateId(concertDateId)
-			.seatNo(1)
-			.price(BigDecimal.valueOf(50000))
-			.seatClass(SeatClass.VIP)
-			.status(SeatStatus.AVAILABLE)
-			.build();
+		Seat seat = TestDataFactory.createSeat(concertDateId);
 		Seat savedSeat = seatRepository.save(seat);
 		seatId = savedSeat.id();
 
-		User user = User.builder()
-			.amount(BigDecimal.valueOf(100000))
-			.build();
+		User user = TestDataFactory.createUser();
 		User savedUser = userRepository.save(user);
 		userId = savedUser.id();
 
@@ -151,11 +124,17 @@ class ReservationIntegrationTest {
 			.andExpect(jsonPath("$.status").value(ReservationStatus.PENDING.toString()))
 			.andExpect(jsonPath("$.createdAt").exists());
 
+		TestTransaction.flagForCommit();
+		TestTransaction.end();
+		TestTransaction.start();
+
 		Seat seat = seatRepository.findById(seatId).get();
 		assertThat(seat.status()).isEqualTo(SeatStatus.RESERVED);
 
 		boolean isHoldSeat = seatHoldRepository.isHoldSeat(seatId, userId);
 		assertThat(isHoldSeat).isTrue();
+
+		TestTransaction.end();
 	}
 
 	@Test
@@ -247,18 +226,8 @@ class ReservationIntegrationTest {
 	@Test
 	@DisplayName("좌석_예약_실패_이미예약된좌석")
 	void reserveSeat_Failure_AlreadyReservedSeat() throws Exception {
-		// 좌석을 예약된 상태로 변경
-		Seat reservedSeat = Seat.builder()
-			.id(seatId)
-			.concertDateId(concertDateId)
-			.seatNo(1)
-			.price(BigDecimal.valueOf(50000))
-			.seatClass(SeatClass.VIP)
-			.status(SeatStatus.RESERVED)
-			.createdAt(LocalDateTime.now())
-			.updatedAt(LocalDateTime.now())
-			.build();
-		seatRepository.save(reservedSeat);
+		Seat seat = seatRepository.findById(seatId).get();
+		seatRepository.save(seat.reserve());
 
 		mockMvc.perform(post("/api/v1/reservations/seats/{seatId}", seatId)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -272,17 +241,8 @@ class ReservationIntegrationTest {
 	@Test
 	@DisplayName("좌석_예약_실패_좌석이미배정됨")
 	void reserveSeat_Failure_SeatAlreadyAssigned() throws Exception {
-		Seat assignedSeat = Seat.builder()
-			.id(seatId)
-			.concertDateId(concertDateId)
-			.seatNo(1)
-			.price(BigDecimal.valueOf(50000))
-			.seatClass(SeatClass.VIP)
-			.status(SeatStatus.ASSIGNED)
-			.createdAt(LocalDateTime.now())
-			.updatedAt(LocalDateTime.now())
-			.build();
-		seatRepository.save(assignedSeat);
+		Seat seat = seatRepository.findById(seatId).get();
+		seatRepository.save(seat.payment());
 
 		mockMvc.perform(post("/api/v1/reservations/seats/{seatId}", seatId)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -318,11 +278,7 @@ class ReservationIntegrationTest {
 	@Test
 	@DisplayName("좌석_예약_실패_잘못된콘서트날짜와좌석조합")
 	void reserveSeat_Failure_InvalidConcertDateSeatCombination() throws Exception {
-		ConcertDate anotherConcertDate = ConcertDate.builder()
-			.concertId(concertId)
-			.date(LocalDateTime.now().plusDays(14))
-			.deadline(LocalDateTime.now().plusDays(12))
-			.build();
+		ConcertDate anotherConcertDate = TestDataFactory.createConcertDate(concertId);
 		ConcertDate savedAnotherConcertDate = concertDateRepository.save(anotherConcertDate);
 
 		ReservationRequest invalidRequest = new ReservationRequest(concertId, savedAnotherConcertDate.id());
