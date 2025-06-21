@@ -49,7 +49,6 @@ public class ReservationInteractor implements ReservationInput {
 	private final EventPublisher eventPublisher;
 
 	@Override
-	@Transactional
 	public void reserveSeat(ReserveSeatCommand command) throws CustomException {
 		try {
 			QueueToken queueToken = getQueueTokenAndValid(command);
@@ -60,14 +59,10 @@ public class ReservationInteractor implements ReservationInput {
 
 			ReservationDomainResult result = reservationDomainService.processReservation(concertDate, seat, queueToken.userId());
 
-			updateSeatStatusReserved(result.seat());
-			Reservation savedReservation = reservationRepository.save(result.reservation());
-			Payment 	savedPayment 	 = paymentRepository.save(Payment.of(seat.id(), savedReservation.id(), seat.price()));
+			TransactionResult transactionResult = processTransaction(result, queueToken.userId());
 
-			seatHoldRepository.hold(seat.id(), queueToken.userId());
-
-			eventPublisher.publish(ReservationCreatedEvent.of(savedPayment, savedReservation, seat, queueToken.userId()));
-			reservationOutput.ok(ReserveSeatResult.of(savedReservation, seat));
+			eventPublisher.publish(ReservationCreatedEvent.of(transactionResult.payment, transactionResult.reservation, seat, queueToken.userId()));
+			reservationOutput.ok(ReserveSeatResult.of(transactionResult.reservation, seat));
 		} catch (CustomException e) {
 			ErrorCode errorCode = e.getErrorCode();
 			log.warn("좌석 예약중 비즈니스 예외 발생 - {}, {}", errorCode.getCode(), errorCode.getMessage());
@@ -76,6 +71,17 @@ public class ReservationInteractor implements ReservationInput {
 			log.error("좌석 예약중 예외 발생 - {}", ErrorCode.INTERNAL_SERVER_ERROR, e);
 			throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
 		}
+	}
+
+	@Transactional
+	public TransactionResult processTransaction(ReservationDomainResult result, UUID userId) throws CustomException {
+		updateSeatStatusReserved(result.seat());
+		Reservation savedReservation = reservationRepository.save(result.reservation());
+		Payment 	savedPayment 	 = paymentRepository.save(Payment.of(userId, savedReservation.id(), result.seat().price()));
+
+		seatHoldRepository.hold(result.seat().id(), userId);
+
+		return new TransactionResult(savedPayment, savedReservation);
 	}
 
 	private void updateSeatStatusReserved(Seat seat) throws CustomException {
@@ -105,4 +111,6 @@ public class ReservationInteractor implements ReservationInput {
 		QueueTokenUtil.validateActiveQueueToken(queueToken);
 		return queueToken;
 	}
+
+	private record TransactionResult (Payment payment, Reservation reservation) {}
 }
