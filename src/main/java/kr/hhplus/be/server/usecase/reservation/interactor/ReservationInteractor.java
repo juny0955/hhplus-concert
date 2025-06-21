@@ -3,6 +3,7 @@ package kr.hhplus.be.server.usecase.reservation.interactor;
 import java.util.UUID;
 
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import kr.hhplus.be.server.domain.concertDate.ConcertDate;
@@ -73,7 +74,7 @@ public class ReservationInteractor implements ReservationInput {
 		}
 	}
 
-	@Transactional
+	@Transactional(isolation = Isolation.READ_COMMITTED)
 	public TransactionResult processTransaction(ReservationDomainResult result, UUID userId) throws CustomException {
 		updateSeatStatusReserved(result.seat());
 		Reservation savedReservation = reservationRepository.save(result.reservation());

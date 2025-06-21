@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import kr.hhplus.be.server.domain.user.User;
@@ -27,7 +28,7 @@ public class UserService {
 		return findUser(userId, false);
 	}
 
-	@Transactional
+	@Transactional(isolation = Isolation.READ_COMMITTED)
 	public User chargePoint(UUID userId, BigDecimal point) throws CustomException {
 		if (point.compareTo(MIN_CHARGE_POINT) < 0) {
 			log.warn("유저 포인트 충전 실패 - 최소 충전 금액 미만: USER_ID - {}, CHARGE_POINT - {}", userId, point);

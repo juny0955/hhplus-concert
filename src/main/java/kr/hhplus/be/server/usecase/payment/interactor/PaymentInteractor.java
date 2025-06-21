@@ -3,6 +3,7 @@ package kr.hhplus.be.server.usecase.payment.interactor;
 import java.util.UUID;
 
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import kr.hhplus.be.server.domain.event.payment.PaymentSuccessEvent;
@@ -76,7 +77,7 @@ public class PaymentInteractor implements PaymentInput {
 		}
 	}
 
-	@Transactional
+	@Transactional(isolation = Isolation.READ_COMMITTED)
 	public TransactionResult processTransaction(PaymentDomainResult result) {
 		Payment 	savedPayment	= paymentRepository.save(result.payment());
 		User        savedUser        = userRepository.save(result.user());
