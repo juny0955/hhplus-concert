@@ -60,7 +60,10 @@ public class PaymentInteractor implements PaymentInput {
 			Payment payment = getPaymentWithLock(reservation.id());
 			PaymentDomainResult result = paymentDomainService.processPayment(reservation, payment, seat, user);
 
-			TransactionResult transactionResult = processTransaction(result, queueToken.tokenId());
+			TransactionResult transactionResult = processTransaction(result);
+
+			seatHoldRepository.deleteHold(transactionResult.seat.id(), transactionResult.user.id());
+			queueTokenRepository.expiresQueueToken(queueToken.tokenId().toString());
 
 			eventPublisher.publish(PaymentSuccessEvent.of(transactionResult.payment.id(), transactionResult.reservation.id(), transactionResult.seat.id(), transactionResult.user.id()));
 			paymentOutput.ok(PaymentResult.of(transactionResult.payment, transactionResult.seat, transactionResult.reservation, transactionResult.user));
@@ -74,14 +77,11 @@ public class PaymentInteractor implements PaymentInput {
 	}
 
 	@Transactional
-	public TransactionResult processTransaction(PaymentDomainResult result, UUID tokenId) {
+	public TransactionResult processTransaction(PaymentDomainResult result) {
 		Payment 	savedPayment	= paymentRepository.save(result.payment());
 		User        savedUser        = userRepository.save(result.user());
 		Reservation savedReservation = reservationRepository.save(result.reservation());
 		Seat        savedSeat        = seatRepository.save(result.seat());
-
-		seatHoldRepository.deleteHold(savedSeat.id(), savedUser.id());
-		queueTokenRepository.expiresQueueToken(tokenId.toString());
 
 		return new TransactionResult(savedPayment, savedReservation, savedSeat, savedUser);
 	}
