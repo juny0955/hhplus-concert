@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import kr.hhplus.be.server.domain.event.Event;
 import kr.hhplus.be.server.domain.event.EventTopic;
+import kr.hhplus.be.server.usecase.payment.interactor.PaymentTransactionResult;
 import lombok.Builder;
 
 @Builder
@@ -16,12 +17,12 @@ public record PaymentSuccessEvent (
 	LocalDateTime occurredAt
 ) implements Event {
 
-	public static PaymentSuccessEvent of(UUID paymentId, UUID reservationId, UUID seatId, UUID userId) {
+	public static PaymentSuccessEvent from(PaymentTransactionResult paymentTransactionResult) {
 		return PaymentSuccessEvent.builder()
-			.paymentId(paymentId)
-			.reservationId(reservationId)
-			.seatId(seatId)
-			.userId(userId)
+			.paymentId(paymentTransactionResult.payment().id())
+			.reservationId(paymentTransactionResult.reservation().id())
+			.seatId(paymentTransactionResult.seat().id())
+			.userId(paymentTransactionResult.user().id())
 			.occurredAt(LocalDateTime.now())
 			.build();
 	}
