@@ -15,7 +15,7 @@ public interface JpaUserRepository extends JpaRepository<UserEntity, String> {
 	@Query("select u from UserEntity u where u.id = :userId")
 	@Lock(LockModeType.PESSIMISTIC_WRITE)
 	@QueryHints({
-		@QueryHint(name = "javax.persistence.lock.timeout", value = "5000")
+		@QueryHint(name = "jakarta.persistence.lock.timeout", value = "5000")
 	})
 	Optional<UserEntity> findByIdForUpdate(String userId);
 }

@@ -33,6 +33,8 @@ public record Payment(
 			.reservationId(reservationId)
 			.amount(amount)
 			.status(PaymentStatus.SUCCESS)
+			.createdAt(createdAt)
+			.updatedAt(LocalDateTime.now())
 			.build();
 	}
 

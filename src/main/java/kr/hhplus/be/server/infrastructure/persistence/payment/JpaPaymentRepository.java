@@ -16,7 +16,7 @@ public interface JpaPaymentRepository extends JpaRepository<PaymentEntity, Strin
 	@Query("select p from PaymentEntity p where p.reservationId = :reservationId")
 	@Lock(LockModeType.PESSIMISTIC_WRITE)
 	@QueryHints({
-		@QueryHint(name = "javax.persistence.lock.timeout", value = "5000")
+		@QueryHint(name = "jakarta.persistence.lock.timeout", value = "5000")
 	})
 	Optional<PaymentEntity> findByReservationIdForUpdate(String reservationId);
 }

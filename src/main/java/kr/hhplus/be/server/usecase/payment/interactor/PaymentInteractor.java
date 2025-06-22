@@ -48,6 +48,7 @@ public class PaymentInteractor implements PaymentInput {
 	private final EventPublisher eventPublisher;
 
 	@Override
+	@Transactional(isolation = Isolation.READ_COMMITTED)
 	public void payment(PaymentCommand command) throws CustomException {
 		try {
 			QueueToken queueToken = getQueueTokenAndValid(command.queueTokenId());
@@ -61,13 +62,16 @@ public class PaymentInteractor implements PaymentInput {
 			Payment payment = getPaymentWithLock(reservation.id());
 			PaymentDomainResult result = paymentDomainService.processPayment(reservation, payment, seat, user);
 
-			TransactionResult transactionResult = processTransaction(result);
+			Payment 	savedPayment	 = paymentRepository.save(result.payment());
+			User        savedUser        = userRepository.save(result.user());
+			Reservation savedReservation = reservationRepository.save(result.reservation());
+			Seat        savedSeat        = seatRepository.save(result.seat());
 
-			seatHoldRepository.deleteHold(transactionResult.seat.id(), transactionResult.user.id());
+			seatHoldRepository.deleteHold(savedSeat.id(), savedUser.id());
 			queueTokenRepository.expiresQueueToken(queueToken.tokenId().toString());
 
-			eventPublisher.publish(PaymentSuccessEvent.of(transactionResult.payment.id(), transactionResult.reservation.id(), transactionResult.seat.id(), transactionResult.user.id()));
-			paymentOutput.ok(PaymentResult.of(transactionResult.payment, transactionResult.seat, transactionResult.reservation, transactionResult.user));
+			eventPublisher.publish(PaymentSuccessEvent.of(savedPayment.id(), savedReservation.id(), savedSeat.id(), savedUser.id()));
+			paymentOutput.ok(PaymentResult.of(savedPayment, savedSeat, savedReservation, savedUser));
 		} catch (CustomException e) {
 			log.warn("결제 진행 중 비즈니스 예외 발생 - {}", e.getErrorCode().name());
 			throw e;
@@ -75,16 +79,6 @@ public class PaymentInteractor implements PaymentInput {
 			log.error("결제 진행 중 예외 발생 - {}", ErrorCode.INTERNAL_SERVER_ERROR, e);
 			throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
 		}
-	}
-
-	@Transactional(isolation = Isolation.READ_COMMITTED)
-	public TransactionResult processTransaction(PaymentDomainResult result) {
-		Payment 	savedPayment	= paymentRepository.save(result.payment());
-		User        savedUser        = userRepository.save(result.user());
-		Reservation savedReservation = reservationRepository.save(result.reservation());
-		Seat        savedSeat        = seatRepository.save(result.seat());
-
-		return new TransactionResult(savedPayment, savedReservation, savedSeat, savedUser);
 	}
 
 	private User getUser(UUID userId) throws CustomException {
@@ -117,6 +111,4 @@ public class PaymentInteractor implements PaymentInput {
 		if (!seatHoldRepository.isHoldSeat(seatId, userId))
 			throw new CustomException(ErrorCode.SEAT_NOT_HOLD);
 	}
-
-	private record TransactionResult(Payment payment, Reservation reservation, Seat seat, User user) {}
 }

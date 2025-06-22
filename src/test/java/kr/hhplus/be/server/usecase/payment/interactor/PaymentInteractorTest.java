@@ -120,9 +120,9 @@ class PaymentInteractorTest {
 
 		when(queueTokenRepository.findQueueTokenByTokenId(paymentCommand.queueTokenId())).thenReturn(queueToken);
 		when(reservationRepository.findById(paymentCommand.reservationId())).thenReturn(Optional.of(reservation));
-		when(paymentRepository.findByReservationId(reservation.id())).thenReturn(Optional.of(payment));
+		when(paymentRepository.findByReservationIdForUpdate(reservation.id())).thenReturn(Optional.of(payment));
 		when(seatRepository.findById(reservation.seatId())).thenReturn(Optional.of(seat));
-		when(userRepository.findByIdForUpdate(queueToken.userId())).thenReturn(Optional.of(user));
+		when(userRepository.findById(queueToken.userId())).thenReturn(Optional.of(user));
 		when(seatHoldRepository.isHoldSeat(seat.id(), user.id())).thenReturn(true);
 		when(paymentDomainService.processPayment(reservation, payment, seat, user)).thenReturn(domainResult);
 		when(reservationRepository.save(successReservation)).thenReturn(successReservation);
@@ -134,9 +134,9 @@ class PaymentInteractorTest {
 
 		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(paymentCommand.queueTokenId());
 		verify(reservationRepository, times(1)).findById(paymentCommand.reservationId());
-		verify(paymentRepository, times(1)).findByReservationId(reservation.id());
+		verify(paymentRepository, times(1)).findByReservationIdForUpdate(reservation.id());
 		verify(seatRepository, times(1)).findById(reservation.seatId());
-		verify(userRepository, times(1)).findByIdForUpdate(queueToken.userId());
+		verify(userRepository, times(1)).findById(queueToken.userId());
 		verify(seatHoldRepository, times(1)).isHoldSeat(seat.id(), user.id());
 		verify(paymentDomainService, times(1)).processPayment(reservation, payment, seat, user);
 		verify(userRepository, times(1)).save(successUser);
@@ -161,9 +161,9 @@ class PaymentInteractorTest {
 
 		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(paymentCommand.queueTokenId());
 		verify(reservationRepository, never()).findById(any());
-		verify(paymentRepository, never()).findByReservationId(any());
+		verify(paymentRepository, never()).findByReservationIdForUpdate(any());
 		verify(seatRepository, never()).findById(any());
-		verify(userRepository, never()).findByIdForUpdate(any());
+		verify(userRepository, never()).findById(any());
 		verify(seatHoldRepository, never()).isHoldSeat(any(), any());
 		verify(paymentDomainService, never()).processPayment(any(), any(), any(), any());
 		verify(userRepository, never()).save(any());
@@ -189,9 +189,9 @@ class PaymentInteractorTest {
 
 		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(paymentCommand.queueTokenId());
 		verify(reservationRepository, times(1)).findById(paymentCommand.reservationId());
-		verify(paymentRepository, never()).findByReservationId(any());
+		verify(paymentRepository, never()).findByReservationIdForUpdate(any());
 		verify(seatRepository, never()).findById(any());
-		verify(userRepository, never()).findByIdForUpdate(any());
+		verify(userRepository, never()).findById(any());
 		verify(seatHoldRepository, never()).isHoldSeat(any(), any());
 		verify(paymentDomainService, never()).processPayment(any(), any(), any(), any());
 
@@ -203,17 +203,20 @@ class PaymentInteractorTest {
 	void payment_Failure_PaymentNotFound() throws CustomException {
 		when(queueTokenRepository.findQueueTokenByTokenId(paymentCommand.queueTokenId())).thenReturn(queueToken);
 		when(reservationRepository.findById(paymentCommand.reservationId())).thenReturn(Optional.of(reservation));
-		when(paymentRepository.findByReservationId(reservation.id())).thenReturn(Optional.empty());
+		when(seatRepository.findById(reservation.seatId())).thenReturn(Optional.of(seat));
+		when(userRepository.findById(queueToken.userId())).thenReturn(Optional.of(user));
+		when(seatHoldRepository.isHoldSeat(seat.id(), user.id())).thenReturn(true);
+		when(paymentRepository.findByReservationIdForUpdate(reservation.id())).thenReturn(Optional.empty());
 
 		CustomException customException = assertThrows(CustomException.class,
 			() -> paymentInteractor.payment(paymentCommand));
 
 		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(paymentCommand.queueTokenId());
 		verify(reservationRepository, times(1)).findById(paymentCommand.reservationId());
-		verify(paymentRepository, times(1)).findByReservationId(reservation.id());
-		verify(seatRepository, never()).findById(any());
-		verify(userRepository, never()).findByIdForUpdate(any());
-		verify(seatHoldRepository, never()).isHoldSeat(any(), any());
+		verify(seatRepository, times(1)).findById(reservation.seatId());
+		verify(userRepository, times(1)).findById(queueToken.userId());
+		verify(seatHoldRepository, times(1)).isHoldSeat(seat.id(), user.id());
+		verify(paymentRepository, times(1)).findByReservationIdForUpdate(reservation.id());
 		verify(paymentDomainService, never()).processPayment(any(), any(), any(), any());
 		verify(userRepository, never()).save(any());
 		verify(paymentRepository, never()).save(any());
@@ -232,7 +235,6 @@ class PaymentInteractorTest {
 	void payment_Failure_SeatNotFound() throws CustomException {
 		when(queueTokenRepository.findQueueTokenByTokenId(paymentCommand.queueTokenId())).thenReturn(queueToken);
 		when(reservationRepository.findById(paymentCommand.reservationId())).thenReturn(Optional.of(reservation));
-		when(paymentRepository.findByReservationId(reservation.id())).thenReturn(Optional.of(payment));
 		when(seatRepository.findById(reservation.seatId())).thenReturn(Optional.empty());
 
 		CustomException customException = assertThrows(CustomException.class,
@@ -240,11 +242,10 @@ class PaymentInteractorTest {
 
 		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(paymentCommand.queueTokenId());
 		verify(reservationRepository, times(1)).findById(paymentCommand.reservationId());
-		verify(paymentRepository, times(1)).findByReservationId(reservation.id());
 		verify(seatRepository, times(1)).findById(reservation.seatId());
-		verify(userRepository, never()).findByIdForUpdate(any());
+		verify(userRepository, never()).findById(any());
+		verify(paymentRepository, never()).findByReservationIdForUpdate(any());
 		verify(seatHoldRepository, never()).isHoldSeat(any(), any());
-		verify(eventPublisher, never()).publish(any(PaymentSuccessEvent.class));
 		verify(paymentDomainService, never()).processPayment(any(), any(), any(), any());
 		verify(userRepository, never()).save(any());
 		verify(paymentRepository, never()).save(any());
@@ -263,18 +264,17 @@ class PaymentInteractorTest {
 	void payment_Failure_UserNotFound() throws CustomException {
 		when(queueTokenRepository.findQueueTokenByTokenId(paymentCommand.queueTokenId())).thenReturn(queueToken);
 		when(reservationRepository.findById(paymentCommand.reservationId())).thenReturn(Optional.of(reservation));
-		when(paymentRepository.findByReservationId(reservation.id())).thenReturn(Optional.of(payment));
 		when(seatRepository.findById(reservation.seatId())).thenReturn(Optional.of(seat));
-		when(userRepository.findByIdForUpdate(queueToken.userId())).thenReturn(Optional.empty());
+		when(userRepository.findById(queueToken.userId())).thenReturn(Optional.empty());
 
 		CustomException customException = assertThrows(CustomException.class,
 			() -> paymentInteractor.payment(paymentCommand));
 
 		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(paymentCommand.queueTokenId());
 		verify(reservationRepository, times(1)).findById(paymentCommand.reservationId());
-		verify(paymentRepository, times(1)).findByReservationId(reservation.id());
 		verify(seatRepository, times(1)).findById(reservation.seatId());
-		verify(userRepository, times(1)).findByIdForUpdate(queueToken.userId());
+		verify(userRepository, times(1)).findById(queueToken.userId());
+		verify(paymentRepository, never()).findByReservationIdForUpdate(any());
 		verify(seatHoldRepository, never()).isHoldSeat(any(), any());
 		verify(paymentDomainService, never()).processPayment(any(), any(), any(), any());
 		verify(userRepository, never()).save(any());
@@ -294,9 +294,8 @@ class PaymentInteractorTest {
 	void payment_Failure_ExpiredSeatHold() throws CustomException {
 		when(queueTokenRepository.findQueueTokenByTokenId(paymentCommand.queueTokenId())).thenReturn(queueToken);
 		when(reservationRepository.findById(paymentCommand.reservationId())).thenReturn(Optional.of(reservation));
-		when(paymentRepository.findByReservationId(reservation.id())).thenReturn(Optional.of(payment));
 		when(seatRepository.findById(reservation.seatId())).thenReturn(Optional.of(seat));
-		when(userRepository.findByIdForUpdate(queueToken.userId())).thenReturn(Optional.of(user));
+		when(userRepository.findById(queueToken.userId())).thenReturn(Optional.of(user));
 		when(seatHoldRepository.isHoldSeat(seat.id(), user.id())).thenReturn(false);
 
 		CustomException customException = assertThrows(CustomException.class,
@@ -304,10 +303,10 @@ class PaymentInteractorTest {
 
 		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(paymentCommand.queueTokenId());
 		verify(reservationRepository, times(1)).findById(paymentCommand.reservationId());
-		verify(paymentRepository, times(1)).findByReservationId(reservation.id());
 		verify(seatRepository, times(1)).findById(reservation.seatId());
-		verify(userRepository, times(1)).findByIdForUpdate(queueToken.userId());
+		verify(userRepository, times(1)).findById(queueToken.userId());
 		verify(seatHoldRepository, times(1)).isHoldSeat(seat.id(), user.id());
+		verify(paymentRepository, never()).findByReservationIdForUpdate(any());
 		verify(paymentDomainService, never()).processPayment(any(), any(), any(), any());
 		verify(userRepository, never()).save(any());
 		verify(paymentRepository, never()).save(any());
