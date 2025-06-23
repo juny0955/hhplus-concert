@@ -38,11 +38,28 @@ public record Payment(
 			.build();
 	}
 
+	public Payment expired() {
+		return Payment.builder()
+				.id(id)
+				.userId(userId)
+				.reservationId(reservationId)
+				.amount(amount)
+				.status(PaymentStatus.FAILED)
+				.failureReason("임시 배정이 만료되었습니다.")
+				.createdAt(createdAt)
+				.updatedAt(LocalDateTime.now())
+				.build();
+	}
+
 	public boolean isPaid() {
 		return status.equals(PaymentStatus.SUCCESS);
 	}
 
 	public boolean checkAmount() {
 		return amount().compareTo(BigDecimal.ZERO) > 0;
+	}
+
+	public boolean isPending() {
+		return status == PaymentStatus.PENDING;
 	}
 }

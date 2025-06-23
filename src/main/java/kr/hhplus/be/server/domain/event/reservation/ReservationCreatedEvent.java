@@ -16,7 +16,6 @@ public record ReservationCreatedEvent(
 	UUID paymentId,
 	UUID seatId,
 	BigDecimal amount,
-	LocalDateTime expiresAt,
 	LocalDateTime occurredAt
 ) implements Event {
 
@@ -29,7 +28,6 @@ public record ReservationCreatedEvent(
 			.paymentId(result.payment().id())
 			.seatId(result.payment().id())
 			.amount(result.payment().amount())
-			.expiresAt(now.plusMinutes(5))
 			.occurredAt(now)
 			.build();
 	}

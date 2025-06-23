@@ -1,11 +1,5 @@
 package kr.hhplus.be.server.infrastructure.persistence.reservation;
 
-import java.util.UUID;
-
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Transactional;
-
 import kr.hhplus.be.server.domain.concert.ConcertRepository;
 import kr.hhplus.be.server.domain.concertDate.ConcertDate;
 import kr.hhplus.be.server.domain.concertDate.ConcertDateRepository;
@@ -27,6 +21,13 @@ import kr.hhplus.be.server.usecase.reservation.input.ReserveSeatCommand;
 import kr.hhplus.be.server.usecase.reservation.interactor.ReservationTransactionResult;
 import kr.hhplus.be.server.usecase.reservation.interactor.ReservationTransactionService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -48,7 +49,7 @@ public class ReservationTransactionManager implements ReservationTransactionServ
 		checkExistsConcert(command.concertId());
 
 		ConcertDate concertDate = getConcertDate(command.concertDateId());
-		Seat seat = getSeat(command.seatId(), command.concertDateId());
+		Seat seat = getSeatByIdAndConcertDateId(command.seatId(), command.concertDateId());
 
 		ReservationDomainResult result = reservationDomainService.processReservation(concertDate, seat, queueToken.userId());
 
@@ -60,17 +61,49 @@ public class ReservationTransactionManager implements ReservationTransactionServ
 		return new ReservationTransactionResult(savedReservation, savedPayment, seat, queueToken.userId());
 	}
 
+	@Override
+	@Transactional
+	public List<ReservationTransactionResult> processExpiredReservation() throws CustomException {
+		List<Reservation> reservations = reservationRepository.findByStatusPending();
+
+		List<ReservationTransactionResult> reservationTransactionResults = new ArrayList<>();
+		for (Reservation reservation : reservations) {
+			if (!seatHoldRepository.isHoldSeat(reservation.seatId(), reservation.userId()))
+				continue;
+
+			Seat 	seat 	= getSeatById(reservation.seatId());
+			Payment payment = getPaymentByReservationId(reservation.id());
+
+			ReservationDomainResult result = reservationDomainService.processReservationExpired(reservation, payment, seat);
+
+			Seat 		updatedSeat 		= seatRepository.save(result.seat());
+			Reservation updatedReservation 	= reservationRepository.save(result.reservation());
+			Payment 	updatedPayment 		= paymentRepository.save(payment);
+
+			reservationTransactionResults.add(new ReservationTransactionResult(updatedReservation, updatedPayment, updatedSeat, updatedReservation.userId()));
+		}
+
+		return reservationTransactionResults;
+	}
+
 	private void updateSeatStatusReserved(Seat seat) throws CustomException {
 		int updateSeat = seatRepository.updateStatusReserved(seat.id());
 		if (updateSeat <= 0)
 			throw new CustomException(ErrorCode.ALREADY_RESERVED_SEAT);
 	}
 
-	private Seat getSeat(UUID seatId, UUID concertDateId) throws CustomException {
+	private Seat getSeatByIdAndConcertDateId(UUID seatId, UUID concertDateId) throws CustomException {
 		return seatRepository.findBySeatIdAndConcertDateId(seatId, concertDateId)
 			.orElseThrow(() -> new CustomException(ErrorCode.SEAT_NOT_FOUND));
 	}
 
+	private Seat getSeatById(UUID seatId) throws CustomException {
+		return seatRepository.findById(seatId).orElseThrow(() -> new CustomException(ErrorCode.SEAT_NOT_FOUND));
+	}
+
+	private Payment getPaymentByReservationId(UUID reservationId) throws CustomException {
+		return paymentRepository.findByReservationId(reservationId).orElseThrow(() -> new CustomException(ErrorCode.PAYMENT_NOT_FOUND));
+	}
 
 	private ConcertDate getConcertDate(UUID concertDateId) throws CustomException {
 		return concertDateRepository.findById(concertDateId)

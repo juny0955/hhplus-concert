@@ -12,4 +12,6 @@ public interface ReservationRepository {
 	List<Reservation> findAll();
 
 	void deleteAll();
+
+	List<Reservation> findByStatusPending();
 }

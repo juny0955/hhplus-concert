@@ -18,8 +18,16 @@ public record Seat(
 	LocalDateTime updatedAt
 ) {
 
-	public boolean isAvailable() {
-		return status.equals(SeatStatus.AVAILABLE);
+	public Seat expired() {
+		return Seat.builder()
+				.id(id)
+				.concertDateId(concertDateId)
+				.seatNo(seatNo)
+				.price(price)
+				.seatClass(seatClass)
+				.status(SeatStatus.AVAILABLE)
+				.updatedAt(LocalDateTime.now())
+				.build();
 	}
 
 	public Seat reserve() {
@@ -45,4 +53,12 @@ public record Seat(
 			.updatedAt(LocalDateTime.now())
 			.build();
 	}
+
+	public boolean isAvailable() {
+		return status.equals(SeatStatus.AVAILABLE);
+	}
+
+    public boolean isReserved() {
+		return status == SeatStatus.RESERVED;
+    }
 }

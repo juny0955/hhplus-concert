@@ -40,4 +40,11 @@ public class ReservationJpaGateway implements ReservationRepository {
 	public void deleteAll() {
 		jpaReservationRepository.deleteAll();
 	}
+
+	@Override
+	public List<Reservation> findByStatusPending() {
+		return jpaReservationRepository.findByStatusPending().stream()
+				.map(ReservationEntity::toDomain)
+				.toList();
+	}
 }

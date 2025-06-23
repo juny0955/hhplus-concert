@@ -18,23 +18,29 @@ public enum ErrorCode {
 	OVER_DEADLINE(400, "C004", "해당 날짜의 마감시간이 지났습니다."),
 	SEAT_NOT_FOUND(404, "C005", "해당 좌석을 찾을 수 없습니다."),
 	ALREADY_RESERVED_SEAT(400, "C006", "해당 좌석은 이미 예약되었습니다."),
-	SEAT_LOCK_CONFLICT(409, "C007", "이미 다른 사용자가 예약중입니다."),
-	SEAT_NOT_HOLD(409, "C008", "해당 좌석은 임시 배정되어있지 않습니다."),
+
 
 	// RESERVATION
 	RESERVATION_NOT_FOUND(404, "R001", "해당 예약정보를 찾을 수 없습니다."),
 	RESERVATION_EXPIRED(400, "R002", "만료된 예약입니다."),
+	RESERVATION_STATUS_NOT_PENDING(400, "R003", "예약 상태가 대기중이 아닙니다"),
 
 	// PAYMENT
 	PAYMENT_NOT_FOUND(404, "P001", "해당 결제정보를 찾을 수 없습니다."),
 	ALREADY_PAID(400, "P002", "이미 결제되었습니다."),
 	INVALID_PAYMENT_AMOUNT(400, "P003", "결제 금액이 잘못되었습니다."),
+	PAYMENT_STATUS_NOT_PENDING(400, "P004", "결제 상태가 대기중이 아닙니다."),
+
+	// SEAT
+	SEAT_LOCK_CONFLICT(409, "S001", "이미 다른 사용자가 예약중입니다."),
+	SEAT_NOT_HOLD(409, "S002", "해당 좌석은 임시 배정되어있지 않습니다."),
+	SEAT_STATUS_NOT_RESERVED(400, "S003", "좌석 상태가 예약중이 아닙니다."),
 
 	// QUEUE TOKEN
 	INVALID_QUEUE_TOKEN(400, "Q001", "대기열 토큰이 유효하지 않습니다."),
 
 	// SERVER
-	INTERNAL_SERVER_ERROR(500, "S001", "시스템 에러 발생")
+	INTERNAL_SERVER_ERROR(500, "S001", "시스템 에러 발생"),
 	;
 
 	private final int status;
