@@ -6,7 +6,7 @@ import java.util.UUID;
 
 import kr.hhplus.be.server.domain.event.Event;
 import kr.hhplus.be.server.domain.event.EventTopic;
-import kr.hhplus.be.server.usecase.reservation.interactor.ReservationTransactionResult;
+import kr.hhplus.be.server.usecase.reservation.service.CreateReservationResult;
 import lombok.Builder;
 
 @Builder
@@ -19,7 +19,7 @@ public record ReservationCreatedEvent(
 	LocalDateTime occurredAt
 ) implements Event {
 
-	public static ReservationCreatedEvent from(ReservationTransactionResult result) {
+	public static ReservationCreatedEvent from(CreateReservationResult result) {
 		LocalDateTime now = LocalDateTime.now();
 
 		return ReservationCreatedEvent.builder()

@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.infrastructure.persistence.reservation;
+package kr.hhplus.be.server.infrastructure.persistence.reservation.jpa;
 
 import java.util.UUID;
 

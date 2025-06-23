@@ -38,13 +38,13 @@ import kr.hhplus.be.server.domain.seat.SeatStatus;
 import kr.hhplus.be.server.framework.exception.CustomException;
 import kr.hhplus.be.server.framework.exception.ErrorCode;
 import kr.hhplus.be.server.usecase.reservation.input.ReserveSeatCommand;
-import kr.hhplus.be.server.usecase.reservation.interactor.ReservationTransactionResult;
+import kr.hhplus.be.server.usecase.reservation.service.CreateReservationResult;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationTransactionManagerTest {
 
 	@InjectMocks
-	private ReservationTransactionManager reservationTransactionManager;
+	private CreateReservationManager reservationTransactionManager;
 
 	@Mock
 	private ReservationRepository reservationRepository;
@@ -106,7 +106,7 @@ class ReservationTransactionManagerTest {
 		payment = new Payment(paymentId, userId, reservationId, BigDecimal.valueOf(50000), PaymentStatus.PENDING, null, now, now);
 
 		Seat reservedSeat = new Seat(seatId, concertDateId, 10, BigDecimal.valueOf(50000), SeatClass.VIP, SeatStatus.RESERVED, now, now);
-		reservationDomainResult = new ReservationDomainResult(reservedSeat, reservation);
+		reservationDomainResult = new ReservationDomainResult(reservedSeat, reservation, null);
 	}
 
 	@Test
@@ -121,7 +121,7 @@ class ReservationTransactionManagerTest {
 		when(reservationRepository.save(reservation)).thenReturn(reservation);
 		when(paymentRepository.save(any(Payment.class))).thenReturn(payment);
 
-		ReservationTransactionResult result = reservationTransactionManager.processReservationTransaction(reserveSeatCommand);
+		CreateReservationResult result = reservationTransactionManager.processCreateReservation(reserveSeatCommand);
 
 		assertThat(result).isNotNull();
 		assertThat(result.reservation()).isEqualTo(reservation);
@@ -147,7 +147,7 @@ class ReservationTransactionManagerTest {
 		when(queueTokenRepository.findQueueTokenByTokenId(queueTokenIdString)).thenReturn(waitingToken);
 
 		CustomException exception = assertThrows(CustomException.class,
-			() -> reservationTransactionManager.processReservationTransaction(reserveSeatCommand));
+			() -> reservationTransactionManager.processCreateReservation(reserveSeatCommand));
 
 		assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.INVALID_QUEUE_TOKEN);
 		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(queueTokenIdString);
@@ -165,7 +165,7 @@ class ReservationTransactionManagerTest {
 		when(concertRepository.existsById(concertId)).thenReturn(false);
 
 		CustomException exception = assertThrows(CustomException.class,
-			() -> reservationTransactionManager.processReservationTransaction(reserveSeatCommand));
+			() -> reservationTransactionManager.processCreateReservation(reserveSeatCommand));
 
 		assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.CONCERT_NOT_FOUND);
 		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(queueTokenIdString);
@@ -183,7 +183,7 @@ class ReservationTransactionManagerTest {
 		when(concertDateRepository.findById(concertDateId)).thenReturn(Optional.empty());
 
 		CustomException exception = assertThrows(CustomException.class,
-			() -> reservationTransactionManager.processReservationTransaction(reserveSeatCommand));
+			() -> reservationTransactionManager.processCreateReservation(reserveSeatCommand));
 
 		assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.CONCERT_DATE_NOT_FOUND);
 		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(queueTokenIdString);
@@ -202,7 +202,7 @@ class ReservationTransactionManagerTest {
 		when(seatRepository.findBySeatIdAndConcertDateId(seatId, concertDateId)).thenReturn(Optional.empty());
 
 		CustomException exception = assertThrows(CustomException.class,
-			() -> reservationTransactionManager.processReservationTransaction(reserveSeatCommand));
+			() -> reservationTransactionManager.processCreateReservation(reserveSeatCommand));
 
 		assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.SEAT_NOT_FOUND);
 		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(queueTokenIdString);
@@ -222,7 +222,7 @@ class ReservationTransactionManagerTest {
 		when(reservationDomainService.processReservation(concertDate, seat, userId)).thenThrow(new CustomException(ErrorCode.ALREADY_RESERVED_SEAT));
 
 		CustomException exception = assertThrows(CustomException.class,
-			() -> reservationTransactionManager.processReservationTransaction(reserveSeatCommand));
+			() -> reservationTransactionManager.processCreateReservation(reserveSeatCommand));
 
 		assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.ALREADY_RESERVED_SEAT);
 		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(queueTokenIdString);
@@ -246,7 +246,7 @@ class ReservationTransactionManagerTest {
 		when(reservationDomainService.processReservation(concertDate, seat, userId)).thenThrow(new CustomException(ErrorCode.OVER_DEADLINE));
 
 		CustomException exception = assertThrows(CustomException.class,
-			() -> reservationTransactionManager.processReservationTransaction(reserveSeatCommand));
+			() -> reservationTransactionManager.processCreateReservation(reserveSeatCommand));
 
 		assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.OVER_DEADLINE);
 		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(queueTokenIdString);
@@ -271,7 +271,7 @@ class ReservationTransactionManagerTest {
 		when(seatRepository.updateStatusReserved(seatId)).thenReturn(0);
 
 		CustomException exception = assertThrows(CustomException.class,
-			() -> reservationTransactionManager.processReservationTransaction(reserveSeatCommand));
+			() -> reservationTransactionManager.processCreateReservation(reserveSeatCommand));
 
 		assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.ALREADY_RESERVED_SEAT);
 		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(queueTokenIdString);

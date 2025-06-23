@@ -20,7 +20,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.hhplus.be.server.api.reservation.dto.request.ReservationRequest;
 import kr.hhplus.be.server.api.reservation.dto.response.ReservationResponse;
 import kr.hhplus.be.server.framework.exception.CustomException;
-import kr.hhplus.be.server.usecase.reservation.input.ReservationInput;
+import kr.hhplus.be.server.usecase.reservation.input.ReservationCreateInput;
 import kr.hhplus.be.server.usecase.reservation.input.ReserveSeatCommand;
 import kr.hhplus.be.server.usecase.reservation.output.ReservationOutput;
 import kr.hhplus.be.server.usecase.reservation.output.ReserveSeatResult;
@@ -33,7 +33,7 @@ import lombok.RequiredArgsConstructor;
 @Tag(name = "Reservation API", description = "예약 관련 API")
 public class ReservationController implements ReservationOutput {
 
-	private final ReservationInput reservationInput;
+	private final ReservationCreateInput reservationCreateInput;
 	private ReservationResponse reservationResponse;
 
 	@Operation(
@@ -77,7 +77,7 @@ public class ReservationController implements ReservationOutput {
 		@RequestBody ReservationRequest request,
 		@RequestHeader(value = "Authorization") String queueToken
 	) throws CustomException {
-		reservationInput.reserveSeat(ReserveSeatCommand.of(request, seatId, queueToken));
+		reservationCreateInput.reserveSeat(ReserveSeatCommand.of(request, seatId, queueToken));
 
 		return ResponseEntity.ok(reservationResponse);
 	}

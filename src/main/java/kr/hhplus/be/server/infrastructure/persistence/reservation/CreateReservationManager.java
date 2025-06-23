@@ -18,20 +18,18 @@ import kr.hhplus.be.server.domain.seat.SeatRepository;
 import kr.hhplus.be.server.framework.exception.CustomException;
 import kr.hhplus.be.server.framework.exception.ErrorCode;
 import kr.hhplus.be.server.usecase.reservation.input.ReserveSeatCommand;
-import kr.hhplus.be.server.usecase.reservation.interactor.ReservationTransactionResult;
-import kr.hhplus.be.server.usecase.reservation.interactor.ReservationTransactionService;
+import kr.hhplus.be.server.usecase.reservation.service.CreateReservationResult;
+import kr.hhplus.be.server.usecase.reservation.service.CreateReservationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
-public class ReservationTransactionManager implements ReservationTransactionService {
+public class CreateReservationManager implements CreateReservationService {
 
 	private final ReservationRepository reservationRepository;
 	private final QueueTokenRepository queueTokenRepository;
@@ -44,7 +42,7 @@ public class ReservationTransactionManager implements ReservationTransactionServ
 
 	@Override
 	@Transactional(isolation = Isolation.READ_COMMITTED)
-	public ReservationTransactionResult processReservationTransaction(ReserveSeatCommand command) throws CustomException {
+	public CreateReservationResult processCreateReservation(ReserveSeatCommand command) throws CustomException {
 		QueueToken queueToken = getQueueTokenAndValid(command);
 		checkExistsConcert(command.concertId());
 
@@ -58,32 +56,7 @@ public class ReservationTransactionManager implements ReservationTransactionServ
 		Payment savedPayment 	 = paymentRepository.save(Payment.of(queueToken.userId(), savedReservation.id(), result.seat().price()));
 
 		seatHoldRepository.hold(result.seat().id(), queueToken.userId());
-		return new ReservationTransactionResult(savedReservation, savedPayment, seat, queueToken.userId());
-	}
-
-	@Override
-	@Transactional
-	public List<ReservationTransactionResult> processExpiredReservation() throws CustomException {
-		List<Reservation> reservations = reservationRepository.findByStatusPending();
-
-		List<ReservationTransactionResult> reservationTransactionResults = new ArrayList<>();
-		for (Reservation reservation : reservations) {
-			if (!seatHoldRepository.isHoldSeat(reservation.seatId(), reservation.userId()))
-				continue;
-
-			Seat 	seat 	= getSeatById(reservation.seatId());
-			Payment payment = getPaymentByReservationId(reservation.id());
-
-			ReservationDomainResult result = reservationDomainService.processReservationExpired(reservation, payment, seat);
-
-			Seat 		updatedSeat 		= seatRepository.save(result.seat());
-			Reservation updatedReservation 	= reservationRepository.save(result.reservation());
-			Payment 	updatedPayment 		= paymentRepository.save(payment);
-
-			reservationTransactionResults.add(new ReservationTransactionResult(updatedReservation, updatedPayment, updatedSeat, updatedReservation.userId()));
-		}
-
-		return reservationTransactionResults;
+		return new CreateReservationResult(savedReservation, savedPayment, seat, queueToken.userId());
 	}
 
 	private void updateSeatStatusReserved(Seat seat) throws CustomException {
@@ -95,14 +68,6 @@ public class ReservationTransactionManager implements ReservationTransactionServ
 	private Seat getSeatByIdAndConcertDateId(UUID seatId, UUID concertDateId) throws CustomException {
 		return seatRepository.findBySeatIdAndConcertDateId(seatId, concertDateId)
 			.orElseThrow(() -> new CustomException(ErrorCode.SEAT_NOT_FOUND));
-	}
-
-	private Seat getSeatById(UUID seatId) throws CustomException {
-		return seatRepository.findById(seatId).orElseThrow(() -> new CustomException(ErrorCode.SEAT_NOT_FOUND));
-	}
-
-	private Payment getPaymentByReservationId(UUID reservationId) throws CustomException {
-		return paymentRepository.findByReservationId(reservationId).orElseThrow(() -> new CustomException(ErrorCode.PAYMENT_NOT_FOUND));
 	}
 
 	private ConcertDate getConcertDate(UUID concertDateId) throws CustomException {
