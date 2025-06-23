@@ -38,7 +38,6 @@ import kr.hhplus.be.server.domain.seat.SeatStatus;
 import kr.hhplus.be.server.framework.exception.CustomException;
 import kr.hhplus.be.server.framework.exception.ErrorCode;
 import kr.hhplus.be.server.usecase.reservation.input.ReserveSeatCommand;
-import kr.hhplus.be.server.usecase.reservation.service.CreateReservationResult;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationTransactionManagerTest {

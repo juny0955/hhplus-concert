@@ -2,7 +2,7 @@ package kr.hhplus.be.server.domain.event.reservation;
 
 import kr.hhplus.be.server.domain.event.Event;
 import kr.hhplus.be.server.domain.event.EventTopic;
-import kr.hhplus.be.server.usecase.reservation.service.CreateReservationResult;
+import kr.hhplus.be.server.infrastructure.persistence.reservation.ExpiredReservationResult;
 import lombok.Builder;
 
 import java.time.LocalDateTime;
@@ -17,12 +17,12 @@ public record ReservationExpiredEvent (
     LocalDateTime occurredAt
 ) implements Event {
 
-    public static ReservationExpiredEvent from(CreateReservationResult createReservationResult) {
+    public static ReservationExpiredEvent from(ExpiredReservationResult expiredReservationResult) {
         return ReservationExpiredEvent.builder()
-                .reservationId(createReservationResult.reservation().id())
-                .paymentId(createReservationResult.payment().id())
-                .seatId(createReservationResult.seat().id())
-                .userId(createReservationResult.userId())
+                .reservationId(expiredReservationResult.reservationId())
+                .paymentId(expiredReservationResult.paymentId())
+                .seatId(expiredReservationResult.seatId())
+                .userId(expiredReservationResult.userId())
                 .occurredAt(LocalDateTime.now())
                 .build();
     }

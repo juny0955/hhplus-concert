@@ -8,8 +8,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import kr.hhplus.be.server.usecase.reservation.service.CreateReservationService;
-import kr.hhplus.be.server.usecase.reservation.service.CreateReservationResult;
+import kr.hhplus.be.server.infrastructure.persistence.reservation.CreateReservationManager;
+import kr.hhplus.be.server.infrastructure.persistence.reservation.CreateReservationResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,7 +40,7 @@ class CreateReservationInteractorTest {
 	private CreateReservationInteractor createReservationInteractor;
 
 	@Mock
-	private CreateReservationService createReservationService;
+	private CreateReservationManager createReservationManager;
 
 	@Mock
 	private ReservationOutput reservationOutput;
@@ -84,12 +84,12 @@ class CreateReservationInteractorTest {
 	@Test
 	@DisplayName("예약_성공")
 	void reserveSeat_Success() throws CustomException {
-		when(createReservationService.processCreateReservation(reserveSeatCommand))
+		when(createReservationManager.processCreateReservation(reserveSeatCommand))
 			.thenReturn(createReservationResult);
 
 		createReservationInteractor.reserveSeat(reserveSeatCommand);
 
-		verify(createReservationService, times(1)).processCreateReservation(reserveSeatCommand);
+		verify(createReservationManager, times(1)).processCreateReservation(reserveSeatCommand);
 		verify(eventPublisher, times(1)).publish(any(ReservationCreatedEvent.class));
 		verify(reservationOutput, times(1)).ok(any(ReserveSeatResult.class));
 	}
@@ -98,14 +98,14 @@ class CreateReservationInteractorTest {
 	@DisplayName("예약_실패_CustomException")
 	void reserveSeat_Failure_CustomException() throws CustomException {
 		CustomException expectedException = new CustomException(ErrorCode.SEAT_NOT_FOUND);
-		when(createReservationService.processCreateReservation(reserveSeatCommand))
+		when(createReservationManager.processCreateReservation(reserveSeatCommand))
 			.thenThrow(expectedException);
 
 		CustomException actualException = assertThrows(CustomException.class,
 			() -> createReservationInteractor.reserveSeat(reserveSeatCommand));
 
 		assertThat(actualException.getErrorCode()).isEqualTo(ErrorCode.SEAT_NOT_FOUND);
-		verify(createReservationService, times(1)).processCreateReservation(reserveSeatCommand);
+		verify(createReservationManager, times(1)).processCreateReservation(reserveSeatCommand);
 		verify(eventPublisher, never()).publish(any());
 		verify(reservationOutput, never()).ok(any());
 	}
@@ -114,14 +114,14 @@ class CreateReservationInteractorTest {
 	@DisplayName("예약_실패_RuntimeException")
 	void reserveSeat_Failure_RuntimeException() throws CustomException {
 		RuntimeException expectedException = new RuntimeException("Database connection failed");
-		when(createReservationService.processCreateReservation(reserveSeatCommand))
+		when(createReservationManager.processCreateReservation(reserveSeatCommand))
 			.thenThrow(expectedException);
 
 		CustomException actualException = assertThrows(CustomException.class,
 			() -> createReservationInteractor.reserveSeat(reserveSeatCommand));
 
 		assertThat(actualException.getErrorCode()).isEqualTo(ErrorCode.INTERNAL_SERVER_ERROR);
-		verify(createReservationService, times(1)).processCreateReservation(reserveSeatCommand);
+		verify(createReservationManager, times(1)).processCreateReservation(reserveSeatCommand);
 		verify(eventPublisher, never()).publish(any());
 		verify(reservationOutput, never()).ok(any());
 	}
@@ -130,14 +130,14 @@ class CreateReservationInteractorTest {
 	@DisplayName("예약_실패_좌석이미예약됨")
 	void reserveSeat_Failure_AlreadyReservedSeat() throws CustomException {
 		CustomException expectedException = new CustomException(ErrorCode.ALREADY_RESERVED_SEAT);
-		when(createReservationService.processCreateReservation(reserveSeatCommand))
+		when(createReservationManager.processCreateReservation(reserveSeatCommand))
 			.thenThrow(expectedException);
 
 		CustomException actualException = assertThrows(CustomException.class,
 			() -> createReservationInteractor.reserveSeat(reserveSeatCommand));
 
 		assertThat(actualException.getErrorCode()).isEqualTo(ErrorCode.ALREADY_RESERVED_SEAT);
-		verify(createReservationService, times(1)).processCreateReservation(reserveSeatCommand);
+		verify(createReservationManager, times(1)).processCreateReservation(reserveSeatCommand);
 		verify(eventPublisher, never()).publish(any());
 		verify(reservationOutput, never()).ok(any());
 	}
@@ -146,14 +146,14 @@ class CreateReservationInteractorTest {
 	@DisplayName("예약_실패_대기열토큰유효하지않음")
 	void reserveSeat_Failure_InvalidQueueToken() throws CustomException {
 		CustomException expectedException = new CustomException(ErrorCode.INVALID_QUEUE_TOKEN);
-		when(createReservationService.processCreateReservation(reserveSeatCommand))
+		when(createReservationManager.processCreateReservation(reserveSeatCommand))
 			.thenThrow(expectedException);
 
 		CustomException actualException = assertThrows(CustomException.class,
 			() -> createReservationInteractor.reserveSeat(reserveSeatCommand));
 
 		assertThat(actualException.getErrorCode()).isEqualTo(ErrorCode.INVALID_QUEUE_TOKEN);
-		verify(createReservationService, times(1)).processCreateReservation(reserveSeatCommand);
+		verify(createReservationManager, times(1)).processCreateReservation(reserveSeatCommand);
 		verify(eventPublisher, never()).publish(any());
 		verify(reservationOutput, never()).ok(any());
 	}
@@ -162,14 +162,14 @@ class CreateReservationInteractorTest {
 	@DisplayName("예약_실패_콘서트정보찾지못함")
 	void reserveSeat_Failure_ConcertNotFound() throws CustomException {
 		CustomException expectedException = new CustomException(ErrorCode.CONCERT_NOT_FOUND);
-		when(createReservationService.processCreateReservation(reserveSeatCommand))
+		when(createReservationManager.processCreateReservation(reserveSeatCommand))
 			.thenThrow(expectedException);
 
 		CustomException actualException = assertThrows(CustomException.class,
 			() -> createReservationInteractor.reserveSeat(reserveSeatCommand));
 
 		assertThat(actualException.getErrorCode()).isEqualTo(ErrorCode.CONCERT_NOT_FOUND);
-		verify(createReservationService, times(1)).processCreateReservation(reserveSeatCommand);
+		verify(createReservationManager, times(1)).processCreateReservation(reserveSeatCommand);
 		verify(eventPublisher, never()).publish(any());
 		verify(reservationOutput, never()).ok(any());
 	}

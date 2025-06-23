@@ -1,5 +1,11 @@
 package kr.hhplus.be.server.infrastructure.persistence.reservation;
 
+import java.util.UUID;
+
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
+
 import kr.hhplus.be.server.domain.concert.ConcertRepository;
 import kr.hhplus.be.server.domain.concertDate.ConcertDate;
 import kr.hhplus.be.server.domain.concertDate.ConcertDateRepository;
@@ -18,18 +24,11 @@ import kr.hhplus.be.server.domain.seat.SeatRepository;
 import kr.hhplus.be.server.framework.exception.CustomException;
 import kr.hhplus.be.server.framework.exception.ErrorCode;
 import kr.hhplus.be.server.usecase.reservation.input.ReserveSeatCommand;
-import kr.hhplus.be.server.usecase.reservation.service.CreateReservationResult;
-import kr.hhplus.be.server.usecase.reservation.service.CreateReservationService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
-public class CreateReservationManager implements CreateReservationService {
+public class CreateReservationManager {
 
 	private final ReservationRepository reservationRepository;
 	private final QueueTokenRepository queueTokenRepository;
@@ -40,7 +39,6 @@ public class CreateReservationManager implements CreateReservationService {
 	private final PaymentRepository paymentRepository;
 	private final ReservationDomainService reservationDomainService;
 
-	@Override
 	@Transactional(isolation = Isolation.READ_COMMITTED)
 	public CreateReservationResult processCreateReservation(ReserveSeatCommand command) throws CustomException {
 		QueueToken queueToken = getQueueTokenAndValid(command);
