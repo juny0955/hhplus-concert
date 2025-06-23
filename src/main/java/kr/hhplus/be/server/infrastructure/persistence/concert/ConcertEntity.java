@@ -52,8 +52,8 @@ public class ConcertEntity extends BaseTimeEntity {
 			.id(UUID.fromString(id))
 			.title(title)
 			.artist(artist)
-			.createdAt(getCreatedAt())
-			.updatedAt(getUpdatedAt())
+			.createdAt(createdAt)
+			.updatedAt(updatedAt)
 			.build();
 	}
 }

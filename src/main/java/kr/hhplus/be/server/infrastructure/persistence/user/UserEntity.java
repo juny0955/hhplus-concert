@@ -50,8 +50,8 @@ public class UserEntity extends BaseTimeEntity {
 		return User.builder()
 			.id(UUID.fromString(id))
 			.amount(amount)
-			.createdAt(getCreatedAt())
-			.updatedAt(getUpdatedAt())
+			.createdAt(createdAt)
+			.updatedAt(updatedAt)
 			.build();
 	}
 }

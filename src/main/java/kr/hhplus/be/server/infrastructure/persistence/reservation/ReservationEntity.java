@@ -65,8 +65,8 @@ public class ReservationEntity extends BaseTimeEntity {
 			.userId(UUID.fromString(userId))
 			.seatId(UUID.fromString(seatId))
 			.status(status)
-			.createdAt(getCreatedAt())
-			.updatedAt(getUpdatedAt())
+			.createdAt(createdAt)
+			.updatedAt(updatedAt)
 			.build();
 	}
 }
