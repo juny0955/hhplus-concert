@@ -37,13 +37,12 @@ import kr.hhplus.be.server.domain.user.UserRepository;
 import kr.hhplus.be.server.framework.exception.CustomException;
 import kr.hhplus.be.server.framework.exception.ErrorCode;
 import kr.hhplus.be.server.usecase.payment.input.PaymentCommand;
-import kr.hhplus.be.server.usecase.payment.interactor.PaymentTransactionResult;
 
 @ExtendWith(MockitoExtension.class)
-class PaymentTransactionManagerTest {
+class PaymentManagerTest {
 
 	@InjectMocks
-	private PaymentTransactionManager paymentTransactionManager;
+	private PaymentManager paymentManager;
 
 	@Mock
 	private QueueTokenRepository queueTokenRepository;
@@ -109,7 +108,7 @@ class PaymentTransactionManagerTest {
 
 	@Test
 	@DisplayName("결제트랜잭션_성공")
-	void processPaymentTransaction_Success() throws CustomException {
+	void processPayment_Success() throws CustomException {
 		when(queueTokenRepository.findQueueTokenByTokenId(queueTokenId.toString())).thenReturn(queueToken);
 		when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(reservation));
 		when(seatRepository.findById(seatId)).thenReturn(Optional.of(seat));
@@ -123,7 +122,7 @@ class PaymentTransactionManagerTest {
 		when(reservationRepository.save(paymentDomainResult.reservation())).thenReturn(paymentDomainResult.reservation());
 		when(seatRepository.save(paymentDomainResult.seat())).thenReturn(paymentDomainResult.seat());
 
-		PaymentTransactionResult result = paymentTransactionManager.processPaymentTransaction(paymentCommand);
+		PaymentTransactionResult result = paymentManager.processPayment(paymentCommand);
 
 		assertThat(result).isNotNull();
 		assertThat(result.payment()).isEqualTo(paymentDomainResult.payment());
@@ -148,12 +147,12 @@ class PaymentTransactionManagerTest {
 
 	@Test
 	@DisplayName("결제트랜잭션_실패_대기열토큰유효하지않음")
-	void processPaymentTransaction_Failure_InvalidQueueToken() throws CustomException {
+	void processPayment_Failure_InvalidQueueToken() throws CustomException {
 		QueueToken waitingToken = QueueToken.waitingTokenOf(queueTokenId, userId, concertId, 10);
 		when(queueTokenRepository.findQueueTokenByTokenId(queueTokenId.toString())).thenReturn(waitingToken);
 
 		CustomException exception = assertThrows(CustomException.class,
-			() -> paymentTransactionManager.processPaymentTransaction(paymentCommand));
+			() -> paymentManager.processPayment(paymentCommand));
 
 		assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.INVALID_QUEUE_TOKEN);
 		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(queueTokenId.toString());
@@ -168,12 +167,12 @@ class PaymentTransactionManagerTest {
 
 	@Test
 	@DisplayName("결제트랜잭션_실패_예약정보찾지못함")
-	void processPaymentTransaction_Failure_ReservationNotFound() throws CustomException {
+	void processPayment_Failure_ReservationNotFound() throws CustomException {
 		when(queueTokenRepository.findQueueTokenByTokenId(queueTokenId.toString())).thenReturn(queueToken);
 		when(reservationRepository.findById(reservationId)).thenReturn(Optional.empty());
 
 		CustomException exception = assertThrows(CustomException.class,
-			() -> paymentTransactionManager.processPaymentTransaction(paymentCommand));
+			() -> paymentManager.processPayment(paymentCommand));
 
 		assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.RESERVATION_NOT_FOUND);
 		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(queueTokenId.toString());
@@ -186,13 +185,13 @@ class PaymentTransactionManagerTest {
 
 	@Test
 	@DisplayName("결제트랜잭션_실패_좌석정보찾지못함")
-	void processPaymentTransaction_Failure_SeatNotFound() throws CustomException {
+	void processPayment_Failure_SeatNotFound() throws CustomException {
 		when(queueTokenRepository.findQueueTokenByTokenId(queueTokenId.toString())).thenReturn(queueToken);
 		when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(reservation));
 		when(seatRepository.findById(seatId)).thenReturn(Optional.empty());
 
 		CustomException exception = assertThrows(CustomException.class,
-			() -> paymentTransactionManager.processPaymentTransaction(paymentCommand));
+			() -> paymentManager.processPayment(paymentCommand));
 
 		assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.SEAT_NOT_FOUND);
 		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(queueTokenId.toString());
@@ -205,14 +204,14 @@ class PaymentTransactionManagerTest {
 
 	@Test
 	@DisplayName("결제트랜잭션_실패_유저정보찾지못함")
-	void processPaymentTransaction_Failure_UserNotFound() throws CustomException {
+	void processPayment_Failure_UserNotFound() throws CustomException {
 		when(queueTokenRepository.findQueueTokenByTokenId(queueTokenId.toString())).thenReturn(queueToken);
 		when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(reservation));
 		when(seatRepository.findById(seatId)).thenReturn(Optional.of(seat));
 		when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
 		CustomException exception = assertThrows(CustomException.class,
-			() -> paymentTransactionManager.processPaymentTransaction(paymentCommand));
+			() -> paymentManager.processPayment(paymentCommand));
 
 		assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.USER_NOT_FOUND);
 		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(queueTokenId.toString());
@@ -226,7 +225,7 @@ class PaymentTransactionManagerTest {
 
 	@Test
 	@DisplayName("결제트랜잭션_실패_좌석임시배정끝남")
-	void processPaymentTransaction_Failure_SeatNotHold() throws CustomException {
+	void processPayment_Failure_SeatNotHold() throws CustomException {
 		when(queueTokenRepository.findQueueTokenByTokenId(queueTokenId.toString())).thenReturn(queueToken);
 		when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(reservation));
 		when(seatRepository.findById(seatId)).thenReturn(Optional.of(seat));
@@ -234,7 +233,7 @@ class PaymentTransactionManagerTest {
 		when(seatHoldRepository.isHoldSeat(seatId, userId)).thenReturn(false);
 
 		CustomException exception = assertThrows(CustomException.class,
-			() -> paymentTransactionManager.processPaymentTransaction(paymentCommand));
+			() -> paymentManager.processPayment(paymentCommand));
 
 		assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.SEAT_NOT_HOLD);
 		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(queueTokenId.toString());
@@ -257,7 +256,7 @@ class PaymentTransactionManagerTest {
 		when(paymentRepository.findByReservationIdForUpdate(reservationId)).thenReturn(Optional.empty());
 
 		CustomException exception = assertThrows(CustomException.class,
-			() -> paymentTransactionManager.processPaymentTransaction(paymentCommand));
+			() -> paymentManager.processPayment(paymentCommand));
 
 		assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.PAYMENT_NOT_FOUND);
 		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(queueTokenId.toString());
@@ -271,7 +270,7 @@ class PaymentTransactionManagerTest {
 
 	@Test
 	@DisplayName("결제트랜잭션_실패_도메인서비스예외")
-	void processPaymentTransaction_Failure_DomainServiceException() throws CustomException {
+	void processPayment_Failure_DomainServiceException() throws CustomException {
 		when(queueTokenRepository.findQueueTokenByTokenId(queueTokenId.toString())).thenReturn(queueToken);
 		when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(reservation));
 		when(seatRepository.findById(seatId)).thenReturn(Optional.of(seat));
@@ -282,7 +281,7 @@ class PaymentTransactionManagerTest {
 			.thenThrow(new CustomException(ErrorCode.INSUFFICIENT_BALANCE));
 
 		CustomException exception = assertThrows(CustomException.class,
-			() -> paymentTransactionManager.processPaymentTransaction(paymentCommand));
+			() -> paymentManager.processPayment(paymentCommand));
 
 		assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.INSUFFICIENT_BALANCE);
 		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(queueTokenId.toString());

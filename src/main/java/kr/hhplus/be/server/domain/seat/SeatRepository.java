@@ -15,5 +15,5 @@ public interface SeatRepository {
 
 	int updateStatusReserved(UUID seatId);
 
-	Optional<Seat> findBySeatIdAndConcertDateId(UUID seatId, UUID concertDateId);
+	Optional<Seat> findBySeatIdAndConcertDateIdForUpdate(UUID seatId, UUID concertDateId);
 }

@@ -1,7 +1,7 @@
 package kr.hhplus.be.server.usecase.payment.output;
 
 import kr.hhplus.be.server.domain.payment.Payment;
-import kr.hhplus.be.server.usecase.payment.interactor.PaymentTransactionResult;
+import kr.hhplus.be.server.infrastructure.persistence.payment.PaymentTransactionResult;
 import kr.hhplus.be.server.domain.reservation.Reservation;
 import kr.hhplus.be.server.domain.seat.Seat;
 import kr.hhplus.be.server.domain.user.User;

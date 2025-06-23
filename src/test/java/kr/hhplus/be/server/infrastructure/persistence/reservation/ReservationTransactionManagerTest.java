@@ -114,7 +114,7 @@ class ReservationTransactionManagerTest {
 		when(queueTokenRepository.findQueueTokenByTokenId(queueTokenIdString)).thenReturn(queueToken);
 		when(concertRepository.existsById(concertId)).thenReturn(true);
 		when(concertDateRepository.findById(concertDateId)).thenReturn(Optional.of(concertDate));
-		when(seatRepository.findBySeatIdAndConcertDateId(seatId, concertDateId)).thenReturn(Optional.of(seat));
+		when(seatRepository.findBySeatIdAndConcertDateIdForUpdate(seatId, concertDateId)).thenReturn(Optional.of(seat));
 		when(reservationDomainService.processReservation(concertDate, seat, userId)).thenReturn(reservationDomainResult);
 		when(seatRepository.updateStatusReserved(seatId)).thenReturn(1);
 		when(reservationRepository.save(reservation)).thenReturn(reservation);
@@ -131,7 +131,7 @@ class ReservationTransactionManagerTest {
 		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(queueTokenIdString);
 		verify(concertRepository, times(1)).existsById(concertId);
 		verify(concertDateRepository, times(1)).findById(concertDateId);
-		verify(seatRepository, times(1)).findBySeatIdAndConcertDateId(seatId, concertDateId);
+		verify(seatRepository, times(1)).findBySeatIdAndConcertDateIdForUpdate(seatId, concertDateId);
 		verify(reservationDomainService, times(1)).processReservation(concertDate, seat, userId);
 		verify(seatRepository, times(1)).updateStatusReserved(seatId);
 		verify(reservationRepository, times(1)).save(reservation);
@@ -152,7 +152,7 @@ class ReservationTransactionManagerTest {
 		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(queueTokenIdString);
 		verify(concertRepository, never()).existsById(any());
 		verify(concertDateRepository, never()).findById(any());
-		verify(seatRepository, never()).findBySeatIdAndConcertDateId(any(), any());
+		verify(seatRepository, never()).findBySeatIdAndConcertDateIdForUpdate(any(), any());
 		verify(reservationDomainService, never()).processReservation(any(), any(), any());
 		verify(seatHoldRepository, never()).hold(any(), any());
 	}
@@ -170,7 +170,7 @@ class ReservationTransactionManagerTest {
 		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(queueTokenIdString);
 		verify(concertRepository, times(1)).existsById(concertId);
 		verify(concertDateRepository, never()).findById(any());
-		verify(seatRepository, never()).findBySeatIdAndConcertDateId(any(), any());
+		verify(seatRepository, never()).findBySeatIdAndConcertDateIdForUpdate(any(), any());
 		verify(reservationDomainService, never()).processReservation(any(), any(), any());
 	}
 
@@ -188,7 +188,7 @@ class ReservationTransactionManagerTest {
 		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(queueTokenIdString);
 		verify(concertRepository, times(1)).existsById(concertId);
 		verify(concertDateRepository, times(1)).findById(concertDateId);
-		verify(seatRepository, never()).findBySeatIdAndConcertDateId(any(), any());
+		verify(seatRepository, never()).findBySeatIdAndConcertDateIdForUpdate(any(), any());
 		verify(reservationDomainService, never()).processReservation(any(), any(), any());
 	}
 
@@ -198,7 +198,7 @@ class ReservationTransactionManagerTest {
 		when(queueTokenRepository.findQueueTokenByTokenId(queueTokenIdString)).thenReturn(queueToken);
 		when(concertRepository.existsById(concertId)).thenReturn(true);
 		when(concertDateRepository.findById(concertDateId)).thenReturn(Optional.of(concertDate));
-		when(seatRepository.findBySeatIdAndConcertDateId(seatId, concertDateId)).thenReturn(Optional.empty());
+		when(seatRepository.findBySeatIdAndConcertDateIdForUpdate(seatId, concertDateId)).thenReturn(Optional.empty());
 
 		CustomException exception = assertThrows(CustomException.class,
 			() -> reservationTransactionManager.processCreateReservation(reserveSeatCommand));
@@ -207,7 +207,7 @@ class ReservationTransactionManagerTest {
 		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(queueTokenIdString);
 		verify(concertRepository, times(1)).existsById(concertId);
 		verify(concertDateRepository, times(1)).findById(concertDateId);
-		verify(seatRepository, times(1)).findBySeatIdAndConcertDateId(seatId, concertDateId);
+		verify(seatRepository, times(1)).findBySeatIdAndConcertDateIdForUpdate(seatId, concertDateId);
 		verify(reservationDomainService, never()).processReservation(any(), any(), any());
 	}
 
@@ -217,7 +217,7 @@ class ReservationTransactionManagerTest {
 		when(queueTokenRepository.findQueueTokenByTokenId(queueTokenIdString)).thenReturn(queueToken);
 		when(concertRepository.existsById(concertId)).thenReturn(true);
 		when(concertDateRepository.findById(concertDateId)).thenReturn(Optional.of(concertDate));
-		when(seatRepository.findBySeatIdAndConcertDateId(seatId, concertDateId)).thenReturn(Optional.of(seat));
+		when(seatRepository.findBySeatIdAndConcertDateIdForUpdate(seatId, concertDateId)).thenReturn(Optional.of(seat));
 		when(reservationDomainService.processReservation(concertDate, seat, userId)).thenThrow(new CustomException(ErrorCode.ALREADY_RESERVED_SEAT));
 
 		CustomException exception = assertThrows(CustomException.class,
@@ -227,7 +227,7 @@ class ReservationTransactionManagerTest {
 		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(queueTokenIdString);
 		verify(concertRepository, times(1)).existsById(concertId);
 		verify(concertDateRepository, times(1)).findById(concertDateId);
-		verify(seatRepository, times(1)).findBySeatIdAndConcertDateId(seatId, concertDateId);
+		verify(seatRepository, times(1)).findBySeatIdAndConcertDateIdForUpdate(seatId, concertDateId);
 		verify(reservationDomainService, times(1)).processReservation(concertDate, seat, userId);
 		verify(seatRepository, never()).updateStatusReserved(any());
 		verify(reservationRepository, never()).save(any());
@@ -241,7 +241,7 @@ class ReservationTransactionManagerTest {
 		when(queueTokenRepository.findQueueTokenByTokenId(queueTokenIdString)).thenReturn(queueToken);
 		when(concertRepository.existsById(concertId)).thenReturn(true);
 		when(concertDateRepository.findById(concertDateId)).thenReturn(Optional.of(concertDate));
-		when(seatRepository.findBySeatIdAndConcertDateId(seatId, concertDateId)).thenReturn(Optional.of(seat));
+		when(seatRepository.findBySeatIdAndConcertDateIdForUpdate(seatId, concertDateId)).thenReturn(Optional.of(seat));
 		when(reservationDomainService.processReservation(concertDate, seat, userId)).thenThrow(new CustomException(ErrorCode.OVER_DEADLINE));
 
 		CustomException exception = assertThrows(CustomException.class,
@@ -251,7 +251,7 @@ class ReservationTransactionManagerTest {
 		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(queueTokenIdString);
 		verify(concertRepository, times(1)).existsById(concertId);
 		verify(concertDateRepository, times(1)).findById(concertDateId);
-		verify(seatRepository, times(1)).findBySeatIdAndConcertDateId(seatId, concertDateId);
+		verify(seatRepository, times(1)).findBySeatIdAndConcertDateIdForUpdate(seatId, concertDateId);
 		verify(reservationDomainService, times(1)).processReservation(concertDate, seat, userId);
 		verify(seatRepository, never()).updateStatusReserved(any());
 		verify(reservationRepository, never()).save(any());
@@ -265,7 +265,7 @@ class ReservationTransactionManagerTest {
 		when(queueTokenRepository.findQueueTokenByTokenId(queueTokenIdString)).thenReturn(queueToken);
 		when(concertRepository.existsById(concertId)).thenReturn(true);
 		when(concertDateRepository.findById(concertDateId)).thenReturn(Optional.of(concertDate));
-		when(seatRepository.findBySeatIdAndConcertDateId(seatId, concertDateId)).thenReturn(Optional.of(seat));
+		when(seatRepository.findBySeatIdAndConcertDateIdForUpdate(seatId, concertDateId)).thenReturn(Optional.of(seat));
 		when(reservationDomainService.processReservation(concertDate, seat, userId)).thenReturn(reservationDomainResult);
 		when(seatRepository.updateStatusReserved(seatId)).thenReturn(0);
 
@@ -276,7 +276,7 @@ class ReservationTransactionManagerTest {
 		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(queueTokenIdString);
 		verify(concertRepository, times(1)).existsById(concertId);
 		verify(concertDateRepository, times(1)).findById(concertDateId);
-		verify(seatRepository, times(1)).findBySeatIdAndConcertDateId(seatId, concertDateId);
+		verify(seatRepository, times(1)).findBySeatIdAndConcertDateIdForUpdate(seatId, concertDateId);
 		verify(reservationDomainService, times(1)).processReservation(concertDate, seat, userId);
 		verify(seatRepository, times(1)).updateStatusReserved(seatId);
 		verify(reservationRepository, never()).save(any());

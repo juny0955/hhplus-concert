@@ -45,26 +45,20 @@ public class CreateReservationManager {
 		checkExistsConcert(command.concertId());
 
 		ConcertDate concertDate = getConcertDate(command.concertDateId());
-		Seat seat = getSeatByIdAndConcertDateId(command.seatId(), command.concertDateId());
+		Seat seat = getSeatByIdAndConcertDateIdWithLock(command.seatId(), command.concertDateId());
 
 		ReservationDomainResult result = reservationDomainService.processReservation(concertDate, seat, queueToken.userId());
 
-		updateSeatStatusReserved(result.seat());
+		Seat savedSeat = seatRepository.save(result.seat());
 		Reservation savedReservation = reservationRepository.save(result.reservation());
-		Payment savedPayment 	 = paymentRepository.save(Payment.of(queueToken.userId(), savedReservation.id(), result.seat().price()));
+		Payment savedPayment 	 = paymentRepository.save(Payment.of(queueToken.userId(), savedReservation.id(), savedSeat.price()));
 
 		seatHoldRepository.hold(result.seat().id(), queueToken.userId());
-		return new CreateReservationResult(savedReservation, savedPayment, seat, queueToken.userId());
+		return new CreateReservationResult(savedReservation, savedPayment, savedSeat, queueToken.userId());
 	}
 
-	private void updateSeatStatusReserved(Seat seat) throws CustomException {
-		int updateSeat = seatRepository.updateStatusReserved(seat.id());
-		if (updateSeat <= 0)
-			throw new CustomException(ErrorCode.ALREADY_RESERVED_SEAT);
-	}
-
-	private Seat getSeatByIdAndConcertDateId(UUID seatId, UUID concertDateId) throws CustomException {
-		return seatRepository.findBySeatIdAndConcertDateId(seatId, concertDateId)
+	private Seat getSeatByIdAndConcertDateIdWithLock(UUID seatId, UUID concertDateId) throws CustomException {
+		return seatRepository.findBySeatIdAndConcertDateIdForUpdate(seatId, concertDateId)
 			.orElseThrow(() -> new CustomException(ErrorCode.SEAT_NOT_FOUND));
 	}
 

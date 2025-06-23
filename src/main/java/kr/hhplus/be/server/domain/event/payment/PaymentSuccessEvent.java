@@ -5,7 +5,7 @@ import java.util.UUID;
 
 import kr.hhplus.be.server.domain.event.Event;
 import kr.hhplus.be.server.domain.event.EventTopic;
-import kr.hhplus.be.server.usecase.payment.interactor.PaymentTransactionResult;
+import kr.hhplus.be.server.infrastructure.persistence.payment.PaymentTransactionResult;
 import lombok.Builder;
 
 @Builder

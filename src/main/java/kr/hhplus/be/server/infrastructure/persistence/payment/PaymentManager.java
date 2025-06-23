@@ -10,8 +10,6 @@ import kr.hhplus.be.server.domain.payment.Payment;
 import kr.hhplus.be.server.domain.payment.PaymentDomainResult;
 import kr.hhplus.be.server.domain.payment.PaymentDomainService;
 import kr.hhplus.be.server.domain.payment.PaymentRepository;
-import kr.hhplus.be.server.usecase.payment.interactor.PaymentTransactionResult;
-import kr.hhplus.be.server.usecase.payment.interactor.PaymentTransactionService;
 import kr.hhplus.be.server.domain.queue.QueueToken;
 import kr.hhplus.be.server.domain.queue.QueueTokenRepository;
 import kr.hhplus.be.server.domain.queue.QueueTokenUtil;
@@ -29,7 +27,7 @@ import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
-public class PaymentTransactionManager implements PaymentTransactionService {
+public class PaymentManager {
 
 	private final QueueTokenRepository queueTokenRepository;
 	private final ReservationRepository reservationRepository;
@@ -39,9 +37,8 @@ public class PaymentTransactionManager implements PaymentTransactionService {
 	private final SeatHoldRepository seatHoldRepository;
 	private final PaymentDomainService paymentDomainService;
 
-	@Override
-	@Transactional(isolation = Isolation.READ_COMMITTED)
-	public PaymentTransactionResult processPaymentTransaction(PaymentCommand command) throws CustomException {
+	@Transactional(isolation = Isolation.SERIALIZABLE)
+	public PaymentTransactionResult processPayment(PaymentCommand command) throws CustomException {
 		QueueToken queueToken = getQueueTokenAndValid(command.queueTokenId());
 
 		Reservation reservation = getReservation(command.reservationId());

@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class ExpiredReservationInteractor implements ReservationExpiredInput {
+public class ReservationExpiredInteractor implements ReservationExpiredInput {
 
     private final ExpiredReservationManager expiredReservationManager;
     private final EventPublisher eventPublisher;

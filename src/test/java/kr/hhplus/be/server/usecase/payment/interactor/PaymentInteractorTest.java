@@ -27,6 +27,8 @@ import kr.hhplus.be.server.domain.seat.SeatStatus;
 import kr.hhplus.be.server.domain.user.User;
 import kr.hhplus.be.server.framework.exception.CustomException;
 import kr.hhplus.be.server.framework.exception.ErrorCode;
+import kr.hhplus.be.server.infrastructure.persistence.payment.PaymentManager;
+import kr.hhplus.be.server.infrastructure.persistence.payment.PaymentTransactionResult;
 import kr.hhplus.be.server.usecase.event.EventPublisher;
 import kr.hhplus.be.server.usecase.payment.input.PaymentCommand;
 import kr.hhplus.be.server.usecase.payment.output.PaymentOutput;
@@ -42,7 +44,7 @@ class PaymentInteractorTest {
 	private PaymentOutput paymentOutput;
 
 	@Mock
-	private PaymentTransactionService paymentTransactionService;
+	private PaymentManager paymentManager;
 
 	@Mock
 	private EventPublisher eventPublisher;
@@ -85,12 +87,12 @@ class PaymentInteractorTest {
 	@Test
 	@DisplayName("결제_성공")
 	void payment_Success() throws CustomException {
-		when(paymentTransactionService.processPaymentTransaction(paymentCommand))
+		when(paymentManager.processPayment(paymentCommand))
 			.thenReturn(paymentTransactionResult);
 		
 		paymentInteractor.payment(paymentCommand);
 		
-		verify(paymentTransactionService, times(1)).processPaymentTransaction(paymentCommand);
+		verify(paymentManager, times(1)).processPayment(paymentCommand);
 		verify(eventPublisher, times(1)).publish(any(PaymentSuccessEvent.class));
 		verify(paymentOutput, times(1)).ok(any(PaymentResult.class));
 	}
@@ -99,14 +101,14 @@ class PaymentInteractorTest {
 	@DisplayName("결제_실패_CustomException")
 	void payment_Failure_CustomException() throws CustomException {
 		CustomException expectedException = new CustomException(ErrorCode.USER_NOT_FOUND);
-		when(paymentTransactionService.processPaymentTransaction(paymentCommand))
+		when(paymentManager.processPayment(paymentCommand))
 			.thenThrow(expectedException);
 		
 		CustomException actualException = assertThrows(CustomException.class,
 			() -> paymentInteractor.payment(paymentCommand));
 
 		assertThat(actualException.getErrorCode()).isEqualTo(ErrorCode.USER_NOT_FOUND);
-		verify(paymentTransactionService, times(1)).processPaymentTransaction(paymentCommand);
+		verify(paymentManager, times(1)).processPayment(paymentCommand);
 		verify(eventPublisher, never()).publish(any());
 		verify(paymentOutput, never()).ok(any());
 	}
@@ -115,14 +117,14 @@ class PaymentInteractorTest {
 	@DisplayName("결제_실패_RuntimeException")
 	void payment_Failure_RuntimeException() throws CustomException {
 		RuntimeException expectedException = new RuntimeException("Database connection failed");
-		when(paymentTransactionService.processPaymentTransaction(paymentCommand))
+		when(paymentManager.processPayment(paymentCommand))
 			.thenThrow(expectedException);
 		
 		CustomException actualException = assertThrows(CustomException.class,
 			() -> paymentInteractor.payment(paymentCommand));
 
 		assertThat(actualException.getErrorCode()).isEqualTo(ErrorCode.INTERNAL_SERVER_ERROR);
-		verify(paymentTransactionService, times(1)).processPaymentTransaction(paymentCommand);
+		verify(paymentManager, times(1)).processPayment(paymentCommand);
 		verify(eventPublisher, never()).publish(any());
 		verify(paymentOutput, never()).ok(any());
 	}
@@ -131,14 +133,14 @@ class PaymentInteractorTest {
 	@DisplayName("결제_실패_잔액부족")
 	void payment_Failure_InsufficientBalance() throws CustomException {
 		CustomException expectedException = new CustomException(ErrorCode.INSUFFICIENT_BALANCE);
-		when(paymentTransactionService.processPaymentTransaction(paymentCommand))
+		when(paymentManager.processPayment(paymentCommand))
 			.thenThrow(expectedException);
 		
 		CustomException actualException = assertThrows(CustomException.class,
 			() -> paymentInteractor.payment(paymentCommand));
 
 		assertThat(actualException.getErrorCode()).isEqualTo(ErrorCode.INSUFFICIENT_BALANCE);
-		verify(paymentTransactionService, times(1)).processPaymentTransaction(paymentCommand);
+		verify(paymentManager, times(1)).processPayment(paymentCommand);
 		verify(eventPublisher, never()).publish(any());
 		verify(paymentOutput, never()).ok(any());
 	}
@@ -147,14 +149,14 @@ class PaymentInteractorTest {
 	@DisplayName("결제_실패_이미결제됨")
 	void payment_Failure_AlreadyPaid() throws CustomException {
 		CustomException expectedException = new CustomException(ErrorCode.ALREADY_PAID);
-		when(paymentTransactionService.processPaymentTransaction(paymentCommand))
+		when(paymentManager.processPayment(paymentCommand))
 			.thenThrow(expectedException);
 		
 		CustomException actualException = assertThrows(CustomException.class,
 			() -> paymentInteractor.payment(paymentCommand));
 
 		assertThat(actualException.getErrorCode()).isEqualTo(ErrorCode.ALREADY_PAID);
-		verify(paymentTransactionService, times(1)).processPaymentTransaction(paymentCommand);
+		verify(paymentManager, times(1)).processPayment(paymentCommand);
 		verify(eventPublisher, never()).publish(any());
 		verify(paymentOutput, never()).ok(any());
 	}

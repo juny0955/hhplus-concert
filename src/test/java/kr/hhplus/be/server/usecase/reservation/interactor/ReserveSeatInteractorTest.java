@@ -34,10 +34,10 @@ import kr.hhplus.be.server.usecase.reservation.output.ReservationOutput;
 import kr.hhplus.be.server.usecase.reservation.output.ReserveSeatResult;
 
 @ExtendWith(MockitoExtension.class)
-class CreateReservationInteractorTest {
+class ReserveSeatInteractorTest {
 
 	@InjectMocks
-	private CreateReservationInteractor createReservationInteractor;
+	private ReserveSeatInteractor reserveSeatInteractor;
 
 	@Mock
 	private CreateReservationManager createReservationManager;
@@ -87,7 +87,7 @@ class CreateReservationInteractorTest {
 		when(createReservationManager.processCreateReservation(reserveSeatCommand))
 			.thenReturn(createReservationResult);
 
-		createReservationInteractor.reserveSeat(reserveSeatCommand);
+		reserveSeatInteractor.reserveSeat(reserveSeatCommand);
 
 		verify(createReservationManager, times(1)).processCreateReservation(reserveSeatCommand);
 		verify(eventPublisher, times(1)).publish(any(ReservationCreatedEvent.class));
@@ -102,7 +102,7 @@ class CreateReservationInteractorTest {
 			.thenThrow(expectedException);
 
 		CustomException actualException = assertThrows(CustomException.class,
-			() -> createReservationInteractor.reserveSeat(reserveSeatCommand));
+			() -> reserveSeatInteractor.reserveSeat(reserveSeatCommand));
 
 		assertThat(actualException.getErrorCode()).isEqualTo(ErrorCode.SEAT_NOT_FOUND);
 		verify(createReservationManager, times(1)).processCreateReservation(reserveSeatCommand);
@@ -118,7 +118,7 @@ class CreateReservationInteractorTest {
 			.thenThrow(expectedException);
 
 		CustomException actualException = assertThrows(CustomException.class,
-			() -> createReservationInteractor.reserveSeat(reserveSeatCommand));
+			() -> reserveSeatInteractor.reserveSeat(reserveSeatCommand));
 
 		assertThat(actualException.getErrorCode()).isEqualTo(ErrorCode.INTERNAL_SERVER_ERROR);
 		verify(createReservationManager, times(1)).processCreateReservation(reserveSeatCommand);
@@ -134,7 +134,7 @@ class CreateReservationInteractorTest {
 			.thenThrow(expectedException);
 
 		CustomException actualException = assertThrows(CustomException.class,
-			() -> createReservationInteractor.reserveSeat(reserveSeatCommand));
+			() -> reserveSeatInteractor.reserveSeat(reserveSeatCommand));
 
 		assertThat(actualException.getErrorCode()).isEqualTo(ErrorCode.ALREADY_RESERVED_SEAT);
 		verify(createReservationManager, times(1)).processCreateReservation(reserveSeatCommand);
@@ -150,7 +150,7 @@ class CreateReservationInteractorTest {
 			.thenThrow(expectedException);
 
 		CustomException actualException = assertThrows(CustomException.class,
-			() -> createReservationInteractor.reserveSeat(reserveSeatCommand));
+			() -> reserveSeatInteractor.reserveSeat(reserveSeatCommand));
 
 		assertThat(actualException.getErrorCode()).isEqualTo(ErrorCode.INVALID_QUEUE_TOKEN);
 		verify(createReservationManager, times(1)).processCreateReservation(reserveSeatCommand);
@@ -166,7 +166,7 @@ class CreateReservationInteractorTest {
 			.thenThrow(expectedException);
 
 		CustomException actualException = assertThrows(CustomException.class,
-			() -> createReservationInteractor.reserveSeat(reserveSeatCommand));
+			() -> reserveSeatInteractor.reserveSeat(reserveSeatCommand));
 
 		assertThat(actualException.getErrorCode()).isEqualTo(ErrorCode.CONCERT_NOT_FOUND);
 		verify(createReservationManager, times(1)).processCreateReservation(reserveSeatCommand);

@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class CreateReservationInteractor implements ReservationCreateInput {
+public class ReserveSeatInteractor implements ReservationCreateInput {
 
 	private final CreateReservationManager createReservationManager;
 	private final ReservationOutput reservationOutput;
