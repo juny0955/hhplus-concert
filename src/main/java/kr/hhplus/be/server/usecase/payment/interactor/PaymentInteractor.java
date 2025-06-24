@@ -3,8 +3,7 @@ package kr.hhplus.be.server.usecase.payment.interactor;
 import org.springframework.stereotype.Component;
 
 import kr.hhplus.be.server.domain.event.payment.PaymentSuccessEvent;
-import kr.hhplus.be.server.framework.exception.CustomException;
-import kr.hhplus.be.server.framework.exception.ErrorCode;
+import kr.hhplus.be.server.infrastructure.persistence.lock.DistributedLockManager;
 import kr.hhplus.be.server.infrastructure.persistence.payment.PaymentManager;
 import kr.hhplus.be.server.infrastructure.persistence.payment.PaymentTransactionResult;
 import kr.hhplus.be.server.usecase.event.EventPublisher;
@@ -20,23 +19,23 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class PaymentInteractor implements PaymentInput {
 
+	private final static String LOCK_KEY = "reservation:";
+
 	private final PaymentManager paymentManager;
 	private final PaymentOutput paymentOutput;
 	private final EventPublisher eventPublisher;
+	private final DistributedLockManager distributedLockManager;
 
 	@Override
-	public void payment(PaymentCommand command) throws CustomException {
-		try {
-			PaymentTransactionResult paymentTransactionResult = paymentManager.processPayment(command);
+	public void payment(PaymentCommand command) throws Exception {
+		String lockKey = LOCK_KEY + command.reservationId();
 
-			eventPublisher.publish(PaymentSuccessEvent.from(paymentTransactionResult));
-			paymentOutput.ok(PaymentResult.from(paymentTransactionResult));
-		} catch (CustomException e) {
-			log.warn("결제 진행 중 비즈니스 예외 발생 - {}", e.getErrorCode().name());
-			throw e;
-		} catch (Exception e) {
-			log.error("결제 진행 중 예외 발생 - {}", ErrorCode.INTERNAL_SERVER_ERROR, e);
-			throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
-		}
+		PaymentTransactionResult paymentTransactionResult = distributedLockManager.executeWithLock(
+			lockKey,
+			() -> paymentManager.processPayment(command)
+		);
+
+		eventPublisher.publish(PaymentSuccessEvent.from(paymentTransactionResult));
+		paymentOutput.ok(PaymentResult.from(paymentTransactionResult));
 	}
 }

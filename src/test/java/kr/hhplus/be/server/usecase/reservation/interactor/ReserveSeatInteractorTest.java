@@ -83,7 +83,7 @@ class ReserveSeatInteractorTest {
 
 	@Test
 	@DisplayName("예약_성공")
-	void reserveSeat_Success() throws CustomException {
+	void reserveSeat_Success() throws Exception {
 		when(createReservationManager.processCreateReservation(reserveSeatCommand))
 			.thenReturn(createReservationResult);
 

@@ -49,12 +49,18 @@ public class CreateReservationManager {
 
 		ReservationDomainResult result = reservationDomainService.processReservation(concertDate, seat, queueToken.userId());
 
-		Seat savedSeat = seatRepository.save(result.seat());
-		Reservation savedReservation = reservationRepository.save(result.reservation());
-		Payment savedPayment 	 = paymentRepository.save(Payment.of(queueToken.userId(), savedReservation.id(), savedSeat.price()));
+		CreateReservationResult createReservationResult = processReservation(result, queueToken.userId());
 
 		seatHoldRepository.hold(result.seat().id(), queueToken.userId());
-		return new CreateReservationResult(savedReservation, savedPayment, savedSeat, queueToken.userId());
+		return createReservationResult;
+	}
+
+	private CreateReservationResult processReservation(ReservationDomainResult result, UUID userId) {
+		Seat savedSeat = seatRepository.save(result.seat());
+		Reservation savedReservation = reservationRepository.save(result.reservation());
+		Payment savedPayment = paymentRepository.save(Payment.of(userId, savedReservation.id(), savedSeat.price()));
+
+		return new CreateReservationResult(savedReservation, savedPayment, savedSeat, userId);
 	}
 
 	private Seat getSeatByIdAndConcertDateIdWithLock(UUID seatId, UUID concertDateId) throws CustomException {
