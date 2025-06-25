@@ -30,7 +30,8 @@ public class ReserveSeatInteractor implements ReservationCreateInput {
 	public void reserveSeat(ReserveSeatCommand command) throws Exception {
 		String lockKey = LOCK_KEY + command.seatId();
 
-		CreateReservationResult createReservationResult = distributedLockManager.executeWithLock(
+		// seat:{seatId} 락 획득 후 좌석 예약 트랜잭션 수행
+		CreateReservationResult createReservationResult = distributedLockManager.executeWithLockHasReturn(
 			lockKey,
 			() -> createReservationManager.processCreateReservation(command)
 		);

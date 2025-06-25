@@ -24,7 +24,7 @@ public class QueueService {
 	public QueueToken issueQueueToken(UUID userId, UUID concertId) throws Exception {
 		String lockKey = LOCK_KEY + concertId;
 
-		return distributedLockManager.executeWithLock(
+		return distributedLockManager.executeWithLockHasReturn(
 			lockKey,
 			() -> queueTokenManager.processIssueQueueToken(userId, concertId)
 		);

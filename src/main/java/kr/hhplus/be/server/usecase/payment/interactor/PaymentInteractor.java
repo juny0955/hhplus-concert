@@ -30,7 +30,8 @@ public class PaymentInteractor implements PaymentInput {
 	public void payment(PaymentCommand command) throws Exception {
 		String lockKey = LOCK_KEY + command.reservationId();
 
-		PaymentTransactionResult paymentTransactionResult = distributedLockManager.executeWithLock(
+		// reservation:{reservationId} 락 획득 후 결제 트랜잭션 수행
+		PaymentTransactionResult paymentTransactionResult = distributedLockManager.executeWithLockHasReturn(
 			lockKey,
 			() -> paymentManager.processPayment(command)
 		);

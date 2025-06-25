@@ -27,9 +27,10 @@ public class UserService {
 	}
 
 	public User chargePoint(UUID userId, BigDecimal point) throws Exception {
-		String lockKey = LOCK_KEY + userId;
+		String lockKey = LOCK_KEY + "charge:" + userId;
 
-		return distributedLockManager.executeWithLock(
+		// user:charge:{userId} 락 획득 후 포인트 충전 트랜잭션 수행
+		return distributedLockManager.executeWithLockHasReturn(
 			lockKey,
 			() -> userManager.chargePoint(userId,point)
 		);
