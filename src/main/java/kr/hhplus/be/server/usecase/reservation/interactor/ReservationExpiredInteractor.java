@@ -19,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ReservationExpiredInteractor implements ReservationExpiredInput {
 
-    private final static String LOCK_KEY = "seat:";
+    private final static String LOCK_KEY = "reservation:";
 
     private final ExpiredReservationManager expiredReservationManager;
     private final EventPublisher eventPublisher;
@@ -30,7 +30,7 @@ public class ReservationExpiredInteractor implements ReservationExpiredInput {
         List<Reservation> reservations = expiredReservationManager.getPendingReservations();
 
         for (Reservation reservation : reservations) {
-            String lockKey = LOCK_KEY + reservation.seatId();
+            String lockKey = LOCK_KEY + reservation.id();
 
             ExpiredReservationResult expiredReservationResult = distributedLockManager.executeWithLock(
                 lockKey,
