@@ -36,30 +36,18 @@ public class UserService {
 		}
 
 		User user = findUser(userId, true);
-
-		User charged = user.charge(point);
-		User saved = userRepository.save(charged);
+		User saved = userRepository.save(user.charge(point));
 
 		log.info("유저 포인트 충전: USER_ID - {}, CHARGE_POINT - {}, AFTER_POINT - {}", userId, point, user.amount());
 		return saved;
 	}
 
 	private User findUser(UUID userId, boolean withLock) throws CustomException {
-		try {
-			User user;
+		if (withLock)
+			return userRepository.findByIdForUpdate(userId)
+				.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-			if (withLock)
-				user = userRepository.findByIdForUpdate(userId)
-					.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-			else
-				user = userRepository.findById(userId)
-					.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-
-			log.debug("유저 조회: USER_ID - {}", userId);
-			return user;
-		} catch (CustomException e) {
-			log.warn("유저 조회 실패: USER_ID - {}", userId);
-			throw e;
-		}
+		return userRepository.findById(userId)
+				.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 	}
 }
