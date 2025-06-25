@@ -78,7 +78,7 @@ public class UserController {
 	public ResponseEntity<UserPointResponse> chargePoint(
 		@PathVariable UUID userId,
 		@RequestBody ChargePointRequest request
-	) throws CustomException {
+	) throws Exception {
 		User user = userService.chargePoint(userId, request.point());
 
 		return ResponseEntity.ok(UserPointResponse.from(user));

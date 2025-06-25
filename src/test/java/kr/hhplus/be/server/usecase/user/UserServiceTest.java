@@ -71,7 +71,7 @@ class UserServiceTest {
 
 	@Test
 	@DisplayName("유저_포인트_충전_성공")
-	void chargePoint_Success() throws CustomException {
+	void chargePoint_Success() throws Exception {
 		BigDecimal chargePoint = BigDecimal.valueOf(5000);
 		User charged = user.charge(chargePoint);
 
