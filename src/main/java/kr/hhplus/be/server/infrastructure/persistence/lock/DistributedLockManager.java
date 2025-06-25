@@ -23,12 +23,43 @@ public class DistributedLockManager {
 
 	private final RedissonClient redissonClient;
 
-	public <T> T executeWithLock(String key, Callable<T> transaction) throws Exception {
+	/**
+	 * 반환 값이 있는 락 프로세스
+	 * @param key 락 키값
+	 * @param transaction 실행 로직
+	 * @return 반환 값
+	 */
+	public <T> T executeWithLockHasReturn(String key, Callable<T> transaction) throws Exception {
 		RLock lock = redissonClient.getLock(LOCK_PREFIX + key);
 
 		try {
 			if (lock.tryLock(WAIT_TIME, LEASE_TIME, TimeUnit.SECONDS))
 				return transaction.call();
+
+			throw new CustomException(ErrorCode.LOCK_CONFLICT);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			log.warn("분산락 획득 대기중 인터럽트 발생: Key - {}", key);
+			throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
+		} finally {
+			if (lock.isHeldByCurrentThread())
+				lock.unlock();
+		}
+	}
+
+	/**
+	 * 반환 값이 없는 락 프로세스
+	 * @param key 락 키값
+	 * @param action 실행 로직
+	 */
+	public void executeWithLock(String key, Runnable action) throws CustomException {
+		RLock lock = redissonClient.getLock(LOCK_PREFIX + key);
+
+		try {
+			if (lock.tryLock(WAIT_TIME, LEASE_TIME, TimeUnit.SECONDS)) {
+				action.run();
+				return;
+			}
 
 			throw new CustomException(ErrorCode.LOCK_CONFLICT);
 		} catch (InterruptedException e) {

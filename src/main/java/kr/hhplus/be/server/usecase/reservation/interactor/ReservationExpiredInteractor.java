@@ -19,20 +19,35 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ReservationExpiredInteractor implements ReservationExpiredInput {
 
-    private final static String LOCK_KEY = "reservation:";
+    private final static String SCHEDULER_LOCK_KEY = "scheduler:reservation-expired";
+    private final static String RESERVATION_LOCK_KEY = "reservation:";
 
     private final ExpiredReservationManager expiredReservationManager;
     private final EventPublisher eventPublisher;
     private final DistributedLockManager distributedLockManager;
 
-    @Override
+	@Override
     public void expiredReservation() throws Exception {
+        // scheduler:reservation-expired 락 획득 후 스케줄러 동작
+        distributedLockManager.executeWithLock(
+            SCHEDULER_LOCK_KEY,
+            () -> {
+                try {
+                    process();
+                } catch (Exception e) {
+                    log.error("예약 만료 처리 스케줄러 처리 중 예외발생", e);
+                }
+            });
+    }
+
+    private void process() throws Exception {
         List<Reservation> reservations = expiredReservationManager.getPendingReservations();
 
         for (Reservation reservation : reservations) {
-            String lockKey = LOCK_KEY + reservation.id();
+            String lockKey = RESERVATION_LOCK_KEY + reservation.id();
 
-            ExpiredReservationResult expiredReservationResult = distributedLockManager.executeWithLock(
+            // reservation:{reservationId} 락 획득 후 임시배정 만료 트랜잭션 수행
+            ExpiredReservationResult expiredReservationResult = distributedLockManager.executeWithLockHasReturn(
                 lockKey,
                 () -> expiredReservationManager.processExpiredReservation(reservation)
             );
