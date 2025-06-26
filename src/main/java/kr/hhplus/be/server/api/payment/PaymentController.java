@@ -17,7 +17,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.hhplus.be.server.api.payment.dto.response.PaymentResponse;
-import kr.hhplus.be.server.framework.exception.CustomException;
 import kr.hhplus.be.server.usecase.payment.input.PaymentCommand;
 import kr.hhplus.be.server.usecase.payment.input.PaymentInput;
 import kr.hhplus.be.server.usecase.payment.output.PaymentOutput;
@@ -65,7 +64,7 @@ public class PaymentController implements PaymentOutput {
 	public ResponseEntity<PaymentResponse> payReservation(
 		@PathVariable UUID reservationId,
 		@RequestHeader(value = "Authorization") String queueToken
-	) throws CustomException {
+	) throws Exception {
 		paymentInput.payment(PaymentCommand.of(reservationId, queueToken));
 
 		return ResponseEntity.ok(paymentResponse);

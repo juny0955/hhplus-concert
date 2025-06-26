@@ -3,7 +3,6 @@ package kr.hhplus.be.server.infrastructure.persistence.reservation;
 import java.util.UUID;
 
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import kr.hhplus.be.server.domain.concert.ConcertRepository;
@@ -39,13 +38,13 @@ public class CreateReservationManager {
 	private final PaymentRepository paymentRepository;
 	private final ReservationDomainService reservationDomainService;
 
-	@Transactional(isolation = Isolation.READ_COMMITTED)
+	@Transactional
 	public CreateReservationResult processCreateReservation(ReserveSeatCommand command) throws CustomException {
 		QueueToken queueToken = getQueueTokenAndValid(command);
 		checkExistsConcert(command.concertId());
 
 		ConcertDate concertDate = getConcertDate(command.concertDateId());
-		Seat seat = getSeatByIdAndConcertDateIdWithLock(command.seatId(), command.concertDateId());
+		Seat seat = getSeat(command.seatId(), command.concertDateId());
 
 		ReservationDomainResult result = reservationDomainService.processReservation(concertDate, seat, queueToken.userId());
 
@@ -63,8 +62,8 @@ public class CreateReservationManager {
 		return new CreateReservationResult(savedReservation, savedPayment, savedSeat, userId);
 	}
 
-	private Seat getSeatByIdAndConcertDateIdWithLock(UUID seatId, UUID concertDateId) throws CustomException {
-		return seatRepository.findBySeatIdAndConcertDateIdForUpdate(seatId, concertDateId)
+	private Seat getSeat(UUID seatId, UUID concertDateId) throws CustomException {
+		return seatRepository.findBySeatIdAndConcertDateId(seatId, concertDateId)
 			.orElseThrow(() -> new CustomException(ErrorCode.SEAT_NOT_FOUND));
 	}
 

@@ -3,7 +3,6 @@ package kr.hhplus.be.server.infrastructure.persistence.payment;
 import java.util.UUID;
 
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import kr.hhplus.be.server.domain.payment.Payment;
@@ -12,7 +11,6 @@ import kr.hhplus.be.server.domain.payment.PaymentDomainService;
 import kr.hhplus.be.server.domain.payment.PaymentRepository;
 import kr.hhplus.be.server.domain.queue.QueueToken;
 import kr.hhplus.be.server.domain.queue.QueueTokenRepository;
-import kr.hhplus.be.server.domain.queue.QueueTokenUtil;
 import kr.hhplus.be.server.domain.reservation.Reservation;
 import kr.hhplus.be.server.domain.reservation.ReservationRepository;
 import kr.hhplus.be.server.domain.seat.Seat;
@@ -37,17 +35,15 @@ public class PaymentManager {
 	private final SeatHoldRepository seatHoldRepository;
 	private final PaymentDomainService paymentDomainService;
 
-	@Transactional(isolation = Isolation.SERIALIZABLE)
-	public PaymentTransactionResult processPayment(PaymentCommand command) throws CustomException {
-		QueueToken queueToken = getQueueTokenAndValid(command.queueTokenId());
-
+	@Transactional
+	public PaymentTransactionResult processPayment(PaymentCommand command, QueueToken queueToken) throws CustomException {
 		Reservation reservation = getReservation(command.reservationId());
 		Seat seat = getSeat(reservation.seatId());
 		User user = getUser(queueToken.userId());
 
 		validateSeatHold(seat.id(), user.id());
 
-		Payment payment = getPaymentWithLock(reservation.id());
+		Payment payment = getPayment(reservation.id());
 		PaymentDomainResult result = paymentDomainService.processPayment(reservation, payment, seat, user);
 
 		PaymentTransactionResult paymentTransactionResult = processPayment(result);
@@ -77,20 +73,14 @@ public class PaymentManager {
 			.orElseThrow(() -> new CustomException(ErrorCode.SEAT_NOT_FOUND));
 	}
 
-	private Payment getPaymentWithLock(UUID reservationId) throws CustomException {
-		return paymentRepository.findByReservationIdForUpdate(reservationId)
+	private Payment getPayment(UUID reservationId) throws CustomException {
+		return paymentRepository.findByReservationId(reservationId)
 			.orElseThrow(() -> new CustomException(ErrorCode.PAYMENT_NOT_FOUND));
 	}
 
 	private Reservation getReservation(UUID reservationId) throws CustomException {
 		return reservationRepository.findById(reservationId)
 			.orElseThrow(() -> new CustomException(ErrorCode.RESERVATION_NOT_FOUND));
-	}
-
-	private QueueToken getQueueTokenAndValid(String tokenId) throws CustomException {
-		QueueToken queueToken = queueTokenRepository.findQueueTokenByTokenId(tokenId);
-		QueueTokenUtil.validateActiveQueueToken(queueToken);
-		return queueToken;
 	}
 
 	private void validateSeatHold(UUID seatId, UUID userId) throws CustomException {

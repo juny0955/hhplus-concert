@@ -33,7 +33,7 @@ public class QueueTokenManager {
 
 		String findTokenId = queueTokenRepository.findTokenIdByUserIdAndConcertId(userId, concertId);
 		if (findTokenId != null)
-			return queueTokenRepository.findQueueTokenByTokenId(findTokenId);
+			return getQueueToken(findTokenId);
 
 		Integer activeTokens = queueTokenRepository.countActiveTokens(concertId);
 		QueueToken queueToken = createQueueToken(activeTokens, userId, concertId);
@@ -46,7 +46,7 @@ public class QueueTokenManager {
 	public QueueToken getQueueInfo(UUID concertId, String tokenId) throws CustomException {
 		validateConcertId(concertId);
 
-		QueueToken queueToken = queueTokenRepository.findQueueTokenByTokenId(tokenId);
+		QueueToken queueToken = getQueueToken(tokenId);
 		if (queueToken == null || queueToken.isExpired())
 			throw new CustomException(ErrorCode.INVALID_QUEUE_TOKEN);
 
@@ -56,6 +56,10 @@ public class QueueTokenManager {
 		Integer waitingPosition = queueTokenRepository.findWaitingPosition(queueToken);
 
 		return queueToken.withWaitingPosition(waitingPosition);
+	}
+
+	public QueueToken getQueueToken(String tokenId) {
+		return queueTokenRepository.findQueueTokenByTokenId(tokenId);
 	}
 
 	private void validateUserId(UUID userId) throws CustomException {

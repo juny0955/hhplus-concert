@@ -19,7 +19,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.hhplus.be.server.api.reservation.dto.request.ReservationRequest;
 import kr.hhplus.be.server.api.reservation.dto.response.ReservationResponse;
-import kr.hhplus.be.server.framework.exception.CustomException;
 import kr.hhplus.be.server.usecase.reservation.input.ReservationCreateInput;
 import kr.hhplus.be.server.usecase.reservation.input.ReserveSeatCommand;
 import kr.hhplus.be.server.usecase.reservation.output.ReservationOutput;
@@ -76,7 +75,7 @@ public class ReservationController implements ReservationOutput {
 		@PathVariable UUID seatId,
 		@RequestBody ReservationRequest request,
 		@RequestHeader(value = "Authorization") String queueToken
-	) throws CustomException {
+	) throws Exception {
 		reservationCreateInput.reserveSeat(ReserveSeatCommand.of(request, seatId, queueToken));
 
 		return ResponseEntity.ok(reservationResponse);
