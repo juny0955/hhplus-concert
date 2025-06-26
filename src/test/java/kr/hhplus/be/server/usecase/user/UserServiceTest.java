@@ -5,8 +5,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -17,9 +17,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import kr.hhplus.be.server.domain.user.User;
-import kr.hhplus.be.server.domain.user.UserRepository;
 import kr.hhplus.be.server.framework.exception.CustomException;
 import kr.hhplus.be.server.framework.exception.ErrorCode;
+import kr.hhplus.be.server.infrastructure.persistence.lock.DistributedLockManager;
+import kr.hhplus.be.server.infrastructure.persistence.user.UserManager;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
@@ -28,7 +29,10 @@ class UserServiceTest {
 	private UserService userService;
 
 	@Mock
-	private UserRepository userRepository;
+	private UserManager userManager;
+
+	@Mock
+	private DistributedLockManager distributedLockManager;
 
 	private UUID userId;
 	private BigDecimal initAmount;
@@ -47,11 +51,11 @@ class UserServiceTest {
 	@Test
 	@DisplayName("유저_조회_성공")
 	void getUser_Success() throws CustomException {
-		when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+		when(userManager.getUser(userId)).thenReturn(user);
 
 		User findUser = userService.getUser(userId);
 
-		verify(userRepository, times(1)).findById(userId);
+		verify(userManager, times(1)).getUser(userId);
 		assertThat(findUser).isNotNull();
 		assertThat(findUser.id()).isEqualTo(userId);
 		assertThat(findUser.amount()).isEqualTo(initAmount);
@@ -59,13 +63,13 @@ class UserServiceTest {
 
 	@Test
 	@DisplayName("유저_조회_실패_유저못찾음")
-	void getUser_Failure_UserNotFound() {
-		when(userRepository.findById(userId)).thenReturn(Optional.empty());
+	void getUser_Failure_UserNotFound() throws CustomException {
+		when(userManager.getUser(userId)).thenThrow(new CustomException(ErrorCode.USER_NOT_FOUND));
 
 		CustomException customException = assertThrows(CustomException.class,
 			() -> userService.getUser(userId));
 
-		verify(userRepository, times(1)).findById(userId);
+		verify(userManager, times(1)).getUser(userId);
 		assertThat(customException.getErrorCode()).isEqualTo(ErrorCode.USER_NOT_FOUND);
 	}
 
@@ -74,42 +78,55 @@ class UserServiceTest {
 	void chargePoint_Success() throws Exception {
 		BigDecimal chargePoint = BigDecimal.valueOf(5000);
 		User charged = user.charge(chargePoint);
+		String expectedLockKey = "user:" + userId;
 
-		when(userRepository.findByIdForUpdate(userId)).thenReturn(Optional.of(user));
-		when(userRepository.save(any(User.class))).thenReturn(charged);
+		// 분산락 Mock 설정
+		when(distributedLockManager.executeWithLockHasReturn(eq(expectedLockKey), any()))
+			.thenAnswer(invocation -> {
+				Callable<User> callable = invocation.getArgument(1);
+				return callable.call();
+			});
+		when(userManager.chargePoint(userId, chargePoint)).thenReturn(charged);
 
-		User user = userService.chargePoint(userId, chargePoint);
+		User result = userService.chargePoint(userId, chargePoint);
 
-		verify(userRepository, times(1)).findByIdForUpdate(userId);
-
-		assertThat(user).isNotNull();
-		assertThat(user.amount()).isEqualTo(initAmount.add(chargePoint));
+		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(expectedLockKey), any());
+		verify(userManager, times(1)).chargePoint(userId, chargePoint);
+		assertThat(result).isNotNull();
+		assertThat(result.amount()).isEqualTo(initAmount.add(chargePoint));
 	}
 
 	@Test
 	@DisplayName("유저_포인트_충전_실패_유저못찾음")
-	void chargePoint_Failure_UserNotFound() {
+	void chargePoint_Failure_UserNotFound() throws Exception {
 		BigDecimal chargePoint = BigDecimal.valueOf(5000);
+		String expectedLockKey = "user:" + userId;
 
-		when(userRepository.findByIdForUpdate(userId)).thenReturn(Optional.empty());
+		when(distributedLockManager.executeWithLockHasReturn(eq(expectedLockKey), any()))
+			.thenAnswer(invocation -> {
+				Callable<User> callable = invocation.getArgument(1);
+				return callable.call();
+			});
+		when(userManager.chargePoint(userId, chargePoint)).thenThrow(new CustomException(ErrorCode.USER_NOT_FOUND));
 
 		CustomException customException = assertThrows(CustomException.class,
 			() -> userService.chargePoint(userId, chargePoint));
 
-		verify(userRepository, times(1)).findByIdForUpdate(userId);
-
+		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(expectedLockKey), any());
+		verify(userManager, times(1)).chargePoint(userId, chargePoint);
 		assertThat(customException.getErrorCode()).isEqualTo(ErrorCode.USER_NOT_FOUND);
 	}
 
 	@Test
 	@DisplayName("유저_포인트_충전_실패_최소충전금액미만(1000원)")
-	void chargePoint_Failure_NotEnoughMinChargePoint() {
+	void chargePoint_Failure_NotEnoughMinChargePoint() throws Exception {
 		BigDecimal chargePoint = BigDecimal.valueOf(500);
 
 		CustomException customException = assertThrows(CustomException.class,
 			() -> userService.chargePoint(userId, chargePoint));
 
-		verify(userRepository, never()).findById(userId);
+		verify(distributedLockManager, never()).executeWithLockHasReturn(anyString(), any());
+		verify(userManager, never()).chargePoint(userId, chargePoint);
 
 		assertThat(customException.getErrorCode()).isEqualTo(ErrorCode.NOT_ENOUGH_MIN_CHARGE_POINT);
 	}

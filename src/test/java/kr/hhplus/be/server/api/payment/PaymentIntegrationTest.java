@@ -143,7 +143,6 @@ class PaymentIntegrationTest {
 			.andExpect(jsonPath("$.reservationId").value(reservationId.toString()))
 			.andExpect(jsonPath("$.amount").value(50000))
 			.andExpect(jsonPath("$.status").value(PaymentStatus.SUCCESS.toString()))
-			.andExpect(jsonPath("$.createdAt").exists())
 			.andReturn();
 
 

@@ -15,13 +15,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import kr.hhplus.be.server.domain.concert.ConcertRepository;
 import kr.hhplus.be.server.domain.queue.QueueStatus;
 import kr.hhplus.be.server.domain.queue.QueueToken;
-import kr.hhplus.be.server.domain.queue.QueueTokenRepository;
-import kr.hhplus.be.server.domain.user.UserRepository;
 import kr.hhplus.be.server.framework.exception.CustomException;
 import kr.hhplus.be.server.framework.exception.ErrorCode;
+import kr.hhplus.be.server.infrastructure.persistence.lock.DistributedLockManager;
+import kr.hhplus.be.server.infrastructure.persistence.queue.QueueTokenManager;
+
+import java.util.concurrent.Callable;
 
 @ExtendWith(MockitoExtension.class)
 class QueueServiceTest {
@@ -30,13 +31,10 @@ class QueueServiceTest {
 	private QueueService queueService;
 
 	@Mock
-	private QueueTokenRepository queueTokenRepository;
+	private QueueTokenManager queueTokenManager;
 
 	@Mock
-	private ConcertRepository concertRepository;
-
-	@Mock
-	private UserRepository userRepository;
+	private DistributedLockManager distributedLockManager;
 
 	private UUID userId;
 	private UUID concertId;
@@ -63,28 +61,24 @@ class QueueServiceTest {
 
 	@Test
 	@DisplayName("콘서트_대기열_토큰_발급_성공(대기상태)") // 최대 활성 토큰 수 50개
-	void issueQueueToken_Success_Waiting() throws CustomException {
-		Integer waitingCount = 10;
+	void issueQueueToken_Success_Waiting() throws Exception {
+		QueueToken waitingToken = QueueToken.waitingTokenOf(tokenId, userId, concertId, 10);
+		String expectedLockKey = "queue:" + concertId;
 
-		when(userRepository.existsById(userId)).thenReturn(true);
-		when(concertRepository.existsById(concertId)).thenReturn(true);
-		when(queueTokenRepository.findTokenIdByUserIdAndConcertId(userId, concertId)).thenReturn(null);
-		when(queueTokenRepository.countActiveTokens(concertId)).thenReturn(50);
-		when(queueTokenRepository.countWaitingTokens(concertId)).thenReturn(waitingCount);
+		when(distributedLockManager.executeWithLockHasReturn(eq(expectedLockKey), any()))
+			.thenAnswer(invocation -> {
+				Callable<QueueToken> callable = invocation.getArgument(1);
+				return callable.call();
+			});
+		when(queueTokenManager.processIssueQueueToken(userId, concertId)).thenReturn(waitingToken);
 
 		QueueToken queueToken = queueService.issueQueueToken(userId, concertId);
 
-		verify(userRepository, times(1)).existsById(userId);
-		verify(concertRepository, times(1)).existsById(concertId);
-		verify(queueTokenRepository, times(1)).findTokenIdByUserIdAndConcertId(userId, concertId);
-		verify(queueTokenRepository, times(1)).countActiveTokens(concertId);
-		verify(queueTokenRepository, times(1)).countWaitingTokens(concertId);
-		verify(queueTokenRepository, times(1)).save(any(QueueToken.class));
-
-		verify(queueTokenRepository, never()).findQueueTokenByTokenId(tokenId.toString());
+		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(expectedLockKey), any());
+		verify(queueTokenManager, times(1)).processIssueQueueToken(userId, concertId);
 
 		assertThat(queueToken.status()).isEqualTo(QueueStatus.WAITING);
-		assertThat(queueToken.position()).isEqualTo(waitingCount + 1);
+		assertThat(queueToken.position()).isEqualTo(11);
 		assertThat(queueToken.issuedAt()).isNotNull();
 		assertThat(queueToken.expiresAt()).isNull();
 		assertThat(queueToken.enteredAt()).isNull();
@@ -92,21 +86,21 @@ class QueueServiceTest {
 
 	@Test
 	@DisplayName("콘서트_대기열_토큰_발급_성공(활성상태)") // 최대 활성 토큰 수 50개
-	void issueQueueToken_Success_Active() throws CustomException {
-		when(userRepository.existsById(userId)).thenReturn(true);
-		when(concertRepository.existsById(concertId)).thenReturn(true);
-		when(queueTokenRepository.findTokenIdByUserIdAndConcertId(userId, concertId)).thenReturn(null);
-		when(queueTokenRepository.countActiveTokens(concertId)).thenReturn(30);
+	void issueQueueToken_Success_Active() throws Exception {
+		QueueToken activeToken = QueueToken.activeTokenOf(tokenId, userId, concertId, 1800000L);
+		String expectedLockKey = "queue:" + concertId;
+
+		when(distributedLockManager.executeWithLockHasReturn(eq(expectedLockKey), any()))
+			.thenAnswer(invocation -> {
+				Callable<QueueToken> callable = invocation.getArgument(1);
+				return callable.call();
+			});
+		when(queueTokenManager.processIssueQueueToken(userId, concertId)).thenReturn(activeToken);
 
 		QueueToken queueToken = queueService.issueQueueToken(userId, concertId);
 
-		verify(userRepository, times(1)).existsById(userId);
-		verify(concertRepository, times(1)).existsById(concertId);
-		verify(queueTokenRepository, times(1)).findTokenIdByUserIdAndConcertId(userId, concertId);
-		verify(queueTokenRepository, times(1)).countActiveTokens(concertId);
-		verify(queueTokenRepository, times(1)).save(any(QueueToken.class));
-
-		verify(queueTokenRepository, never()).findQueueTokenByTokenId(tokenId.toString());
+		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(expectedLockKey), any());
+		verify(queueTokenManager, times(1)).processIssueQueueToken(userId, concertId);
 
 		assertThat(queueToken.status()).isEqualTo(QueueStatus.ACTIVE);
 		assertThat(queueToken.issuedAt()).isNotNull();
@@ -116,21 +110,21 @@ class QueueServiceTest {
 
 	@Test
 	@DisplayName("콘서트_대기열_토큰_발급_성공(기존_토큰_존재)")
-	void issueQueueToken_Success_existsToken() throws CustomException {
-		when(userRepository.existsById(userId)).thenReturn(true);
-		when(concertRepository.existsById(concertId)).thenReturn(true);
-		when(queueTokenRepository.findTokenIdByUserIdAndConcertId(userId, concertId)).thenReturn(tokenId.toString());
-		when(queueTokenRepository.findQueueTokenByTokenId(tokenId.toString())).thenReturn(existingToken);
+	void issueQueueToken_Success_existsToken() throws Exception {
+		String expectedLockKey = "queue:" + concertId;
+
+		// 분산락 Mock 설정
+		when(distributedLockManager.executeWithLockHasReturn(eq(expectedLockKey), any()))
+			.thenAnswer(invocation -> {
+				Callable<QueueToken> callable = invocation.getArgument(1);
+				return callable.call();
+			});
+		when(queueTokenManager.processIssueQueueToken(userId, concertId)).thenReturn(existingToken);
 
 		QueueToken queueToken = queueService.issueQueueToken(userId, concertId);
 
-		verify(userRepository, times(1)).existsById(userId);
-		verify(concertRepository, times(1)).existsById(concertId);
-		verify(queueTokenRepository, times(1)).findTokenIdByUserIdAndConcertId(userId, concertId);
-		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(tokenId.toString());
-
-		verify(queueTokenRepository, never()).countActiveTokens(concertId);
-		verify(queueTokenRepository, never()).save(any(QueueToken.class));
+		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(expectedLockKey), any());
+		verify(queueTokenManager, times(1)).processIssueQueueToken(userId, concertId);
 
 		assertThat(queueToken.tokenId()).isEqualTo(tokenId);
 		assertThat(queueToken.status()).isEqualTo(QueueStatus.ACTIVE);
@@ -141,38 +135,79 @@ class QueueServiceTest {
 
 	@Test
 	@DisplayName("콘서트_대기열_토큰_발급_실패_유저못찾음")
-	void issueQueueToken_Failure_UserNotFound() {
-		when(userRepository.existsById(userId)).thenReturn(false);
+	void issueQueueToken_Failure_UserNotFound() throws Exception {
+		String expectedLockKey = "queue:" + concertId;
+
+		when(distributedLockManager.executeWithLockHasReturn(eq(expectedLockKey), any()))
+			.thenAnswer(invocation -> {
+				Callable<QueueToken> callable = invocation.getArgument(1);
+				return callable.call();
+			});
+		when(queueTokenManager.processIssueQueueToken(userId, concertId))
+			.thenThrow(new CustomException(ErrorCode.USER_NOT_FOUND));
 
 		CustomException customException = assertThrows(CustomException.class,
 			() -> queueService.issueQueueToken(userId, concertId));
 
-		verify(userRepository, times(1)).existsById(userId);
-		verify(concertRepository, never()).existsById(concertId);
-		verify(queueTokenRepository, never()).findTokenIdByUserIdAndConcertId(userId, concertId);
-		verify(queueTokenRepository, never()).findQueueTokenByTokenId(tokenId.toString());
-		verify(queueTokenRepository, never()).countActiveTokens(concertId);
-		verify(queueTokenRepository, never()).save(any(QueueToken.class));
+		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(expectedLockKey), any());
+		verify(queueTokenManager, times(1)).processIssueQueueToken(userId, concertId);
 
 		assertThat(customException.getErrorCode()).isEqualTo(ErrorCode.USER_NOT_FOUND);
 	}
 
 	@Test
 	@DisplayName("콘서트_대기열_토큰_발급_실패_콘서트못찾음")
-	void issueQueueToken_Failure_ConcertNotFound() {
-		when(userRepository.existsById(userId)).thenReturn(true);
-		when(concertRepository.existsById(concertId)).thenReturn(false);
+	void issueQueueToken_Failure_ConcertNotFound() throws Exception {
+		String expectedLockKey = "queue:" + concertId;
+
+		// 분산락 Mock 설정 - 내부에서 예외 발생
+		when(distributedLockManager.executeWithLockHasReturn(eq(expectedLockKey), any()))
+			.thenAnswer(invocation -> {
+				Callable<QueueToken> callable = invocation.getArgument(1);
+				return callable.call();
+			});
+		when(queueTokenManager.processIssueQueueToken(userId, concertId))
+			.thenThrow(new CustomException(ErrorCode.CONCERT_NOT_FOUND));
 
 		CustomException customException = assertThrows(CustomException.class,
 			() -> queueService.issueQueueToken(userId, concertId));
 
-		verify(userRepository, times(1)).existsById(userId);
-		verify(concertRepository, times(1)).existsById(concertId);
-		verify(queueTokenRepository, never()).findTokenIdByUserIdAndConcertId(userId, concertId);
-		verify(queueTokenRepository, never()).findQueueTokenByTokenId(tokenId.toString());
-		verify(queueTokenRepository, never()).countActiveTokens(concertId);
-		verify(queueTokenRepository, never()).save(any(QueueToken.class));
+		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(expectedLockKey), any());
+		verify(queueTokenManager, times(1)).processIssueQueueToken(userId, concertId);
 
 		assertThat(customException.getErrorCode()).isEqualTo(ErrorCode.CONCERT_NOT_FOUND);
+	}
+
+	@Test
+	@DisplayName("콘서트_대기열_토큰_조회_성공")
+	void getQueueInfo_Success() throws CustomException {
+		String tokenIdString = tokenId.toString();
+		
+		when(queueTokenManager.getQueueInfo(concertId, tokenIdString)).thenReturn(existingToken);
+
+		QueueToken queueToken = queueService.getQueueInfo(concertId, tokenIdString);
+
+		verify(queueTokenManager, times(1)).getQueueInfo(concertId, tokenIdString);
+		
+		assertThat(queueToken.tokenId()).isEqualTo(tokenId);
+		assertThat(queueToken.status()).isEqualTo(QueueStatus.ACTIVE);
+		assertThat(queueToken.userId()).isEqualTo(userId);
+		assertThat(queueToken.concertId()).isEqualTo(concertId);
+	}
+
+	@Test
+	@DisplayName("콘서트_대기열_토큰_조회_실패_토큰못찾음")
+	void getQueueInfo_Failure_TokenNotFound() throws CustomException {
+		String tokenIdString = tokenId.toString();
+		
+		when(queueTokenManager.getQueueInfo(concertId, tokenIdString))
+			.thenThrow(new CustomException(ErrorCode.INVALID_QUEUE_TOKEN));
+
+		CustomException customException = assertThrows(CustomException.class,
+			() -> queueService.getQueueInfo(concertId, tokenIdString));
+
+		verify(queueTokenManager, times(1)).getQueueInfo(concertId, tokenIdString);
+		
+		assertThat(customException.getErrorCode()).isEqualTo(ErrorCode.INVALID_QUEUE_TOKEN);
 	}
 }

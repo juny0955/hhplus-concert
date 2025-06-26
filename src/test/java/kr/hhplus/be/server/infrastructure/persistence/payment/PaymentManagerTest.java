@@ -109,12 +109,11 @@ class PaymentManagerTest {
 	@Test
 	@DisplayName("결제트랜잭션_성공")
 	void processPayment_Success() throws CustomException {
-		when(queueTokenRepository.findQueueTokenByTokenId(queueTokenId.toString())).thenReturn(queueToken);
 		when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(reservation));
 		when(seatRepository.findById(seatId)).thenReturn(Optional.of(seat));
 		when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 		when(seatHoldRepository.isHoldSeat(seatId, userId)).thenReturn(true);
-		when(paymentRepository.findByReservationIdForUpdate(reservationId)).thenReturn(Optional.of(payment));
+		when(paymentRepository.findByReservationId(reservationId)).thenReturn(Optional.of(payment));
 		when(paymentDomainService.processPayment(reservation, payment, seat, user)).thenReturn(paymentDomainResult);
 		
 		when(paymentRepository.save(paymentDomainResult.payment())).thenReturn(paymentDomainResult.payment());
@@ -122,7 +121,7 @@ class PaymentManagerTest {
 		when(reservationRepository.save(paymentDomainResult.reservation())).thenReturn(paymentDomainResult.reservation());
 		when(seatRepository.save(paymentDomainResult.seat())).thenReturn(paymentDomainResult.seat());
 
-		PaymentTransactionResult result = paymentManager.processPayment(paymentCommand);
+		PaymentTransactionResult result = paymentManager.processPayment(paymentCommand, queueToken);
 
 		assertThat(result).isNotNull();
 		assertThat(result.payment()).isEqualTo(paymentDomainResult.payment());
@@ -130,12 +129,11 @@ class PaymentManagerTest {
 		assertThat(result.seat()).isEqualTo(paymentDomainResult.seat());
 		assertThat(result.user()).isEqualTo(paymentDomainResult.user());
 
-		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(queueTokenId.toString());
 		verify(reservationRepository, times(1)).findById(reservationId);
 		verify(seatRepository, times(1)).findById(seatId);
 		verify(userRepository, times(1)).findById(userId);
 		verify(seatHoldRepository, times(1)).isHoldSeat(seatId, userId);
-		verify(paymentRepository, times(1)).findByReservationIdForUpdate(reservationId);
+		verify(paymentRepository, times(1)).findByReservationId(reservationId);
 		verify(paymentDomainService, times(1)).processPayment(reservation, payment, seat, user);
 		verify(paymentRepository, times(1)).save(paymentDomainResult.payment());
 		verify(userRepository, times(1)).save(paymentDomainResult.user());
@@ -146,150 +144,118 @@ class PaymentManagerTest {
 	}
 
 	@Test
-	@DisplayName("결제트랜잭션_실패_대기열토큰유효하지않음")
-	void processPayment_Failure_InvalidQueueToken() throws CustomException {
-		QueueToken waitingToken = QueueToken.waitingTokenOf(queueTokenId, userId, concertId, 10);
-		when(queueTokenRepository.findQueueTokenByTokenId(queueTokenId.toString())).thenReturn(waitingToken);
-
-		CustomException exception = assertThrows(CustomException.class,
-			() -> paymentManager.processPayment(paymentCommand));
-
-		assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.INVALID_QUEUE_TOKEN);
-		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(queueTokenId.toString());
-		verify(reservationRepository, never()).findById(any());
-		verify(seatRepository, never()).findById(any());
-		verify(userRepository, never()).findById(any());
-		verify(paymentRepository, never()).findByReservationIdForUpdate(any());
-		verify(paymentDomainService, never()).processPayment(any(), any(), any(), any());
-		verify(seatHoldRepository, never()).deleteHold(any(), any());
-		verify(queueTokenRepository, never()).expiresQueueToken(any());
-	}
-
-	@Test
 	@DisplayName("결제트랜잭션_실패_예약정보찾지못함")
 	void processPayment_Failure_ReservationNotFound() throws CustomException {
-		when(queueTokenRepository.findQueueTokenByTokenId(queueTokenId.toString())).thenReturn(queueToken);
 		when(reservationRepository.findById(reservationId)).thenReturn(Optional.empty());
 
 		CustomException exception = assertThrows(CustomException.class,
-			() -> paymentManager.processPayment(paymentCommand));
+			() -> paymentManager.processPayment(paymentCommand, queueToken));
 
 		assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.RESERVATION_NOT_FOUND);
-		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(queueTokenId.toString());
 		verify(reservationRepository, times(1)).findById(reservationId);
 		verify(seatRepository, never()).findById(any());
 		verify(userRepository, never()).findById(any());
-		verify(paymentRepository, never()).findByReservationIdForUpdate(any());
+		verify(paymentRepository, never()).findByReservationId(any());
 		verify(paymentDomainService, never()).processPayment(any(), any(), any(), any());
 	}
 
 	@Test
 	@DisplayName("결제트랜잭션_실패_좌석정보찾지못함")
 	void processPayment_Failure_SeatNotFound() throws CustomException {
-		when(queueTokenRepository.findQueueTokenByTokenId(queueTokenId.toString())).thenReturn(queueToken);
 		when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(reservation));
 		when(seatRepository.findById(seatId)).thenReturn(Optional.empty());
 
 		CustomException exception = assertThrows(CustomException.class,
-			() -> paymentManager.processPayment(paymentCommand));
+			() -> paymentManager.processPayment(paymentCommand, queueToken));
 
 		assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.SEAT_NOT_FOUND);
-		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(queueTokenId.toString());
 		verify(reservationRepository, times(1)).findById(reservationId);
 		verify(seatRepository, times(1)).findById(seatId);
 		verify(userRepository, never()).findById(any());
-		verify(paymentRepository, never()).findByReservationIdForUpdate(any());
+		verify(paymentRepository, never()).findByReservationId(any());
 		verify(paymentDomainService, never()).processPayment(any(), any(), any(), any());
 	}
 
 	@Test
 	@DisplayName("결제트랜잭션_실패_유저정보찾지못함")
 	void processPayment_Failure_UserNotFound() throws CustomException {
-		when(queueTokenRepository.findQueueTokenByTokenId(queueTokenId.toString())).thenReturn(queueToken);
 		when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(reservation));
 		when(seatRepository.findById(seatId)).thenReturn(Optional.of(seat));
 		when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
 		CustomException exception = assertThrows(CustomException.class,
-			() -> paymentManager.processPayment(paymentCommand));
+			() -> paymentManager.processPayment(paymentCommand, queueToken));
 
 		assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.USER_NOT_FOUND);
-		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(queueTokenId.toString());
 		verify(reservationRepository, times(1)).findById(reservationId);
 		verify(seatRepository, times(1)).findById(seatId);
 		verify(userRepository, times(1)).findById(userId);
 		verify(seatHoldRepository, never()).isHoldSeat(any(), any());
-		verify(paymentRepository, never()).findByReservationIdForUpdate(any());
+		verify(paymentRepository, never()).findByReservationId(any());
 		verify(paymentDomainService, never()).processPayment(any(), any(), any(), any());
 	}
 
 	@Test
 	@DisplayName("결제트랜잭션_실패_좌석임시배정끝남")
 	void processPayment_Failure_SeatNotHold() throws CustomException {
-		when(queueTokenRepository.findQueueTokenByTokenId(queueTokenId.toString())).thenReturn(queueToken);
 		when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(reservation));
 		when(seatRepository.findById(seatId)).thenReturn(Optional.of(seat));
 		when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 		when(seatHoldRepository.isHoldSeat(seatId, userId)).thenReturn(false);
 
 		CustomException exception = assertThrows(CustomException.class,
-			() -> paymentManager.processPayment(paymentCommand));
+			() -> paymentManager.processPayment(paymentCommand, queueToken));
 
 		assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.SEAT_NOT_HOLD);
-		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(queueTokenId.toString());
 		verify(reservationRepository, times(1)).findById(reservationId);
 		verify(seatRepository, times(1)).findById(seatId);
 		verify(userRepository, times(1)).findById(userId);
 		verify(seatHoldRepository, times(1)).isHoldSeat(seatId, userId);
-		verify(paymentRepository, never()).findByReservationIdForUpdate(any());
+		verify(paymentRepository, never()).findByReservationId(any());
 		verify(paymentDomainService, never()).processPayment(any(), any(), any(), any());
 	}
 
 	@Test
 	@DisplayName("결제트랜잭션_실패_결제정보찾지못함")
 	void processPaymentTransaction_Failure_PaymentNotFound() throws CustomException {
-		when(queueTokenRepository.findQueueTokenByTokenId(queueTokenId.toString())).thenReturn(queueToken);
 		when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(reservation));
 		when(seatRepository.findById(seatId)).thenReturn(Optional.of(seat));
 		when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 		when(seatHoldRepository.isHoldSeat(seatId, userId)).thenReturn(true);
-		when(paymentRepository.findByReservationIdForUpdate(reservationId)).thenReturn(Optional.empty());
+		when(paymentRepository.findByReservationId(reservationId)).thenReturn(Optional.empty());
 
 		CustomException exception = assertThrows(CustomException.class,
-			() -> paymentManager.processPayment(paymentCommand));
+			() -> paymentManager.processPayment(paymentCommand, queueToken));
 
 		assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.PAYMENT_NOT_FOUND);
-		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(queueTokenId.toString());
 		verify(reservationRepository, times(1)).findById(reservationId);
 		verify(seatRepository, times(1)).findById(seatId);
 		verify(userRepository, times(1)).findById(userId);
 		verify(seatHoldRepository, times(1)).isHoldSeat(seatId, userId);
-		verify(paymentRepository, times(1)).findByReservationIdForUpdate(reservationId);
+		verify(paymentRepository, times(1)).findByReservationId(reservationId);
 		verify(paymentDomainService, never()).processPayment(any(), any(), any(), any());
 	}
 
 	@Test
 	@DisplayName("결제트랜잭션_실패_도메인서비스예외")
 	void processPayment_Failure_DomainServiceException() throws CustomException {
-		when(queueTokenRepository.findQueueTokenByTokenId(queueTokenId.toString())).thenReturn(queueToken);
 		when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(reservation));
 		when(seatRepository.findById(seatId)).thenReturn(Optional.of(seat));
 		when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 		when(seatHoldRepository.isHoldSeat(seatId, userId)).thenReturn(true);
-		when(paymentRepository.findByReservationIdForUpdate(reservationId)).thenReturn(Optional.of(payment));
+		when(paymentRepository.findByReservationId(reservationId)).thenReturn(Optional.of(payment));
 		when(paymentDomainService.processPayment(reservation, payment, seat, user))
 			.thenThrow(new CustomException(ErrorCode.INSUFFICIENT_BALANCE));
 
 		CustomException exception = assertThrows(CustomException.class,
-			() -> paymentManager.processPayment(paymentCommand));
+			() -> paymentManager.processPayment(paymentCommand, queueToken));
 
 		assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.INSUFFICIENT_BALANCE);
-		verify(queueTokenRepository, times(1)).findQueueTokenByTokenId(queueTokenId.toString());
 		verify(reservationRepository, times(1)).findById(reservationId);
 		verify(seatRepository, times(1)).findById(seatId);
 		verify(userRepository, times(1)).findById(userId);
 		verify(seatHoldRepository, times(1)).isHoldSeat(seatId, userId);
-		verify(paymentRepository, times(1)).findByReservationIdForUpdate(reservationId);
+		verify(paymentRepository, times(1)).findByReservationId(reservationId);
 		verify(paymentDomainService, times(1)).processPayment(reservation, payment, seat, user);
 
 		verify(paymentRepository, never()).save(any());
