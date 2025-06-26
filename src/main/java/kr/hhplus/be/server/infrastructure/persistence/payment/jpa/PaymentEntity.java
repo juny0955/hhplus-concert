@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.infrastructure.persistence.payment;
+package kr.hhplus.be.server.infrastructure.persistence.payment.jpa;
 
 import java.math.BigDecimal;
 import java.util.UUID;

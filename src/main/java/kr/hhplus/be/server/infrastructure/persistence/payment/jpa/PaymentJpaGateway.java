@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.infrastructure.persistence.payment;
+package kr.hhplus.be.server.infrastructure.persistence.payment.jpa;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -24,12 +24,6 @@ public class PaymentJpaGateway implements PaymentRepository {
 	@Override
 	public Optional<Payment> findByReservationId(UUID reservationId) {
 		return jpaPaymentRepository.findByReservationId(reservationId.toString())
-			.map(PaymentEntity::toDomain);
-	}
-
-	@Override
-	public Optional<Payment> findByReservationIdForUpdate(UUID reservationId) {
-		return jpaPaymentRepository.findByReservationIdForUpdate(reservationId.toString())
 			.map(PaymentEntity::toDomain);
 	}
 

@@ -9,6 +9,4 @@ public interface PaymentRepository {
 	Optional<Payment> findByReservationId(UUID reservationId);
 
 	void deleteAll();
-
-	Optional<Payment> findByReservationIdForUpdate(UUID reservationId);
 }
