@@ -19,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ReserveSeatInteractor implements ReservationCreateInput {
 
-	private final static String LOCK_KEY = "seat:";
+	private final static String LOCK_KEY = "reserve:seat:";
 
 	private final CreateReservationManager createReservationManager;
 	private final ReservationOutput reservationOutput;
@@ -31,7 +31,7 @@ public class ReserveSeatInteractor implements ReservationCreateInput {
 		String lockKey = LOCK_KEY + command.seatId();
 
 		// seat:{seatId} 락 획득 후 좌석 예약 트랜잭션 수행
-		CreateReservationResult createReservationResult = distributedLockManager.executeWithLockHasReturn(
+		CreateReservationResult createReservationResult = distributedLockManager.executeWithSimpleLockHasReturn(
 			lockKey,
 			() -> createReservationManager.processCreateReservation(command)
 		);

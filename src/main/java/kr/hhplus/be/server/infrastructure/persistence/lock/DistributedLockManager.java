@@ -1,14 +1,16 @@
 package kr.hhplus.be.server.infrastructure.persistence.lock;
 
+import java.time.Duration;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
-import kr.hhplus.be.server.framework.exception.CustomException;
-import kr.hhplus.be.server.framework.exception.ErrorCode;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
+import kr.hhplus.be.server.framework.exception.CustomException;
+import kr.hhplus.be.server.framework.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -17,11 +19,12 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class DistributedLockManager {
 
-	private static final String LOCK_PREFIX = "RLock:";
+	private static final String LOCK_PREFIX = "lock:";
 	private static final long WAIT_TIME = 3L;
 	private static final long LEASE_TIME = 10L;
 
 	private final RedissonClient redissonClient;
+	private final RedisTemplate<String, Object> redisTemplate;
 
 	/**
 	 * 반환 값이 있는 락 프로세스
@@ -69,6 +72,39 @@ public class DistributedLockManager {
 		} finally {
 			if (lock.isHeldByCurrentThread())
 				lock.unlock();
+		}
+	}
+
+	/**
+	 * 반환값이 있는 일반 Redis 락
+	 * @param key 락 키값
+	 * @param transaction 실행 로직
+	 * @return 반환값
+	 * @throws Exception 락 획득 실패 시 예외 발생
+	 */
+	public <T> T executeWithSimpleLockHasReturn(String key, Callable<T> transaction) throws Exception {
+		String lockKey = LOCK_PREFIX + key;
+
+		try {
+			Boolean result = redisTemplate.opsForValue().setIfAbsent(
+				lockKey, 
+				"lock",
+				Duration.ofSeconds(LEASE_TIME)
+			);
+			
+			if (Boolean.TRUE.equals(result)) {
+				try {
+					return transaction.call();
+				} finally {
+					redisTemplate.delete(lockKey);
+				}
+			}
+
+			throw new CustomException(ErrorCode.LOCK_CONFLICT);
+		} catch (CustomException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
 		}
 	}
 }
