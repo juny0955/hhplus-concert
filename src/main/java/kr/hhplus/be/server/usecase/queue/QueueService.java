@@ -16,7 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class QueueService {
 
-	private static final String LOCK_KEY = "queue:";
+	private static final String LOCK_KEY = "queue:issue:";
 
 	private final QueueTokenManager queueTokenManager;
 	private final DistributedLockManager distributedLockManager;
