@@ -12,6 +12,7 @@ import kr.hhplus.be.server.domain.concertDate.ConcertDate;
 import kr.hhplus.be.server.domain.concertDate.ConcertDateRepository;
 import kr.hhplus.be.server.domain.seat.Seat;
 import kr.hhplus.be.server.domain.seat.SeatRepository;
+import kr.hhplus.be.server.domain.seat.Seats;
 import kr.hhplus.be.server.framework.exception.CustomException;
 import kr.hhplus.be.server.framework.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -29,22 +30,22 @@ public class ConcertService {
 
 	public List<ConcertDate> getAvailableConcertDates(UUID concertId) throws CustomException {
 		existsConcert(concertId);
-		return concertDateRepository.findAvailableDatesWithAvailableSeatCount(concertId);
+		return concertDateRepository.findAvailableDatesWithAvailableSeatCount(concertId).concertDates();
 	}
 
 	public List<Seat> getAvailableSeats(UUID concertId, UUID concertDateId) throws CustomException {
 		existsConcert(concertId);
 
-		List<Seat> availableSeats = seatRepository.findAvailableSeats(concertId, concertDateId);
+		Seats availableSeats = seatRepository.findAvailableSeats(concertId, concertDateId);
 
-		if (availableSeats.isEmpty()) {
+		if (availableSeats.seats().isEmpty()) {
 			existsConcertDate(concertDateId);
 
 			log.debug("콘서트 예약 가능 좌석 조회 - 없음: CONCERT_DATE_ID - {}", concertDateId);
 			return Collections.emptyList();
 		}
 
-		return availableSeats;
+		return availableSeats.seats();
 	}
 
 	private void existsConcert(UUID concertId) throws CustomException {

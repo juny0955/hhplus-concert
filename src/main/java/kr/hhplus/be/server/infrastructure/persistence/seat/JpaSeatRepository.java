@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 public interface JpaSeatRepository extends JpaRepository<SeatEntity, String> {
@@ -20,15 +19,6 @@ public interface JpaSeatRepository extends JpaRepository<SeatEntity, String> {
 		order by s.seatNo
 	""")
 	List<SeatEntity> findAvailableSeats(String concertId, String concertDateId);
-
-	@Query("""
-		update SeatEntity
-			set status = 'RESERVED'
-		where id = :seatId
-			and status = 'AVAILABLE'
-	""")
-	@Modifying
-	int updateStatusReserved(String seatId);
 
 	@Query("""
 		select s

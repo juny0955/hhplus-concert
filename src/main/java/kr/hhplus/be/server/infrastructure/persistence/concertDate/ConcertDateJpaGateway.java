@@ -5,10 +5,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import kr.hhplus.be.server.domain.concertDate.ConcertDate;
 import kr.hhplus.be.server.domain.concertDate.ConcertDateRepository;
+import kr.hhplus.be.server.domain.concertDate.ConcertDates;
 import lombok.RequiredArgsConstructor;
 
 @Component
@@ -29,11 +31,12 @@ public class ConcertDateJpaGateway implements ConcertDateRepository {
 			.map(ConcertDateEntity::toDomain);
 	}
 
+	@Cacheable(value = "cache:concert:dates", key = "#concertId")
 	@Override
-	public List<ConcertDate> findAvailableDatesWithAvailableSeatCount(UUID concertId) {
+	public ConcertDates findAvailableDatesWithAvailableSeatCount(UUID concertId) {
 		List<Object[]> results = jpaConcertDateRepository.findAvailableDatesWithAvailableSeatCount(concertId.toString());
 
-		return results.stream()
+		return new ConcertDates(results.stream()
 			.map(result -> {
 				String id = (String) result[0];
 				String concertIdStr = (String) result[1];
@@ -53,7 +56,7 @@ public class ConcertDateJpaGateway implements ConcertDateRepository {
 					.updatedAt(updatedAt)
 					.build();
 			})
-			.toList();
+			.toList());
 	}
 
 	@Override

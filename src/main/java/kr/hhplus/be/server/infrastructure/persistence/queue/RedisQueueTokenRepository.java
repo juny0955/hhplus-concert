@@ -19,14 +19,13 @@ import lombok.RequiredArgsConstructor;
 public class RedisQueueTokenRepository implements QueueTokenRepository {
 
 	private final RedisTemplate<String, Object> redisTemplate;
-	private final RedisTemplate<String, Object> queueTokenRedisTemplate;
 
 	@Override
 	public void save(QueueToken queueToken) {
 		String tokenInfoKey = QueueTokenUtil.formattingTokenInfoKey(queueToken.tokenId());
 		String tokenIdKey = QueueTokenUtil.formattingTokenIdKey(queueToken.userId(), queueToken.concertId());
 
-		queueTokenRedisTemplate.opsForValue().set(tokenInfoKey, queueToken);
+		redisTemplate.opsForValue().set(tokenInfoKey, queueToken);
 		redisTemplate.opsForValue().set(tokenIdKey, queueToken.tokenId().toString());
 
 		if (queueToken.status().equals(QueueStatus.ACTIVE))
@@ -45,7 +44,7 @@ public class RedisQueueTokenRepository implements QueueTokenRepository {
 	@Override
 	public QueueToken findQueueTokenByTokenId(String tokenId) {
 		String tokenInfoKey = QueueTokenUtil.formattingTokenInfoKey(UUID.fromString(tokenId));
-		Object tokenInfo = queueTokenRedisTemplate.opsForValue().get(tokenInfoKey);
+		Object tokenInfo = redisTemplate.opsForValue().get(tokenInfoKey);
 		return tokenInfo != null ? (QueueToken) tokenInfo : null;
 	}
 
@@ -80,7 +79,7 @@ public class RedisQueueTokenRepository implements QueueTokenRepository {
 		String tokenInfoKey = QueueTokenUtil.formattingTokenInfoKey(queueToken.tokenId());
 		String tokenIdKey = QueueTokenUtil.formattingTokenIdKey(queueToken.userId(), queueToken.concertId());
 
-		queueTokenRedisTemplate.delete(tokenInfoKey);
+		redisTemplate.delete(tokenInfoKey);
 		redisTemplate.delete(tokenIdKey);
 
 		if (queueToken.status().equals(QueueStatus.ACTIVE))

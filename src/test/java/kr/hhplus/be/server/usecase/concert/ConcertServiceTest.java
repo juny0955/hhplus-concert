@@ -8,7 +8,6 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -88,12 +87,12 @@ class ConcertServiceTest {
 		List<ConcertDate> concertDateEntities = List.of(concertDate);
 
 		when(concertRepository.existsById(concertId)).thenReturn(true);
-		when(concertDateRepository.findAvailableDatesWithAvailableSeatCount(concertId)).thenReturn(concertDateEntities);
+		when(concertDateRepository.findAvailableDates(concertId)).thenReturn(concertDateEntities);
 
 		List<ConcertDate> results = concertService.getAvailableConcertDates(concertId);
 
 		verify(concertRepository, times(1)).existsById(concertId);
-		verify(concertDateRepository, times(1)).findAvailableDatesWithAvailableSeatCount(concert.id());
+		verify(concertDateRepository, times(1)).findAvailableDates(concert.id());
 
 		assertThat(results).hasSize(1);
 		assertThat(results.get(0).id()).isEqualTo(concertDateId);
@@ -108,7 +107,7 @@ class ConcertServiceTest {
 			() -> concertService.getAvailableConcertDates(concertId));
 
 		verify(concertRepository, times(1)).existsById(concertId);
-		verify(concertDateRepository, never()).findAvailableDatesWithAvailableSeatCount(concert.id());
+		verify(concertDateRepository, never()).findAvailableDates(concert.id());
 
 		assertThat(customException.getErrorCode()).isEqualTo(ErrorCode.CONCERT_NOT_FOUND);
 	}
@@ -117,12 +116,12 @@ class ConcertServiceTest {
 	@DisplayName("예약_가능_콘서트_날짜_조회_정상_빈_리스트(매진, 예약)")
 	void getAvailableConcertDates_Success_CanReservationDateNotFound() throws CustomException {
 		when(concertRepository.existsById(concertId)).thenReturn(true);
-		when(concertDateRepository.findAvailableDatesWithAvailableSeatCount(concertId)).thenReturn(Collections.emptyList());
+		when(concertDateRepository.findAvailableDates(concertId)).thenReturn(Collections.emptyList());
 
 		List<ConcertDate> results = concertService.getAvailableConcertDates(concertId);
 
 		verify(concertRepository, times(1)).existsById(concertId);
-		verify(concertDateRepository, times(1)).findAvailableDatesWithAvailableSeatCount(concertId);
+		verify(concertDateRepository, times(1)).findAvailableDates(concertId);
 
 		assertThat(results).isEmpty();
 	}
