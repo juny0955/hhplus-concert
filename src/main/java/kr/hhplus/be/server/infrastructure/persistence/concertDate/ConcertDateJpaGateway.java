@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import kr.hhplus.be.server.domain.concertDate.ConcertDate;
@@ -31,7 +30,6 @@ public class ConcertDateJpaGateway implements ConcertDateRepository {
 			.map(ConcertDateEntity::toDomain);
 	}
 
-	@Cacheable(value = "cache:concert:dates", key = "#concertId")
 	@Override
 	public ConcertDates findAvailableDatesWithAvailableSeatCount(UUID concertId) {
 		List<Object[]> results = jpaConcertDateRepository.findAvailableDatesWithAvailableSeatCount(concertId.toString());
