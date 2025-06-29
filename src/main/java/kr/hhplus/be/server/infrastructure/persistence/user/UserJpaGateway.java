@@ -28,12 +28,6 @@ public class UserJpaGateway implements UserRepository {
 	}
 
 	@Override
-	public Optional<User> findByIdForUpdate(UUID userId) {
-		return jpaUserRepository.findByIdForUpdate(userId.toString())
-			.map(UserEntity::toDomain);
-	}
-
-	@Override
 	public boolean existsById(UUID userId) {
 		return jpaUserRepository.existsById(userId.toString());
 	}

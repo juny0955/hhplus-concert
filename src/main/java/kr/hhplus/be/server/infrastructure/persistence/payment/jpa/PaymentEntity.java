@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.infrastructure.persistence.payment;
+package kr.hhplus.be.server.infrastructure.persistence.payment.jpa;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -75,8 +75,8 @@ public class PaymentEntity extends BaseTimeEntity {
 			.status(status)
 			.amount(amount)
 			.failureReason(failureReason)
-			.createdAt(getCreatedAt())
-			.updatedAt(getUpdatedAt())
+			.createdAt(createdAt)
+			.updatedAt(updatedAt)
 			.build();
 	}
 }

@@ -22,7 +22,7 @@ public record Reservation(
 			.build();
 	}
 
-	public Reservation payment() {
+	public Reservation doPay() {
 		return Reservation.builder()
 			.id(id)
 			.userId(userId)
@@ -32,4 +32,20 @@ public record Reservation(
 			.updatedAt(LocalDateTime.now())
 			.build();
 	}
+
+	public Reservation expired() {
+		return Reservation.builder()
+				.id(id)
+				.userId(userId)
+				.seatId(seatId)
+				.status(ReservationStatus.FAILED)
+				.createdAt(createdAt)
+				.updatedAt(LocalDateTime.now())
+				.build();
+	}
+
+	public boolean isPending() {
+		return status == ReservationStatus.PENDING;
+	}
+
 }

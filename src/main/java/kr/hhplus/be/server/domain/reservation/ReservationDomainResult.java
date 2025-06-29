@@ -5,6 +5,7 @@ import kr.hhplus.be.server.domain.payment.Payment;
 
 public record ReservationDomainResult(
 	Seat seat,
-	Reservation reservation
+	Reservation reservation,
+	Payment payment
 ) {
 }

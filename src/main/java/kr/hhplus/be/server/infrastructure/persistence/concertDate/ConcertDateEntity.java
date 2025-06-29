@@ -59,8 +59,8 @@ public class ConcertDateEntity extends BaseTimeEntity {
 			.concertId(UUID.fromString(concertId))
 			.date(date)
 			.deadline(deadline)
-			.createdAt(getCreatedAt())
-			.updatedAt(getUpdatedAt())
+			.createdAt(createdAt)
+			.updatedAt(updatedAt)
 			.build();
 	}
 }

@@ -77,8 +77,8 @@ public class SeatEntity extends BaseTimeEntity {
 			.price(price)
 			.seatClass(seatClass)
 			.status(status)
-			.createdAt(getCreatedAt())
-			.updatedAt(getUpdatedAt())
+			.createdAt(createdAt)
+			.updatedAt(updatedAt)
 			.build();
 	}
 }

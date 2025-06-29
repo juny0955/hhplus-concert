@@ -1,10 +1,9 @@
 package kr.hhplus.be.server.infrastructure.external.kafka;
 
-import org.springframework.stereotype.Component;
-
 import kr.hhplus.be.server.domain.event.Event;
 import kr.hhplus.be.server.usecase.event.EventPublisher;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 @Component
 @Slf4j

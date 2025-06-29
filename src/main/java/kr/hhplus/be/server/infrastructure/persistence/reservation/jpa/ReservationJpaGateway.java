@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.infrastructure.persistence.reservation;
+package kr.hhplus.be.server.infrastructure.persistence.reservation.jpa;
 
 import java.util.List;
 import java.util.Optional;
@@ -39,5 +39,12 @@ public class ReservationJpaGateway implements ReservationRepository {
 	@Override
 	public void deleteAll() {
 		jpaReservationRepository.deleteAll();
+	}
+
+	@Override
+	public List<Reservation> findByStatusPending() {
+		return jpaReservationRepository.findByStatusPending().stream()
+				.map(ReservationEntity::toDomain)
+				.toList();
 	}
 }

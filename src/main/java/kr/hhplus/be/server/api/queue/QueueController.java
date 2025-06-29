@@ -54,7 +54,7 @@ public class QueueController {
 	public ResponseEntity<QueueTokenResponse> issueQueueToken(
 		@PathVariable UUID concertId,
 		@PathVariable UUID userId
-	) throws CustomException {
+	) throws Exception {
 		QueueToken queueToken = queueService.issueQueueToken(userId, concertId);
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(QueueTokenResponse.from(queueToken));

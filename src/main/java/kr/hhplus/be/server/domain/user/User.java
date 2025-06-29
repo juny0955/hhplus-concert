@@ -22,7 +22,7 @@ public record User (
 			.build();
 	}
 
-	public User payment(BigDecimal balance) {
+	public User doPay(BigDecimal balance) {
 		return User.builder()
 			.id(id)
 			.amount(amount.subtract(balance))

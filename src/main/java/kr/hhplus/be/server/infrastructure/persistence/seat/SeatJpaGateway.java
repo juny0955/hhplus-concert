@@ -4,10 +4,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
 import kr.hhplus.be.server.domain.seat.Seat;
 import kr.hhplus.be.server.domain.seat.SeatRepository;
+import kr.hhplus.be.server.domain.seat.Seats;
 import lombok.RequiredArgsConstructor;
 
 @Component
@@ -16,15 +19,11 @@ public class SeatJpaGateway implements SeatRepository {
 
 	private final JpaSeatRepository jpaSeatRepository;
 
+	@CacheEvict(value = "cache:seat:available", key   = "#seat.concertDateId")
 	@Override
 	public Seat save(Seat seat) {
 		SeatEntity seatEntity = jpaSeatRepository.save(SeatEntity.from(seat));
 		return seatEntity.toDomain();
-	}
-
-	@Override
-	public int updateStatusReserved(UUID seatId) {
-		return jpaSeatRepository.updateStatusReserved(seatId.toString());
 	}
 
 	@Override
@@ -33,11 +32,14 @@ public class SeatJpaGateway implements SeatRepository {
 			.map(SeatEntity::toDomain);
 	}
 
+	@Cacheable(value = "cache:seat:available", key = "#concertDateId")
 	@Override
-	public List<Seat> findAvailableSeats(UUID concertId, UUID concertDateId) {
-		return jpaSeatRepository.findAvailableSeats(concertId.toString(), concertDateId.toString()).stream()
+	public Seats findAvailableSeats(UUID concertId, UUID concertDateId) {
+		List<Seat> results = jpaSeatRepository.findAvailableSeats(concertId.toString(), concertDateId.toString()).stream()
 			.map(SeatEntity::toDomain)
 			.toList();
+
+		return new Seats(results);
 	}
 
 	@Override

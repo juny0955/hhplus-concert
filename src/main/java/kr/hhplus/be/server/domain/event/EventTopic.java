@@ -8,7 +8,9 @@ import lombok.Getter;
 public enum EventTopic {
 
 	RESERVATION_CREATED("reservation.created"),
-	PAYMENT_SUCCESS("payment.success")
+	RESERVATION_EXPIRED("reservation.expired"),
+
+	PAYMENT_SUCCESS("doPay.success"),
 	;
 
 	private final String topicName;

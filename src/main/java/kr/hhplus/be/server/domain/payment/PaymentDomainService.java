@@ -17,8 +17,8 @@ public class PaymentDomainService {
 		validatePayment(payment);
 		validateUserBalance(payment, user);
 
-		User paidUser 				= user.payment(payment.amount());
-		Reservation paidReservation = reservation.payment();
+		User paidUser 				= user.doPay(payment.amount());
+		Reservation paidReservation = reservation.doPay();
 		Payment paidPayment 		= payment.success();
 		Seat paidSeat 				= seat.payment();
 
