@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.domain.reservation;
 
+import kr.hhplus.be.server.domain.concert.Concert;
 import kr.hhplus.be.server.domain.concertDate.ConcertDate;
 import kr.hhplus.be.server.domain.payment.Payment;
 import kr.hhplus.be.server.domain.seat.Seat;
@@ -14,7 +15,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ReservationDomainService {
 
-	public ReservationDomainResult processReservation(ConcertDate concertDate, Seat seat, UUID userId) throws CustomException {
+	public ReservationDomainResult processReservation(Concert concert, ConcertDate concertDate, Seat seat, UUID userId) throws CustomException {
+		validateConcertOpenTimeAndDeadline(concert);
 		validateSeatAvailable(seat);
 		validateConcertDateDeadline(concertDate);
 
@@ -51,5 +53,10 @@ public class ReservationDomainService {
 	private void validateConcertDateDeadline(ConcertDate concertDate) throws CustomException {
 		if (!concertDate.checkDeadline())
 			throw new CustomException(ErrorCode.OVER_DEADLINE);
+	}
+
+	private void validateConcertOpenTimeAndDeadline(Concert concert) throws CustomException {
+		if (!concert.isOpen())
+			throw new CustomException(ErrorCode.CONCERT_NOT_OPEN);
 	}
 }

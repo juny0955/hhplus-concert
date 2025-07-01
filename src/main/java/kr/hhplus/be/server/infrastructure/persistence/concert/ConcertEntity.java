@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.infrastructure.persistence.concert;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.hibernate.annotations.JdbcTypeCode;
@@ -39,11 +40,19 @@ public class ConcertEntity extends BaseTimeEntity {
 	@Column(name = "artist", length = 50, nullable = false)
 	private String artist;
 
+	@Column(name = "open_time", nullable = false)
+	private LocalDateTime openTime;
+
+	@Column(name = "sold_out_time")
+	private LocalDateTime soldOutTime;
+
 	public static ConcertEntity from(Concert concert) {
 		return ConcertEntity.builder()
 			.id(concert.id() != null ? concert.id().toString() : null)
 			.title(concert.title())
 			.artist(concert.artist())
+			.openTime(concert.openTime())
+			.soldOutTime(concert.soldOutTime())
 			.build();
 	}
 
@@ -52,6 +61,8 @@ public class ConcertEntity extends BaseTimeEntity {
 			.id(UUID.fromString(id))
 			.title(title)
 			.artist(artist)
+			.openTime(openTime)
+			.soldOutTime(soldOutTime)
 			.createdAt(createdAt)
 			.updatedAt(updatedAt)
 			.build();

@@ -17,6 +17,7 @@ public enum ErrorCode {
 	CONCERT_DATE_NOT_FOUND(404, "C003", "해당 날짜의 콘서트가 없습니다."),
 	OVER_DEADLINE(400, "C004", "해당 날짜의 마감시간이 지났습니다."),
 	SEAT_NOT_FOUND(404, "C005", "해당 좌석을 찾을 수 없습니다."),
+	CONCERT_NOT_OPEN(400, "C006", "티켓팅 시작 전 입니다."),
 
 	// RESERVATION
 	RESERVATION_NOT_FOUND(404, "R001", "해당 예약정보를 찾을 수 없습니다."),

@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.infrastructure.persistence.concert;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.stereotype.Component;
@@ -18,6 +19,12 @@ public class ConcertJpaGateway implements ConcertRepository {
 	public Concert save(Concert concert) {
 		ConcertEntity concertEntity = jpaConcertRepository.save(ConcertEntity.from(concert));
 		return concertEntity.toDomain();
+	}
+
+	@Override
+	public Optional<Concert> findById(UUID concertId) {
+		return jpaConcertRepository.findById(concertId.toString())
+			.map(ConcertEntity::toDomain);
 	}
 
 	@Override
