@@ -88,6 +88,13 @@ public class RedisQueueTokenRepository implements QueueTokenRepository {
 			redisTemplate.opsForZSet().remove(QueueTokenUtil.formattingWaitingTokenKey(queueToken.concertId()), tokenIdKey);
 	}
 
+	/**
+	 * 대기 토큰 저장
+	 * ZSet (Sorted Set) 자료구조 사용
+	 * @param queueToken 토큰 정보
+	 * @param tokenInfoKey 토큰 정보 Key
+	 * @param tokenIdKey 토큰 ID Key
+	 */
 	private void saveWaitingToken(QueueToken queueToken, String tokenInfoKey, String tokenIdKey) {
 		String waitingTokenKey = QueueTokenUtil.formattingWaitingTokenKey(queueToken.concertId());
 		Instant issuedInstant = queueToken.issuedAt()
@@ -100,6 +107,12 @@ public class RedisQueueTokenRepository implements QueueTokenRepository {
 		redisTemplate.expire(tokenIdKey, Duration.ofHours(24));
 	}
 
+	/**
+	 * 활설 토큰 저장
+	 * @param queueToken 토큰 정보
+	 * @param tokenInfoKey 토큰 정보 Key
+	 * @param tokenIdKey 토큰 ID Key
+	 */
 	private void saveActiveToken(QueueToken queueToken, String tokenInfoKey, String tokenIdKey) {
 		String activeTokenKey = QueueTokenUtil.formattingActiveTokenKey(queueToken.concertId());
 		Instant expiresInstant = queueToken.expiresAt()

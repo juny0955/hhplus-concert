@@ -19,4 +19,16 @@ public record Concert(
 	public boolean isOpen() {
 		return openTime.isAfter(LocalDateTime.now());
 	}
+
+	public Concert soldOut(LocalDateTime soldOutTime) {
+		return Concert.builder()
+			.id(id)
+			.title(title)
+			.artist(artist)
+			.openTime(openTime)
+			.soldOutTime(soldOutTime)
+			.createdAt(createdAt)
+			.updatedAt(LocalDateTime.now())
+			.build();
+	}
 }
