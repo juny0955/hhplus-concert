@@ -1,6 +1,9 @@
 package kr.hhplus.be.server.domain.queue;
 
+import java.util.List;
 import java.util.UUID;
+
+import kr.hhplus.be.server.domain.concert.Concert;
 
 public interface QueueTokenRepository {
 	/**
@@ -50,4 +53,6 @@ public interface QueueTokenRepository {
 	 * @param tokenId 대기열 토큰 ID
 	 */
 	void expiresQueueToken(String tokenId);
+
+	void promoteQueueToken(List<Concert> openConcerts);
 }

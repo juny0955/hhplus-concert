@@ -3,11 +3,13 @@ package kr.hhplus.be.server.infrastructure.persistence.queue;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
+import kr.hhplus.be.server.domain.concert.Concert;
 import kr.hhplus.be.server.domain.queue.QueueStatus;
 import kr.hhplus.be.server.domain.queue.QueueToken;
 import kr.hhplus.be.server.domain.queue.QueueTokenRepository;
@@ -85,6 +87,18 @@ public class RedisQueueTokenRepository implements QueueTokenRepository {
 			redisTemplate.opsForSet().remove(QueueTokenUtil.formattingActiveTokenKey(queueToken.concertId()), tokenIdKey);
 		else
 			redisTemplate.opsForZSet().remove(QueueTokenUtil.formattingWaitingTokenKey(queueToken.concertId()), tokenIdKey);
+	}
+
+	@Override
+	public void promoteQueueToken(List<Concert> openConcerts) {
+		for (Concert openConcert : openConcerts) {
+			String activeTokenKey = QueueTokenUtil.formattingActiveTokenKey(openConcert.id());
+			String waitingTokenKey = QueueTokenUtil.formattingWaitingTokenKey(openConcert.id());
+
+			List<String> keys = List.of(activeTokenKey, waitingTokenKey);
+
+			redisTemplate.execute(QueueTokenUtil.promoteWaitingTokenScript(), keys, 50);
+		}
 	}
 
 	/**

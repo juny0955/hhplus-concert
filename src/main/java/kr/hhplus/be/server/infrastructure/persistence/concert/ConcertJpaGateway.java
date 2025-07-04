@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.infrastructure.persistence.concert;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -35,5 +36,12 @@ public class ConcertJpaGateway implements ConcertRepository {
 	@Override
 	public void deleteAll() {
 		jpaConcertRepository.deleteAll();
+	}
+
+	@Override
+	public List<Concert> findByOpenConcerts() {
+		return jpaConcertRepository.findByOpenConcerts().stream()
+			.map(ConcertEntity::toDomain)
+			.toList();
 	}
 }
