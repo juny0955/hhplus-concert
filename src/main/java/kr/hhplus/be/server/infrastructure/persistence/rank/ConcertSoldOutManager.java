@@ -10,6 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import kr.hhplus.be.server.domain.concert.Concert;
 import kr.hhplus.be.server.domain.concert.ConcertRepository;
+import kr.hhplus.be.server.domain.concert.SoldOutRank;
+import kr.hhplus.be.server.domain.concert.SoldOutRankRepository;
 import kr.hhplus.be.server.domain.event.payment.PaymentSuccessEvent;
 import kr.hhplus.be.server.framework.exception.CustomException;
 import kr.hhplus.be.server.framework.exception.ErrorCode;
@@ -25,15 +27,19 @@ public class ConcertSoldOutManager {
 
 	private final ConcertRepository concertRepository;
 	private final ConcertSoldOutRankRepository concertSoldOutRankRepository;
+	private final SoldOutRankRepository soldOutRankRepository;
 
 	@Transactional
 	public void processUpdateRanking(PaymentSuccessEvent event, UUID concertId, int seatSize) throws CustomException {
 		Concert concert = getConcert(concertId);
 
-		long score = calcScore(event.payment().updatedAt(), concert.openTime(), seatSize);
+		long soldOutTime = Duration.between(event.payment().updatedAt(), concert.openTime()).getSeconds();
+
+		long score = calcScore(soldOutTime, concert.openTime(), seatSize);
 
 		Long rank = concertSoldOutRankRepository.updateRank(concertId, score);
 		concertRepository.save(concert.soldOut(event.payment().updatedAt()));
+		soldOutRankRepository.save(SoldOutRank.of(concertId, score, soldOutTime));
 
 		log.info("콘서트 매진 랭킹 업데이트 - CONCERT_ID: {}, RANKING: {}", concertId, rank);
 	}
@@ -45,13 +51,12 @@ public class ConcertSoldOutManager {
 
 	/**
 	 * 점수 계산
-	 * @param lastSeatPaidTime 마지막 좌석 결제 시간
+	 * @param soldOutTime 매진 소요 시간
 	 * @param openTime 티켓팅 오픈 시간
 	 * @param seatSize 좌석 총 개수
 	 * @return 점수
 	 */
-	private long calcScore(LocalDateTime lastSeatPaidTime, LocalDateTime openTime, int seatSize) {
-		long soldOutTime = Duration.between(openTime, lastSeatPaidTime).getSeconds();
+	private long calcScore(long soldOutTime, LocalDateTime openTime, int seatSize) {
 		int concertDateScore = 100 - (seatSize / MAX_SEAT_COUNT);
 		long openTimeStamp = openTime.toEpochSecond(ZoneOffset.UTC);
 
