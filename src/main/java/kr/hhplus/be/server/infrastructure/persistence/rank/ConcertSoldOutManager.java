@@ -33,7 +33,7 @@ public class ConcertSoldOutManager {
 	public void processUpdateRanking(PaymentSuccessEvent event, UUID concertId, int seatSize) throws CustomException {
 		Concert concert = getConcert(concertId);
 
-		long soldOutTime = Duration.between(event.payment().updatedAt(), concert.openTime()).getSeconds();
+		long soldOutTime = Duration.between(concert.openTime(), event.payment().updatedAt()).getSeconds();
 
 		long score = calcScore(soldOutTime, concert.openTime(), seatSize);
 

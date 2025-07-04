@@ -47,7 +47,7 @@ public class ConcertSoldOutRankListener {
 				concertSoldOutManager.processUpdateRanking(event, concertDate.concertId(), allSeats.size());
 
 		} catch (Exception e) {
-			// TODO: 실패한 이벤트 재시도
+			// TODO: 실패한 이벤트 재시도 OR 예외 처리?
 		}
 	}
 
