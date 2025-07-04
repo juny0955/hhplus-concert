@@ -30,7 +30,7 @@ public class RedisQueueTokenRepository implements QueueTokenRepository {
 		redisTemplate.opsForValue().set(tokenIdKey, queueToken.tokenId().toString());
 
 		if (queueToken.status().equals(QueueStatus.ACTIVE))
-			saveActiveToken(queueToken, tokenInfoKey, tokenIdKey);
+			saveActiveToken(queueToken, tokenIdKey);
 		else
 			saveWaitingToken(queueToken, tokenInfoKey, tokenIdKey);
 	}
@@ -66,9 +66,8 @@ public class RedisQueueTokenRepository implements QueueTokenRepository {
 
 	@Override
 	public Integer countActiveTokens(UUID concertId) {
-		Object count = redisTemplate.opsForZSet().count(QueueTokenUtil.formattingActiveTokenKey(concertId), Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
-		if (count == null) return 0;
-		return Integer.parseInt(count.toString());
+		Long count = redisTemplate.opsForSet().size(QueueTokenUtil.formattingActiveTokenKey(concertId));
+		return count != null ? count.intValue() : 0;
 	}
 
 	@Override
@@ -83,7 +82,7 @@ public class RedisQueueTokenRepository implements QueueTokenRepository {
 		redisTemplate.delete(tokenIdKey);
 
 		if (queueToken.status().equals(QueueStatus.ACTIVE))
-			redisTemplate.opsForZSet().remove(QueueTokenUtil.formattingActiveTokenKey(queueToken.concertId()), tokenIdKey);
+			redisTemplate.opsForSet().remove(QueueTokenUtil.formattingActiveTokenKey(queueToken.concertId()), tokenIdKey);
 		else
 			redisTemplate.opsForZSet().remove(QueueTokenUtil.formattingWaitingTokenKey(queueToken.concertId()), tokenIdKey);
 	}
@@ -110,18 +109,10 @@ public class RedisQueueTokenRepository implements QueueTokenRepository {
 	/**
 	 * 활설 토큰 저장
 	 * @param queueToken 토큰 정보
-	 * @param tokenInfoKey 토큰 정보 Key
 	 * @param tokenIdKey 토큰 ID Key
 	 */
-	private void saveActiveToken(QueueToken queueToken, String tokenInfoKey, String tokenIdKey) {
+	private void saveActiveToken(QueueToken queueToken, String tokenIdKey) {
 		String activeTokenKey = QueueTokenUtil.formattingActiveTokenKey(queueToken.concertId());
-		Instant expiresInstant = queueToken.expiresAt()
-			.atZone(ZoneOffset.UTC)
-			.toInstant();
-		double score = expiresInstant.getEpochSecond();
-		redisTemplate.opsForZSet().add(activeTokenKey, tokenIdKey, score);
-
-		redisTemplate.expireAt(tokenInfoKey, expiresInstant);
-		redisTemplate.expireAt(tokenIdKey, expiresInstant);
+		redisTemplate.opsForSet().add(activeTokenKey, tokenIdKey);
 	}
 }
