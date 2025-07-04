@@ -17,6 +17,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import kr.hhplus.be.server.api.TestDataFactory;
+import kr.hhplus.be.server.domain.concert.Concert;
 import kr.hhplus.be.server.domain.concert.ConcertRepository;
 import kr.hhplus.be.server.domain.concertDate.ConcertDate;
 import kr.hhplus.be.server.domain.concertDate.ConcertDateRepository;
@@ -79,6 +81,7 @@ class ReservationTransactionManagerTest {
 	private String queueTokenIdString;
 	private ReserveSeatCommand reserveSeatCommand;
 	private QueueToken queueToken;
+	private Concert concert;
 	private ConcertDate concertDate;
 	private Seat seat;
 	private Reservation reservation;
@@ -99,6 +102,7 @@ class ReservationTransactionManagerTest {
 		LocalDateTime now = LocalDateTime.now();
 		reserveSeatCommand = new ReserveSeatCommand(concertId, concertDateId, seatId, queueTokenIdString);
 		queueToken = QueueToken.activeTokenOf(queueTokenId, userId, concertId, 1000000);
+		concert = TestDataFactory.createConcert();
 		concertDate = new ConcertDate(concertDateId, concertId, null, now.plusDays(7), now.plusDays(5), now, now);
 		seat = new Seat(seatId, concertDateId, 10, BigDecimal.valueOf(50000), SeatClass.VIP, SeatStatus.AVAILABLE, now, now);
 		reservation = new Reservation(reservationId, userId, seatId, ReservationStatus.PENDING, now, now);
@@ -115,7 +119,7 @@ class ReservationTransactionManagerTest {
 		when(concertRepository.existsById(concertId)).thenReturn(true);
 		when(concertDateRepository.findById(concertDateId)).thenReturn(Optional.of(concertDate));
 		when(seatRepository.findBySeatIdAndConcertDateId(seatId, concertDateId)).thenReturn(Optional.of(seat));
-		when(reservationDomainService.processReservation(concertDate, seat, userId)).thenReturn(reservationDomainResult);
+		when(reservationDomainService.processReservation(concert, concertDate, seat, userId)).thenReturn(reservationDomainResult);
 		when(seatRepository.save(any(Seat.class))).thenReturn(seat);
 		when(reservationRepository.save(reservation)).thenReturn(reservation);
 		when(paymentRepository.save(any(Payment.class))).thenReturn(payment);
@@ -132,7 +136,7 @@ class ReservationTransactionManagerTest {
 		verify(concertRepository, times(1)).existsById(concertId);
 		verify(concertDateRepository, times(1)).findById(concertDateId);
 		verify(seatRepository, times(1)).findBySeatIdAndConcertDateId(seatId, concertDateId);
-		verify(reservationDomainService, times(1)).processReservation(concertDate, seat, userId);
+		verify(reservationDomainService, times(1)).processReservation(concert, concertDate, seat, userId);
 		verify(seatRepository, times(1)).save(any(Seat.class));
 		verify(reservationRepository, times(1)).save(reservation);
 		verify(paymentRepository, times(1)).save(any(Payment.class));
@@ -153,7 +157,7 @@ class ReservationTransactionManagerTest {
 		verify(concertRepository, never()).existsById(any());
 		verify(concertDateRepository, never()).findById(any());
 		verify(seatRepository, never()).findBySeatIdAndConcertDateId(any(), any());
-		verify(reservationDomainService, never()).processReservation(any(), any(), any());
+		verify(reservationDomainService, never()).processReservation(any(), any(), any(), any());
 		verify(seatHoldRepository, never()).hold(any(), any());
 	}
 
@@ -171,7 +175,7 @@ class ReservationTransactionManagerTest {
 		verify(concertRepository, times(1)).existsById(concertId);
 		verify(concertDateRepository, never()).findById(any());
 		verify(seatRepository, never()).findBySeatIdAndConcertDateId(any(), any());
-		verify(reservationDomainService, never()).processReservation(any(), any(), any());
+		verify(reservationDomainService, never()).processReservation(any(), any(), any(), any());
 	}
 
 	@Test
@@ -189,7 +193,7 @@ class ReservationTransactionManagerTest {
 		verify(concertRepository, times(1)).existsById(concertId);
 		verify(concertDateRepository, times(1)).findById(concertDateId);
 		verify(seatRepository, never()).findBySeatIdAndConcertDateId(any(), any());
-		verify(reservationDomainService, never()).processReservation(any(), any(), any());
+		verify(reservationDomainService, never()).processReservation(any(), any(), any(), any());
 	}
 
 	@Test
@@ -208,7 +212,7 @@ class ReservationTransactionManagerTest {
 		verify(concertRepository, times(1)).existsById(concertId);
 		verify(concertDateRepository, times(1)).findById(concertDateId);
 		verify(seatRepository, times(1)).findBySeatIdAndConcertDateId(seatId, concertDateId);
-		verify(reservationDomainService, never()).processReservation(any(), any(), any());
+		verify(reservationDomainService, never()).processReservation(any(), any(), any(), any());
 	}
 
 	@Test
@@ -218,7 +222,7 @@ class ReservationTransactionManagerTest {
 		when(concertRepository.existsById(concertId)).thenReturn(true);
 		when(concertDateRepository.findById(concertDateId)).thenReturn(Optional.of(concertDate));
 		when(seatRepository.findBySeatIdAndConcertDateId(seatId, concertDateId)).thenReturn(Optional.of(seat));
-		when(reservationDomainService.processReservation(concertDate, seat, userId)).thenThrow(new CustomException(ErrorCode.ALREADY_RESERVED_SEAT));
+		when(reservationDomainService.processReservation(concert, concertDate, seat, userId)).thenThrow(new CustomException(ErrorCode.ALREADY_RESERVED_SEAT));
 
 		CustomException exception = assertThrows(CustomException.class,
 			() -> reservationTransactionManager.processCreateReservation(reserveSeatCommand));
@@ -228,7 +232,7 @@ class ReservationTransactionManagerTest {
 		verify(concertRepository, times(1)).existsById(concertId);
 		verify(concertDateRepository, times(1)).findById(concertDateId);
 		verify(seatRepository, times(1)).findBySeatIdAndConcertDateId(seatId, concertDateId);
-		verify(reservationDomainService, times(1)).processReservation(concertDate, seat, userId);
+		verify(reservationDomainService, times(1)).processReservation(concert, concertDate, seat, userId);
 		verify(seatRepository, never()).save(any());
 		verify(reservationRepository, never()).save(any());
 		verify(paymentRepository, never()).save(any());
@@ -242,7 +246,7 @@ class ReservationTransactionManagerTest {
 		when(concertRepository.existsById(concertId)).thenReturn(true);
 		when(concertDateRepository.findById(concertDateId)).thenReturn(Optional.of(concertDate));
 		when(seatRepository.findBySeatIdAndConcertDateId(seatId, concertDateId)).thenReturn(Optional.of(seat));
-		when(reservationDomainService.processReservation(concertDate, seat, userId)).thenThrow(new CustomException(ErrorCode.OVER_DEADLINE));
+		when(reservationDomainService.processReservation(concert, concertDate, seat, userId)).thenThrow(new CustomException(ErrorCode.OVER_DEADLINE));
 
 		CustomException exception = assertThrows(CustomException.class,
 			() -> reservationTransactionManager.processCreateReservation(reserveSeatCommand));
@@ -252,7 +256,7 @@ class ReservationTransactionManagerTest {
 		verify(concertRepository, times(1)).existsById(concertId);
 		verify(concertDateRepository, times(1)).findById(concertDateId);
 		verify(seatRepository, times(1)).findBySeatIdAndConcertDateId(seatId, concertDateId);
-		verify(reservationDomainService, times(1)).processReservation(concertDate, seat, userId);
+		verify(reservationDomainService, times(1)).processReservation(concert, concertDate, seat, userId);
 		verify(seatRepository, never()).save(any());
 		verify(reservationRepository, never()).save(any());
 		verify(paymentRepository, never()).save(any());
@@ -266,7 +270,7 @@ class ReservationTransactionManagerTest {
 		when(concertRepository.existsById(concertId)).thenReturn(true);
 		when(concertDateRepository.findById(concertDateId)).thenReturn(Optional.of(concertDate));
 		when(seatRepository.findBySeatIdAndConcertDateId(seatId, concertDateId)).thenReturn(Optional.of(seat));
-		when(reservationDomainService.processReservation(concertDate, seat, userId))
+		when(reservationDomainService.processReservation(concert, concertDate, seat, userId))
 			.thenThrow(new CustomException(ErrorCode.ALREADY_RESERVED_SEAT));
 
 		CustomException exception = assertThrows(CustomException.class,
@@ -277,7 +281,7 @@ class ReservationTransactionManagerTest {
 		verify(concertRepository, times(1)).existsById(concertId);
 		verify(concertDateRepository, times(1)).findById(concertDateId);
 		verify(seatRepository, times(1)).findBySeatIdAndConcertDateId(seatId, concertDateId);
-		verify(reservationDomainService, times(1)).processReservation(concertDate, seat, userId);
+		verify(reservationDomainService, times(1)).processReservation(concert, concertDate, seat, userId);
 		verify(seatRepository, never()).save(any(Seat.class));
 		verify(reservationRepository, never()).save(any());
 		verify(paymentRepository, never()).save(any());

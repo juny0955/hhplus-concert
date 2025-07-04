@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.usecase.payment.interactor;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 import kr.hhplus.be.server.domain.event.payment.PaymentSuccessEvent;
@@ -29,7 +30,7 @@ public class PaymentInteractor implements PaymentInput {
 	private final PaymentManager paymentManager;
 	private final QueueTokenManager queueTokenManager;
 	private final PaymentOutput paymentOutput;
-	private final EventPublisher eventPublisher;
+	private final ApplicationEventPublisher eventPublisher;
 	private final DistributedLockManager distributedLockManager;
 
 	@Override
@@ -51,7 +52,7 @@ public class PaymentInteractor implements PaymentInput {
 			)
 		);
 
-		eventPublisher.publish(PaymentSuccessEvent.from(paymentTransactionResult));
+		eventPublisher.publishEvent(PaymentSuccessEvent.from(paymentTransactionResult));
 		paymentOutput.ok(PaymentResult.from(paymentTransactionResult));
 	}
 

@@ -14,11 +14,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import kr.hhplus.be.server.api.TestDataFactory;
+import kr.hhplus.be.server.domain.concert.Concert;
 import kr.hhplus.be.server.domain.concertDate.ConcertDate;
 import kr.hhplus.be.server.domain.seat.Seat;
 import kr.hhplus.be.server.domain.seat.SeatClass;
 import kr.hhplus.be.server.domain.seat.SeatStatus;
-import kr.hhplus.be.server.domain.payment.PaymentStatus;
 import kr.hhplus.be.server.framework.exception.CustomException;
 import kr.hhplus.be.server.framework.exception.ErrorCode;
 
@@ -32,42 +33,26 @@ class ReservationDomainServiceTest {
 	private UUID concertId;
 	private UUID concertDateId;
 	private UUID seatId;
+	private Concert concert;
 	private ConcertDate concertDate;
 	private Seat availableSeat;
 
 	@BeforeEach
 	void beforeEach() {
-		LocalDateTime now = LocalDateTime.now();
 		userId = UUID.randomUUID();
 		concertId = UUID.randomUUID();
 		concertDateId = UUID.randomUUID();
 		seatId = UUID.randomUUID();
 
-		concertDate = ConcertDate.builder()
-			.id(concertDateId)
-			.concertId(concertId)
-			.date(now.plusDays(7))
-			.deadline(now.plusDays(5))
-			.createdAt(now)
-			.updatedAt(now)
-			.build();
-
-		availableSeat = Seat.builder()
-			.id(seatId)
-			.concertDateId(concertDateId)
-			.seatNo(10)
-			.price(BigDecimal.valueOf(50000))
-			.seatClass(SeatClass.VIP)
-			.status(SeatStatus.AVAILABLE)
-			.createdAt(now)
-			.updatedAt(now)
-			.build();
+		concert = TestDataFactory.createConcert();
+		concertDate = TestDataFactory.createConcertDate(concertId);
+		availableSeat = TestDataFactory.createSeat(concertDateId);
 	}
 
 	@Test
 	@DisplayName("예약_처리_성공")
 	void processReservation_Success() throws CustomException {
-		ReservationDomainResult result = reservationDomainService.processReservation(concertDate, availableSeat, userId);
+		ReservationDomainResult result = reservationDomainService.processReservation(concert, concertDate, availableSeat, userId);
 
 		assertThat(result).isNotNull();
 
@@ -95,7 +80,7 @@ class ReservationDomainServiceTest {
 			.build();
 
 		CustomException customException = assertThrows(CustomException.class,
-			() -> reservationDomainService.processReservation(concertDate, reservedSeat, userId));
+			() -> reservationDomainService.processReservation(concert, concertDate, reservedSeat, userId));
 
 		assertThat(customException.getErrorCode()).isEqualTo(ErrorCode.ALREADY_RESERVED_SEAT);
 	}
@@ -115,7 +100,7 @@ class ReservationDomainServiceTest {
 			.build();
 
 		CustomException customException = assertThrows(CustomException.class,
-			() -> reservationDomainService.processReservation(concertDate, assignedSeat, userId));
+			() -> reservationDomainService.processReservation(concert, concertDate, assignedSeat, userId));
 
 		assertThat(customException.getErrorCode()).isEqualTo(ErrorCode.ALREADY_RESERVED_SEAT);
 	}
@@ -133,9 +118,24 @@ class ReservationDomainServiceTest {
 			.build();
 
 		CustomException customException = assertThrows(CustomException.class,
-			() -> reservationDomainService.processReservation(expiredConcertDate, availableSeat, userId));
+			() -> reservationDomainService.processReservation(concert, expiredConcertDate, availableSeat, userId));
 
 		assertThat(customException.getErrorCode()).isEqualTo(ErrorCode.OVER_DEADLINE);
+	}
+
+	@Test
+	@DisplayName("예약_처리_실패_콘서트_오픈시간_이전")
+	void processReservation_Failure_BeforeOpenTime() throws CustomException {
+		Concert beforeOpenTimeConcert = Concert.builder()
+			.title("GD 콘서트")
+			.artist("GD")
+			.openTime(LocalDateTime.now().plusDays(1))
+			.build();
+
+		CustomException customException = assertThrows(CustomException.class,
+			() -> reservationDomainService.processReservation(beforeOpenTimeConcert, concertDate, availableSeat, userId));
+
+		assertThat(customException.getErrorCode()).isEqualTo(ErrorCode.CONCERT_NOT_OPEN);
 	}
 
 	@Test
@@ -151,7 +151,7 @@ class ReservationDomainServiceTest {
 			.build();
 
 		assertThatNoException().isThrownBy(() ->
-			reservationDomainService.processReservation(nearDeadlineConcertDate, availableSeat, userId)
+			reservationDomainService.processReservation(concert, nearDeadlineConcertDate, availableSeat, userId)
 		);
 
 		ConcertDate pastDeadlineConcertDate = ConcertDate.builder()
@@ -164,7 +164,7 @@ class ReservationDomainServiceTest {
 			.build();
 
 		CustomException customException = assertThrows(CustomException.class,
-			() -> reservationDomainService.processReservation(pastDeadlineConcertDate, availableSeat, userId));
+			() -> reservationDomainService.processReservation(concert, pastDeadlineConcertDate, availableSeat, userId));
 
 		assertThat(customException.getErrorCode()).isEqualTo(ErrorCode.OVER_DEADLINE);
 	}
