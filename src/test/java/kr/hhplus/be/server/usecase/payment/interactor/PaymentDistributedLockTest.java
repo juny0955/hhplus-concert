@@ -33,7 +33,7 @@ import kr.hhplus.be.server.infrastructure.persistence.lock.DistributedLockManage
 import kr.hhplus.be.server.payment.infrastructure.PaymentManager;
 import kr.hhplus.be.server.payment.infrastructure.PaymentTransactionResult;
 import kr.hhplus.be.server.queue.infrastructure.QueueTokenManager;
-import kr.hhplus.be.server.usecase.event.EventPublisher;
+import kr.hhplus.be.server.infrastructure.event.EventPublisher;
 import kr.hhplus.be.server.payment.usecase.input.PaymentCommand;
 import kr.hhplus.be.server.payment.usecase.output.PaymentOutput;
 import kr.hhplus.be.server.payment.usecase.output.PaymentResult;

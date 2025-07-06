@@ -6,7 +6,7 @@ import kr.hhplus.be.server.reservation.domain.ReservationCreatedEvent;
 import kr.hhplus.be.server.infrastructure.persistence.lock.DistributedLockManager;
 import kr.hhplus.be.server.reservation.infrastructure.CreateReservationManager;
 import kr.hhplus.be.server.reservation.infrastructure.CreateReservationResult;
-import kr.hhplus.be.server.usecase.event.EventPublisher;
+import kr.hhplus.be.server.infrastructure.event.EventPublisher;
 import kr.hhplus.be.server.reservation.usecase.input.ReservationCreateInput;
 import kr.hhplus.be.server.reservation.usecase.input.ReserveSeatCommand;
 import kr.hhplus.be.server.reservation.usecase.output.ReservationOutput;

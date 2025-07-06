@@ -2,8 +2,8 @@ package kr.hhplus.be.server.payment.domain;
 
 import java.time.LocalDateTime;
 
-import kr.hhplus.be.server.domain.event.Event;
-import kr.hhplus.be.server.domain.event.EventTopic;
+import kr.hhplus.be.server.infrastructure.event.Event;
+import kr.hhplus.be.server.infrastructure.event.EventTopic;
 import kr.hhplus.be.server.reservation.domain.Reservation;
 import kr.hhplus.be.server.concert.domain.seat.Seat;
 import kr.hhplus.be.server.user.domain.User;

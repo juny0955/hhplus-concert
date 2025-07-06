@@ -9,7 +9,7 @@ import kr.hhplus.be.server.reservation.domain.Reservation;
 import kr.hhplus.be.server.infrastructure.persistence.lock.DistributedLockManager;
 import kr.hhplus.be.server.reservation.infrastructure.ExpiredReservationManager;
 import kr.hhplus.be.server.reservation.infrastructure.ExpiredReservationResult;
-import kr.hhplus.be.server.usecase.event.EventPublisher;
+import kr.hhplus.be.server.infrastructure.event.EventPublisher;
 import kr.hhplus.be.server.reservation.usecase.input.ReservationExpiredInput;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

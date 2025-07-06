@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.domain.event;
+package kr.hhplus.be.server.infrastructure.event;
 
 public interface Event {
 	EventTopic getTopic();

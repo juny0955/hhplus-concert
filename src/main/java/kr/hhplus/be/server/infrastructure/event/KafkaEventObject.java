@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.domain.event;
+package kr.hhplus.be.server.infrastructure.event;
 
 public record KafkaEventObject<T extends Event>(
 	EventTopic topic,

@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.infrastructure.scheduler;
+package kr.hhplus.be.server.concert.scheduler;
 
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;

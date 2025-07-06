@@ -31,7 +31,7 @@ import kr.hhplus.be.server.concert.domain.seat.SeatStatus;
 import kr.hhplus.be.server.framework.exception.CustomException;
 import kr.hhplus.be.server.framework.exception.ErrorCode;
 import kr.hhplus.be.server.reservation.usecase.interactor.ReserveSeatInteractor;
-import kr.hhplus.be.server.usecase.event.EventPublisher;
+import kr.hhplus.be.server.infrastructure.event.EventPublisher;
 import kr.hhplus.be.server.reservation.usecase.input.ReserveSeatCommand;
 import kr.hhplus.be.server.reservation.usecase.output.ReservationOutput;
 import kr.hhplus.be.server.reservation.usecase.output.ReserveSeatResult;

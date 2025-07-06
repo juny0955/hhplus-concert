@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.infrastructure.scheduler;
+package kr.hhplus.be.server.queue.scheduler;
 
 import java.util.List;
 

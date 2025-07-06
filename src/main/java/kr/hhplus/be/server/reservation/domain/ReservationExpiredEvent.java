@@ -1,7 +1,7 @@
 package kr.hhplus.be.server.reservation.domain;
 
-import kr.hhplus.be.server.domain.event.Event;
-import kr.hhplus.be.server.domain.event.EventTopic;
+import kr.hhplus.be.server.infrastructure.event.Event;
+import kr.hhplus.be.server.infrastructure.event.EventTopic;
 import kr.hhplus.be.server.reservation.infrastructure.ExpiredReservationResult;
 import lombok.Builder;
 
