@@ -17,26 +17,27 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import kr.hhplus.be.server.domain.event.payment.PaymentSuccessEvent;
-import kr.hhplus.be.server.domain.payment.Payment;
-import kr.hhplus.be.server.domain.payment.PaymentStatus;
-import kr.hhplus.be.server.domain.queue.QueueToken;
-import kr.hhplus.be.server.domain.reservation.Reservation;
-import kr.hhplus.be.server.domain.reservation.ReservationStatus;
-import kr.hhplus.be.server.domain.seat.Seat;
-import kr.hhplus.be.server.domain.seat.SeatClass;
-import kr.hhplus.be.server.domain.seat.SeatStatus;
-import kr.hhplus.be.server.domain.user.User;
+import kr.hhplus.be.server.payment.domain.PaymentSuccessEvent;
+import kr.hhplus.be.server.payment.domain.Payment;
+import kr.hhplus.be.server.payment.domain.PaymentStatus;
+import kr.hhplus.be.server.queue.domain.QueueToken;
+import kr.hhplus.be.server.reservation.domain.Reservation;
+import kr.hhplus.be.server.reservation.domain.ReservationStatus;
+import kr.hhplus.be.server.concert.domain.seat.Seat;
+import kr.hhplus.be.server.concert.domain.seat.SeatClass;
+import kr.hhplus.be.server.concert.domain.seat.SeatStatus;
+import kr.hhplus.be.server.payment.usecase.interactor.PaymentInteractor;
+import kr.hhplus.be.server.user.domain.User;
 import kr.hhplus.be.server.framework.exception.CustomException;
 import kr.hhplus.be.server.framework.exception.ErrorCode;
 import kr.hhplus.be.server.infrastructure.persistence.lock.DistributedLockManager;
-import kr.hhplus.be.server.infrastructure.persistence.payment.PaymentManager;
-import kr.hhplus.be.server.infrastructure.persistence.payment.PaymentTransactionResult;
-import kr.hhplus.be.server.infrastructure.persistence.queue.QueueTokenManager;
+import kr.hhplus.be.server.payment.infrastructure.PaymentManager;
+import kr.hhplus.be.server.payment.infrastructure.PaymentTransactionResult;
+import kr.hhplus.be.server.queue.infrastructure.QueueTokenManager;
 import kr.hhplus.be.server.usecase.event.EventPublisher;
-import kr.hhplus.be.server.usecase.payment.input.PaymentCommand;
-import kr.hhplus.be.server.usecase.payment.output.PaymentOutput;
-import kr.hhplus.be.server.usecase.payment.output.PaymentResult;
+import kr.hhplus.be.server.payment.usecase.input.PaymentCommand;
+import kr.hhplus.be.server.payment.usecase.output.PaymentOutput;
+import kr.hhplus.be.server.payment.usecase.output.PaymentResult;
 
 @ExtendWith(MockitoExtension.class)
 class PaymentInteractorTest {

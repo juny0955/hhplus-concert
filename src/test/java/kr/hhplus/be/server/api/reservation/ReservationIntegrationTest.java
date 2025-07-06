@@ -24,20 +24,21 @@ import org.testcontainers.utility.TestcontainersConfiguration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import kr.hhplus.be.server.api.TestDataFactory;
-import kr.hhplus.be.server.api.reservation.dto.request.ReservationRequest;
-import kr.hhplus.be.server.domain.concert.Concert;
-import kr.hhplus.be.server.domain.concert.ConcertRepository;
-import kr.hhplus.be.server.domain.concertDate.ConcertDate;
-import kr.hhplus.be.server.domain.concertDate.ConcertDateRepository;
-import kr.hhplus.be.server.domain.queue.QueueToken;
-import kr.hhplus.be.server.domain.queue.QueueTokenRepository;
-import kr.hhplus.be.server.domain.reservation.ReservationStatus;
-import kr.hhplus.be.server.domain.seat.Seat;
-import kr.hhplus.be.server.domain.seat.SeatHoldRepository;
-import kr.hhplus.be.server.domain.seat.SeatRepository;
-import kr.hhplus.be.server.domain.seat.SeatStatus;
-import kr.hhplus.be.server.domain.user.User;
-import kr.hhplus.be.server.domain.user.UserRepository;
+import kr.hhplus.be.server.queue.domain.QueueStatus;
+import kr.hhplus.be.server.reservation.api.dto.request.ReservationRequest;
+import kr.hhplus.be.server.concert.domain.concert.Concert;
+import kr.hhplus.be.server.concert.domain.concert.ConcertRepository;
+import kr.hhplus.be.server.concert.domain.concertDate.ConcertDate;
+import kr.hhplus.be.server.concert.domain.concertDate.ConcertDateRepository;
+import kr.hhplus.be.server.queue.domain.QueueToken;
+import kr.hhplus.be.server.queue.domain.QueueTokenRepository;
+import kr.hhplus.be.server.reservation.domain.ReservationStatus;
+import kr.hhplus.be.server.concert.domain.seat.Seat;
+import kr.hhplus.be.server.concert.domain.seat.SeatHoldRepository;
+import kr.hhplus.be.server.concert.domain.seat.SeatRepository;
+import kr.hhplus.be.server.concert.domain.seat.SeatStatus;
+import kr.hhplus.be.server.user.domain.User;
+import kr.hhplus.be.server.user.domain.UserRepository;
 import kr.hhplus.be.server.framework.exception.ErrorCode;
 
 @SpringBootTest(properties = {
@@ -300,7 +301,7 @@ class ReservationIntegrationTest {
 			.tokenId(expiredTokenId)
 			.userId(userId)
 			.concertId(concertId)
-			.status(kr.hhplus.be.server.domain.queue.QueueStatus.ACTIVE)
+			.status(QueueStatus.ACTIVE)
 			.position(0)
 			.issuedAt(LocalDateTime.now().minusHours(2))
 			.enteredAt(LocalDateTime.now().minusHours(2))

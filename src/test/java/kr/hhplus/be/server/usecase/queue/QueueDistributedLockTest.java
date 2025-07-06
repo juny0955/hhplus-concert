@@ -20,11 +20,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import kr.hhplus.be.server.domain.queue.QueueToken;
+import kr.hhplus.be.server.queue.domain.QueueToken;
 import kr.hhplus.be.server.framework.exception.CustomException;
 import kr.hhplus.be.server.framework.exception.ErrorCode;
 import kr.hhplus.be.server.infrastructure.persistence.lock.DistributedLockManager;
-import kr.hhplus.be.server.infrastructure.persistence.queue.QueueTokenManager;
+import kr.hhplus.be.server.queue.infrastructure.QueueTokenManager;
+import kr.hhplus.be.server.queue.usecase.QueueService;
 
 @ExtendWith(MockitoExtension.class)
 public class QueueDistributedLockTest {

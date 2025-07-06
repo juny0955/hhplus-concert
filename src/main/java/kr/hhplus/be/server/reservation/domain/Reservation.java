@@ -1,0 +1,51 @@
+package kr.hhplus.be.server.reservation.domain;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+import lombok.Builder;
+
+@Builder
+public record Reservation(
+	UUID id,
+	UUID userId,
+	UUID seatId,
+	ReservationStatus status,
+	LocalDateTime createdAt,
+	LocalDateTime updatedAt
+) {
+	public static Reservation of(UUID userId, UUID seatId) {
+		return Reservation.builder()
+			.userId(userId)
+			.seatId(seatId)
+			.status(ReservationStatus.PENDING)
+			.build();
+	}
+
+	public Reservation doPay() {
+		return Reservation.builder()
+			.id(id)
+			.userId(userId)
+			.seatId(seatId)
+			.status(ReservationStatus.SUCCESS)
+			.createdAt(createdAt)
+			.updatedAt(LocalDateTime.now())
+			.build();
+	}
+
+	public Reservation expired() {
+		return Reservation.builder()
+				.id(id)
+				.userId(userId)
+				.seatId(seatId)
+				.status(ReservationStatus.FAILED)
+				.createdAt(createdAt)
+				.updatedAt(LocalDateTime.now())
+				.build();
+	}
+
+	public boolean isPending() {
+		return status == ReservationStatus.PENDING;
+	}
+
+}

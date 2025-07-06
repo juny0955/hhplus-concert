@@ -17,7 +17,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
-import kr.hhplus.be.server.domain.queue.QueueToken;
+import kr.hhplus.be.server.queue.domain.QueueToken;
 
 @Configuration
 public class RedisConfig {

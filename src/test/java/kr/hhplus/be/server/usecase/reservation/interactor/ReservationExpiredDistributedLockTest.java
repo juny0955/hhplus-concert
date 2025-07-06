@@ -21,14 +21,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import kr.hhplus.be.server.domain.event.reservation.ReservationExpiredEvent;
-import kr.hhplus.be.server.domain.reservation.Reservation;
-import kr.hhplus.be.server.domain.reservation.ReservationStatus;
+import kr.hhplus.be.server.reservation.domain.ReservationExpiredEvent;
+import kr.hhplus.be.server.reservation.domain.Reservation;
+import kr.hhplus.be.server.reservation.domain.ReservationStatus;
 import kr.hhplus.be.server.framework.exception.CustomException;
 import kr.hhplus.be.server.framework.exception.ErrorCode;
 import kr.hhplus.be.server.infrastructure.persistence.lock.DistributedLockManager;
-import kr.hhplus.be.server.infrastructure.persistence.reservation.ExpiredReservationManager;
-import kr.hhplus.be.server.infrastructure.persistence.reservation.ExpiredReservationResult;
+import kr.hhplus.be.server.reservation.infrastructure.ExpiredReservationManager;
+import kr.hhplus.be.server.reservation.infrastructure.ExpiredReservationResult;
+import kr.hhplus.be.server.reservation.usecase.interactor.ReservationExpiredInteractor;
 import kr.hhplus.be.server.usecase.event.EventPublisher;
 
 @ExtendWith(MockitoExtension.class)

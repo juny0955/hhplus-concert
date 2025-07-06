@@ -20,19 +20,20 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import kr.hhplus.be.server.domain.event.reservation.ReservationCreatedEvent;
-import kr.hhplus.be.server.domain.payment.Payment;
-import kr.hhplus.be.server.domain.reservation.Reservation;
-import kr.hhplus.be.server.domain.seat.Seat;
+import kr.hhplus.be.server.reservation.domain.ReservationCreatedEvent;
+import kr.hhplus.be.server.payment.domain.Payment;
+import kr.hhplus.be.server.reservation.domain.Reservation;
+import kr.hhplus.be.server.concert.domain.seat.Seat;
 import kr.hhplus.be.server.framework.exception.CustomException;
 import kr.hhplus.be.server.framework.exception.ErrorCode;
 import kr.hhplus.be.server.infrastructure.persistence.lock.DistributedLockManager;
-import kr.hhplus.be.server.infrastructure.persistence.reservation.CreateReservationManager;
-import kr.hhplus.be.server.infrastructure.persistence.reservation.CreateReservationResult;
+import kr.hhplus.be.server.reservation.infrastructure.CreateReservationManager;
+import kr.hhplus.be.server.reservation.infrastructure.CreateReservationResult;
+import kr.hhplus.be.server.reservation.usecase.interactor.ReserveSeatInteractor;
 import kr.hhplus.be.server.usecase.event.EventPublisher;
-import kr.hhplus.be.server.usecase.reservation.input.ReserveSeatCommand;
-import kr.hhplus.be.server.usecase.reservation.output.ReservationOutput;
-import kr.hhplus.be.server.usecase.reservation.output.ReserveSeatResult;
+import kr.hhplus.be.server.reservation.usecase.input.ReserveSeatCommand;
+import kr.hhplus.be.server.reservation.usecase.output.ReservationOutput;
+import kr.hhplus.be.server.reservation.usecase.output.ReserveSeatResult;
 
 @ExtendWith(MockitoExtension.class)
 public class ReservationDistributedLockTest {
