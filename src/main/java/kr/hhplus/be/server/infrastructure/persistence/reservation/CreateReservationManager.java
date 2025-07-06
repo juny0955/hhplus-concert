@@ -5,6 +5,7 @@ import java.util.UUID;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import kr.hhplus.be.server.domain.concert.Concert;
 import kr.hhplus.be.server.domain.concert.ConcertRepository;
 import kr.hhplus.be.server.domain.concertDate.ConcertDate;
 import kr.hhplus.be.server.domain.concertDate.ConcertDateRepository;
@@ -41,12 +42,12 @@ public class CreateReservationManager {
 	@Transactional
 	public CreateReservationResult processCreateReservation(ReserveSeatCommand command) throws CustomException {
 		QueueToken queueToken = getQueueTokenAndValid(command);
-		checkExistsConcert(command.concertId());
+		Concert concert = getConcert(command.concertId());
 
 		ConcertDate concertDate = getConcertDate(command.concertDateId());
 		Seat seat = getSeat(command.seatId(), command.concertDateId());
 
-		ReservationDomainResult result = reservationDomainService.processReservation(concertDate, seat, queueToken.userId());
+		ReservationDomainResult result = reservationDomainService.processReservation(concert, concertDate, seat, queueToken.userId());
 
 		CreateReservationResult createReservationResult = processReservation(result, queueToken.userId());
 
@@ -72,9 +73,9 @@ public class CreateReservationManager {
 			.orElseThrow(() -> new CustomException(ErrorCode.CONCERT_DATE_NOT_FOUND));
 	}
 
-	private void checkExistsConcert(UUID concertId) throws CustomException {
-		if (!concertRepository.existsById(concertId))
-			throw new CustomException(ErrorCode.CONCERT_NOT_FOUND);
+	private Concert getConcert(UUID concertId) throws CustomException {
+		return concertRepository.findById(concertId)
+			.orElseThrow(() -> new CustomException(ErrorCode.CONCERT_NOT_FOUND));
 	}
 
 	private QueueToken getQueueTokenAndValid(ReserveSeatCommand command) throws CustomException {

@@ -49,6 +49,13 @@ public class SeatJpaGateway implements SeatRepository {
 	}
 
 	@Override
+	public List<Seat> findByConcertDateId(UUID concertDateId) {
+		return jpaSeatRepository.findByConcertDateId(concertDateId.toString()).stream()
+			.map(SeatEntity::toDomain)
+			.toList();
+	}
+
+	@Override
 	public void deleteAll() {
 		jpaSeatRepository.deleteAll();
 	}

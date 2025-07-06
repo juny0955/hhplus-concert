@@ -1,6 +1,5 @@
 package kr.hhplus.be.server.infrastructure.persistence.concert;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.hibernate.annotations.JdbcTypeCode;
@@ -12,7 +11,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import kr.hhplus.be.server.domain.concert.Concert;
+import kr.hhplus.be.server.domain.concert.SoldOutRank;
 import kr.hhplus.be.server.infrastructure.persistence.BaseTimeEntity;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -21,12 +20,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "CONCERT")
+@Table(name = "SOLD_OUT_RANK")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
 @Builder
-public class ConcertEntity extends BaseTimeEntity {
+public class SoldOutRankEntity extends BaseTimeEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
@@ -34,34 +33,32 @@ public class ConcertEntity extends BaseTimeEntity {
 	@Column(name = "id", length = 36)
 	private String id;
 
-	@Column(name = "title", length = 100, nullable = false)
-	private String title;
+	@JdbcTypeCode(SqlTypes.VARCHAR)
+	@Column(name = "concert_id", length = 36, nullable = false)
+	private String concertId;
 
-	@Column(name = "artist", length = 50, nullable = false)
-	private String artist;
+	@Column(name = "score", nullable = false)
+	@JdbcTypeCode(SqlTypes.BIGINT)
+	private long score;
 
-	@Column(name = "open_time", nullable = false)
-	private LocalDateTime openTime;
+	@Column(name = "sold_out_time", nullable = false)
+	@JdbcTypeCode(SqlTypes.BIGINT)
+	private long soldOutTime;
 
-	@Column(name = "sold_out_time")
-	private LocalDateTime soldOutTime;
-
-	public static ConcertEntity from(Concert concert) {
-		return ConcertEntity.builder()
-			.id(concert.id() != null ? concert.id().toString() : null)
-			.title(concert.title())
-			.artist(concert.artist())
-			.openTime(concert.openTime())
-			.soldOutTime(concert.soldOutTime())
+	public static SoldOutRankEntity from(SoldOutRank soldOutRank) {
+		return SoldOutRankEntity.builder()
+			.id(soldOutRank.id() != null ? soldOutRank.id().toString() : null)
+			.concertId(soldOutRank.concertId().toString())
+			.score(soldOutRank.score())
+			.soldOutTime(soldOutRank.soldOutTime())
 			.build();
 	}
 
-	public Concert toDomain() {
-		return Concert.builder()
+	public SoldOutRank toDomain() {
+		return SoldOutRank.builder()
 			.id(UUID.fromString(id))
-			.title(title)
-			.artist(artist)
-			.openTime(openTime)
+			.concertId(UUID.fromString(concertId))
+			.score(score)
 			.soldOutTime(soldOutTime)
 			.createdAt(createdAt)
 			.updatedAt(updatedAt)

@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 public class QueueTokenManager {
 
 	private static final int MAX_ACTIVE_TOKEN_SIZE = 50;
-	private static final long QUEUE_EXPIRES_TIME = 60L;
+	private static final long QUEUE_EXPIRES_TIME = 30L;
 
 	private final QueueTokenRepository queueTokenRepository;
 	private final ConcertRepository concertRepository;
