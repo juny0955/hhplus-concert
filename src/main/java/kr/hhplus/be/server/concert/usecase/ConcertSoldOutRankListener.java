@@ -8,7 +8,7 @@ import kr.hhplus.be.server.concert.domain.seat.SeatRepository;
 import kr.hhplus.be.server.concert.domain.seat.SeatStatus;
 import kr.hhplus.be.server.framework.exception.CustomException;
 import kr.hhplus.be.server.framework.exception.ErrorCode;
-import kr.hhplus.be.server.concert.infrastructure.rank.ConcertSoldOutManager;
+import kr.hhplus.be.server.infrastructure.persistence.rank.ConcertSoldOutManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;

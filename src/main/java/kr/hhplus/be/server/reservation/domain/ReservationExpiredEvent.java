@@ -2,7 +2,7 @@ package kr.hhplus.be.server.reservation.domain;
 
 import kr.hhplus.be.server.infrastructure.event.Event;
 import kr.hhplus.be.server.infrastructure.event.EventTopic;
-import kr.hhplus.be.server.reservation.infrastructure.ExpiredReservationResult;
+import kr.hhplus.be.server.infrastructure.persistence.reservation.ExpiredReservationResult;
 import lombok.Builder;
 
 import java.time.LocalDateTime;

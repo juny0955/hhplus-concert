@@ -22,10 +22,12 @@ import kr.hhplus.be.server.concert.domain.concert.Concert;
 import kr.hhplus.be.server.concert.domain.concert.ConcertRepository;
 import kr.hhplus.be.server.concert.domain.concertDate.ConcertDate;
 import kr.hhplus.be.server.concert.domain.concertDate.ConcertDateRepository;
+import kr.hhplus.be.server.concert.domain.concertDate.ConcertDates;
 import kr.hhplus.be.server.concert.domain.seat.Seat;
 import kr.hhplus.be.server.concert.domain.seat.SeatClass;
 import kr.hhplus.be.server.concert.domain.seat.SeatRepository;
 import kr.hhplus.be.server.concert.domain.seat.SeatStatus;
+import kr.hhplus.be.server.concert.domain.seat.Seats;
 import kr.hhplus.be.server.concert.usecase.ConcertService;
 import kr.hhplus.be.server.framework.exception.CustomException;
 import kr.hhplus.be.server.framework.exception.ErrorCode;
@@ -86,9 +88,10 @@ class ConcertServiceTest {
 	@DisplayName("예약_가능_콘서트_날짜_조회_성공")
 	void getAvailableConcertDates_Success() throws CustomException {
 		List<ConcertDate> concertDateEntities = List.of(concertDate);
+		ConcertDates concertDates = new ConcertDates(concertDateEntities);
 
 		when(concertRepository.existsById(concertId)).thenReturn(true);
-		when(concertDateRepository.findAvailableDatesWithAvailableSeatCount(concertId)).thenReturn(concertDateEntities);
+		when(concertDateRepository.findAvailableDatesWithAvailableSeatCount(concertId)).thenReturn(concertDates);
 
 		List<ConcertDate> results = concertService.getAvailableConcertDates(concertId);
 
@@ -116,8 +119,10 @@ class ConcertServiceTest {
 	@Test
 	@DisplayName("예약_가능_콘서트_날짜_조회_정상_빈_리스트(매진, 예약)")
 	void getAvailableConcertDates_Success_CanReservationDateNotFound() throws CustomException {
+		ConcertDates concertDates = new ConcertDates(Collections.emptyList());
+
 		when(concertRepository.existsById(concertId)).thenReturn(true);
-		when(concertDateRepository.findAvailableDatesWithAvailableSeatCount(concertId)).thenReturn(Collections.emptyList());
+		when(concertDateRepository.findAvailableDatesWithAvailableSeatCount(concertId)).thenReturn(concertDates);
 
 		List<ConcertDate> results = concertService.getAvailableConcertDates(concertId);
 
@@ -130,8 +135,10 @@ class ConcertServiceTest {
 	@Test
 	@DisplayName("예약_가능_좌석_조회_정상")
 	void getAvailableSeats_Success() throws CustomException {
+		Seats seats = new Seats(List.of(seat));
+
 		when(concertRepository.existsById(concertId)).thenReturn(true);
-		when(seatRepository.findAvailableSeats(concertId, concertDateId)).thenReturn(List.of(seat));
+		when(seatRepository.findAvailableSeats(concertId, concertDateId)).thenReturn(seats);
 
 		List<Seat> results = concertService.getAvailableSeats(concertId, concertDateId);
 
@@ -161,8 +168,10 @@ class ConcertServiceTest {
 	@Test
 	@DisplayName("예약_가능_좌석_조회_실패_해당날짜예약불가")
 	void getAvailableSeats_Failure_CannotReservationDate() {
+		Seats seats = new Seats(Collections.emptyList());
+
 		when(concertRepository.existsById(concertId)).thenReturn(true);
-		when(seatRepository.findAvailableSeats(concertId, concertDateId)).thenReturn(Collections.emptyList());
+		when(seatRepository.findAvailableSeats(concertId, concertDateId)).thenReturn(seats);
 		when(concertDateRepository.existsById(concertDateId)).thenReturn(false);
 
 		CustomException customException = assertThrows(CustomException.class,
@@ -178,8 +187,10 @@ class ConcertServiceTest {
 	@Test
 	@DisplayName("예약_가능_좌석_조회_정상_빈_리스트(매진, 예약)")
 	void getAvailableSeats_Success_EmptyList() throws CustomException {
+		Seats seats = new Seats(Collections.emptyList());
+
 		when(concertRepository.existsById(concertId)).thenReturn(true);
-		when(seatRepository.findAvailableSeats(concertId, concertDateId)).thenReturn(Collections.emptyList());
+		when(seatRepository.findAvailableSeats(concertId, concertDateId)).thenReturn(seats);
 		when(concertDateRepository.existsById(concertDateId)).thenReturn(true);
 
 		List<Seat> results = concertService.getAvailableSeats(concertId, concertDateId);

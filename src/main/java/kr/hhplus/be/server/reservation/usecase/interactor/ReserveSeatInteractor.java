@@ -1,12 +1,12 @@
 package kr.hhplus.be.server.reservation.usecase.interactor;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
-import kr.hhplus.be.server.reservation.domain.ReservationCreatedEvent;
 import kr.hhplus.be.server.infrastructure.persistence.lock.DistributedLockManager;
-import kr.hhplus.be.server.reservation.infrastructure.CreateReservationManager;
-import kr.hhplus.be.server.reservation.infrastructure.CreateReservationResult;
-import kr.hhplus.be.server.infrastructure.event.EventPublisher;
+import kr.hhplus.be.server.infrastructure.persistence.reservation.CreateReservationManager;
+import kr.hhplus.be.server.infrastructure.persistence.reservation.CreateReservationResult;
+import kr.hhplus.be.server.reservation.domain.ReservationCreatedEvent;
 import kr.hhplus.be.server.reservation.usecase.input.ReservationCreateInput;
 import kr.hhplus.be.server.reservation.usecase.input.ReserveSeatCommand;
 import kr.hhplus.be.server.reservation.usecase.output.ReservationOutput;
@@ -23,7 +23,7 @@ public class ReserveSeatInteractor implements ReservationCreateInput {
 
 	private final CreateReservationManager createReservationManager;
 	private final ReservationOutput reservationOutput;
-	private final EventPublisher eventPublisher;
+	private final ApplicationEventPublisher eventPublisher;
 	private final DistributedLockManager distributedLockManager;
 
 	@Override
@@ -37,7 +37,7 @@ public class ReserveSeatInteractor implements ReservationCreateInput {
 			() -> createReservationManager.processCreateReservation(command)
 		);
 
-		eventPublisher.publish(ReservationCreatedEvent.from(createReservationResult));
+		eventPublisher.publishEvent(ReservationCreatedEvent.from(createReservationResult));
 		reservationOutput.ok(ReserveSeatResult.from(createReservationResult));
 	}
 }

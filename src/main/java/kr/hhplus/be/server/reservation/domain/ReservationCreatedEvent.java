@@ -6,7 +6,7 @@ import java.util.UUID;
 
 import kr.hhplus.be.server.infrastructure.event.Event;
 import kr.hhplus.be.server.infrastructure.event.EventTopic;
-import kr.hhplus.be.server.reservation.infrastructure.CreateReservationResult;
+import kr.hhplus.be.server.infrastructure.persistence.reservation.CreateReservationResult;
 import lombok.Builder;
 
 @Builder

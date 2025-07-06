@@ -22,8 +22,6 @@ import kr.hhplus.be.server.payment.domain.PaymentDomainResult;
 import kr.hhplus.be.server.payment.domain.PaymentDomainService;
 import kr.hhplus.be.server.payment.domain.PaymentRepository;
 import kr.hhplus.be.server.payment.domain.PaymentStatus;
-import kr.hhplus.be.server.payment.infrastructure.PaymentManager;
-import kr.hhplus.be.server.payment.infrastructure.PaymentTransactionResult;
 import kr.hhplus.be.server.queue.domain.QueueToken;
 import kr.hhplus.be.server.queue.domain.QueueTokenRepository;
 import kr.hhplus.be.server.reservation.domain.Reservation;

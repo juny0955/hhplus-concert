@@ -2,14 +2,14 @@ package kr.hhplus.be.server.reservation.usecase.interactor;
 
 import java.util.List;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
-import kr.hhplus.be.server.reservation.domain.ReservationExpiredEvent;
-import kr.hhplus.be.server.reservation.domain.Reservation;
 import kr.hhplus.be.server.infrastructure.persistence.lock.DistributedLockManager;
-import kr.hhplus.be.server.reservation.infrastructure.ExpiredReservationManager;
-import kr.hhplus.be.server.reservation.infrastructure.ExpiredReservationResult;
-import kr.hhplus.be.server.infrastructure.event.EventPublisher;
+import kr.hhplus.be.server.infrastructure.persistence.reservation.ExpiredReservationManager;
+import kr.hhplus.be.server.infrastructure.persistence.reservation.ExpiredReservationResult;
+import kr.hhplus.be.server.reservation.domain.Reservation;
+import kr.hhplus.be.server.reservation.domain.ReservationExpiredEvent;
 import kr.hhplus.be.server.reservation.usecase.input.ReservationExpiredInput;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +23,7 @@ public class ReservationExpiredInteractor implements ReservationExpiredInput {
     private final static String RESERVATION_LOCK_KEY = "reservation:";
 
     private final ExpiredReservationManager expiredReservationManager;
-    private final EventPublisher eventPublisher;
+    private final ApplicationEventPublisher eventPublisher;
     private final DistributedLockManager distributedLockManager;
 
 	@Override
@@ -55,7 +55,7 @@ public class ReservationExpiredInteractor implements ReservationExpiredInput {
             if (expiredReservationResult == null)
                 continue;
 
-            eventPublisher.publish(ReservationExpiredEvent.from(expiredReservationResult));
+            eventPublisher.publishEvent(ReservationExpiredEvent.from(expiredReservationResult));
         }
     }
 }
