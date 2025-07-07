@@ -39,7 +39,6 @@ public class PaymentInteractor implements PaymentInput {
 		);
 
 		eventPublisher.publishEvent(PaymentSuccessEvent.from(paymentTransactionResult));
-
 		return PaymentResult.from(paymentTransactionResult);
 	}
 }

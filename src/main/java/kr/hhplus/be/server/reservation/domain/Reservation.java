@@ -24,7 +24,10 @@ public record Reservation(
 			.build();
 	}
 
-	public Reservation paid() {
+	public Reservation paid() throws CustomException {
+		if (!status.equals(ReservationStatus.PENDING))
+			throw new CustomException(ErrorCode.RESERVATION_STATUS_NOT_PENDING);
+
 		return Reservation.builder()
 			.id(id)
 			.userId(userId)

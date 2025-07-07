@@ -28,7 +28,10 @@ public record Payment(
 			.build();
 	}
 
-	public Payment success() {
+	public Payment success() throws CustomException {
+		if (!status.equals(PaymentStatus.PENDING))
+			throw new CustomException(ErrorCode.PAYMENT_STATUS_NOT_PENDING);
+
 		return Payment.builder()
 			.id(id)
 			.userId(userId)

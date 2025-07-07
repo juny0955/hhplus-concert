@@ -32,7 +32,7 @@ public class ReserveInteractor implements ReservationCreateInput {
 		// 락 획득하지 못할 시 예외 응답
 		CreateReservationResult createReservationResult = distributedLockManager.executeWithSimpleLockHasReturn(
 			lockKey,
-			() -> reservationApplicationService.processCreateReservation(command)
+			() -> reservationApplicationService.createReservation(command)
 		);
 
 		eventPublisher.publishEvent(ReservationCreatedEvent.from(createReservationResult));

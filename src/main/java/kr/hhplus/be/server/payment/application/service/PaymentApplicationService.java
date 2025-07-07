@@ -13,13 +13,12 @@ import kr.hhplus.be.server.framework.exception.CustomException;
 import kr.hhplus.be.server.framework.exception.ErrorCode;
 import kr.hhplus.be.server.payment.domain.Payment;
 import kr.hhplus.be.server.payment.domain.PaymentTransactionResult;
-import kr.hhplus.be.server.payment.domain.service.PaymentDomainResult;
 import kr.hhplus.be.server.payment.ports.in.PaymentCommand;
 import kr.hhplus.be.server.payment.ports.out.PaymentRepository;
 import kr.hhplus.be.server.queue.domain.QueueToken;
 import kr.hhplus.be.server.queue.ports.out.QueueTokenRepository;
 import kr.hhplus.be.server.reservation.domain.Reservation;
-import kr.hhplus.be.server.reservation.ports.out.ReservationRepository;
+import kr.hhplus.be.server.reservation.ports.in.PaidReservationInput;
 import kr.hhplus.be.server.user.domain.User;
 import kr.hhplus.be.server.user.ports.in.UsePointInput;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +28,7 @@ import lombok.RequiredArgsConstructor;
 public class PaymentApplicationService {
 
 	private final QueueTokenRepository queueTokenRepository;
-	private final ReservationRepository reservationRepository;
+	private final PaidReservationInput paidReservationInput;
 	private final UsePointInput usePointInput;
 	private final PaidSeatInput paidSeatInput;
 	private final PaymentRepository paymentRepository;
@@ -37,16 +36,14 @@ public class PaymentApplicationService {
 
 	@Transactional
 	public PaymentTransactionResult processPayment(PaymentCommand command, QueueToken queueToken) throws Exception {
-		Reservation reservation = getReservation(command.reservationId());
-
 		validateSeatHold(reservation.seatId(), queueToken.userId());
 
-		Payment payment = getPayment(reservation.id());
+		Payment payment = getPayment(command.reservationId());
 
-		Payment savedPayment 	 = paymentRepository.save(result.payment());
-		User savedUser           = usePointInput.usePoint(userId, result.payment().amount());
-		Reservation savedReservation = reservationRepository.save(reservation.paid());
-		Seat savedSeat       	 = paidSeatInput.paidSeat(reservation.seatId());
+		Payment savedPayment		 = paymentRepository.save(payment.success());
+		User savedUser          	 = usePointInput.usePoint(queueToken.userId(), payment.amount());
+		Reservation savedReservation = paidReservationInput.paidReservation(command.reservationId());
+		Seat savedSeat       	 	 = paidSeatInput.paidSeat(savedReservation.seatId());
 
 		seatHoldRepository.deleteHold(savedSeat.id(), savedUser.id());
 		queueTokenRepository.expiresQueueToken(queueToken.tokenId().toString());
@@ -57,11 +54,6 @@ public class PaymentApplicationService {
 	public Payment getPayment(UUID reservationId) throws CustomException {
 		return paymentRepository.findByReservationId(reservationId)
 			.orElseThrow(() -> new CustomException(ErrorCode.PAYMENT_NOT_FOUND));
-	}
-
-	private Reservation getReservation(UUID reservationId) throws CustomException {
-		return reservationRepository.findById(reservationId)
-			.orElseThrow(() -> new CustomException(ErrorCode.RESERVATION_NOT_FOUND));
 	}
 
 	private void validateSeatHold(UUID seatId, UUID userId) throws CustomException {

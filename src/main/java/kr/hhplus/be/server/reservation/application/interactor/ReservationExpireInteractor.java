@@ -49,7 +49,7 @@ public class ReservationExpireInteractor implements ReservationExpireInput {
             // reservation:{reservationId} 락 획득 후 임시배정 만료 트랜잭션 수행
             ExpiredReservationResult expiredReservationResult = distributedLockManager.executeWithLockHasReturn(
                 lockKey,
-                () -> reservationApplicationService.processExpiredReservation(reservation)
+                () -> reservationApplicationService.expireReservation(reservation)
             );
 
             if (expiredReservationResult == null)

@@ -1,6 +1,7 @@
 package kr.hhplus.be.server.reservation.application.service;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Isolation;
@@ -13,6 +14,7 @@ import kr.hhplus.be.server.concert.ports.in.seat.ExpireSeatInput;
 import kr.hhplus.be.server.concert.ports.in.seat.ReserveSeatInput;
 import kr.hhplus.be.server.concert.ports.out.SeatHoldRepository;
 import kr.hhplus.be.server.framework.exception.CustomException;
+import kr.hhplus.be.server.framework.exception.ErrorCode;
 import kr.hhplus.be.server.payment.domain.Payment;
 import kr.hhplus.be.server.payment.ports.in.CreatePaymentInput;
 import kr.hhplus.be.server.payment.ports.in.ExpirePaymentInput;
@@ -40,7 +42,7 @@ public class ReservationApplicationService {
 	private final ExpirePaymentInput expirePaymentInput;
 
 	@Transactional
-	public CreateReservationResult processCreateReservation(ReserveSeatCommand command) throws CustomException {
+	public CreateReservationResult createReservation(ReserveSeatCommand command) throws CustomException {
 		QueueToken queueToken = getActiveQueueTokenInput.getActiveQueueToken(command.queueTokenId());
 
 		validOpenConcertInput.validOpenConcert(command.concertId());
@@ -55,7 +57,7 @@ public class ReservationApplicationService {
 	}
 
 	@Transactional(isolation = Isolation.READ_COMMITTED)
-	public ExpiredReservationResult processExpiredReservation(Reservation reservation) throws CustomException {
+	public ExpiredReservationResult expireReservation(Reservation reservation) throws CustomException {
 		if (!seatHoldRepository.isHoldSeat(reservation.seatId(), reservation.userId()))
 			return null;
 
@@ -68,5 +70,16 @@ public class ReservationApplicationService {
 
 	public List<Reservation> getPendingReservations() {
 		return reservationRepository.findByStatusPending();
+	}
+
+	@Transactional
+	public Reservation paidReservation(UUID reservationId) throws CustomException {
+		Reservation reservation = getReservation(reservationId);
+		return reservationRepository.save(reservation.paid());
+	}
+
+	public Reservation getReservation(UUID reservationId) throws CustomException {
+		return reservationRepository.findById(reservationId)
+			.orElseThrow(() -> new CustomException(ErrorCode.RESERVATION_NOT_FOUND));
 	}
 }
