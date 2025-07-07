@@ -27,9 +27,8 @@ import kr.hhplus.be.server.concert.domain.seat.Seat;
 import kr.hhplus.be.server.framework.exception.CustomException;
 import kr.hhplus.be.server.framework.exception.ErrorCode;
 import kr.hhplus.be.server.infrastructure.persistence.lock.DistributedLockManager;
-import kr.hhplus.be.server.reservation.application.service.CreateReservationManager;
 import kr.hhplus.be.server.reservation.application.dto.CreateReservationResult;
-import kr.hhplus.be.server.reservation.application.interactor.ReserveSeatInteractor;
+import kr.hhplus.be.server.reservation.application.interactor.ReserveInteractor;
 import kr.hhplus.be.server.reservation.ports.in.ReserveSeatCommand;
 import kr.hhplus.be.server.reservation.usecase.output.ReservationOutput;
 import kr.hhplus.be.server.reservation.application.dto.ReserveSeatResult;
@@ -38,7 +37,7 @@ import kr.hhplus.be.server.reservation.application.dto.ReserveSeatResult;
 public class ReservationDistributedLockTest {
 
 	@InjectMocks
-	private ReserveSeatInteractor reserveSeatInteractor;
+	private ReserveInteractor reserveInteractor;
 
 	@Mock
 	private CreateReservationManager createReservationManager;
@@ -87,7 +86,7 @@ public class ReservationDistributedLockTest {
 			.thenThrow(new CustomException(ErrorCode.LOCK_CONFLICT));
 
 		CustomException exception = assertThrows(CustomException.class,
-			() -> reserveSeatInteractor.reserveSeat(reserveSeatCommand));
+			() -> reserveInteractor.reserveSeat(reserveSeatCommand));
 
 		assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.LOCK_CONFLICT);
 
@@ -107,7 +106,7 @@ public class ReservationDistributedLockTest {
 			});
 		when(createReservationManager.processCreateReservation(reserveSeatCommand)).thenReturn(createReservationResult);
 
-		reserveSeatInteractor.reserveSeat(reserveSeatCommand);
+		reserveInteractor.reserveSeat(reserveSeatCommand);
 
 		verify(distributedLockManager, times(1)).executeWithSimpleLockHasReturn(eq(seatLockKey), any());
 		verify(createReservationManager, times(1)).processCreateReservation(reserveSeatCommand);
@@ -139,7 +138,7 @@ public class ReservationDistributedLockTest {
 		for (int i = 0; i < threadCount; i++) {
 			CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
 				try {
-					reserveSeatInteractor.reserveSeat(reserveSeatCommand);
+					reserveInteractor.reserveSeat(reserveSeatCommand);
 				} catch (CustomException e) {
 					if (e.getErrorCode() == ErrorCode.LOCK_CONFLICT) {
 						lockConflictCount.incrementAndGet();
@@ -193,7 +192,7 @@ public class ReservationDistributedLockTest {
 			final int index = i;
 			CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
 				try {
-					reserveSeatInteractor.reserveSeat(commands.get(index));
+					reserveInteractor.reserveSeat(commands.get(index));
 				} catch (Exception e) {
 
 				} finally {

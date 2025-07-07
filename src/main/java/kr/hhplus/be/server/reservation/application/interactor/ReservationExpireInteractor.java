@@ -6,23 +6,23 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 import kr.hhplus.be.server.infrastructure.persistence.lock.DistributedLockManager;
-import kr.hhplus.be.server.reservation.application.service.ExpiredReservationManager;
 import kr.hhplus.be.server.reservation.application.dto.ExpiredReservationResult;
+import kr.hhplus.be.server.reservation.application.service.ReservationApplicationService;
 import kr.hhplus.be.server.reservation.domain.Reservation;
 import kr.hhplus.be.server.reservation.domain.ReservationExpiredEvent;
-import kr.hhplus.be.server.reservation.ports.in.ReservationExpiredInput;
+import kr.hhplus.be.server.reservation.ports.in.ReservationExpireInput;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class ReservationExpiredInteractor implements ReservationExpiredInput {
+public class ReservationExpireInteractor implements ReservationExpireInput {
 
     private final static String SCHEDULER_LOCK_KEY = "scheduler:reservation-expired";
     private final static String RESERVATION_LOCK_KEY = "reservation:";
 
-    private final ExpiredReservationManager expiredReservationManager;
+    private final ReservationApplicationService reservationApplicationService;
     private final ApplicationEventPublisher eventPublisher;
     private final DistributedLockManager distributedLockManager;
 
@@ -41,7 +41,7 @@ public class ReservationExpiredInteractor implements ReservationExpiredInput {
     }
 
     private void process() throws Exception {
-        List<Reservation> reservations = expiredReservationManager.getPendingReservations();
+        List<Reservation> reservations = reservationApplicationService.getPendingReservations();
 
         for (Reservation reservation : reservations) {
             String lockKey = RESERVATION_LOCK_KEY + reservation.id();
@@ -49,7 +49,7 @@ public class ReservationExpiredInteractor implements ReservationExpiredInput {
             // reservation:{reservationId} 락 획득 후 임시배정 만료 트랜잭션 수행
             ExpiredReservationResult expiredReservationResult = distributedLockManager.executeWithLockHasReturn(
                 lockKey,
-                () -> expiredReservationManager.processExpiredReservation(reservation)
+                () -> reservationApplicationService.processExpiredReservation(reservation)
             );
 
             if (expiredReservationResult == null)

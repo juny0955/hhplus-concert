@@ -6,7 +6,7 @@ import java.util.UUID;
 import org.springframework.stereotype.Component;
 
 import kr.hhplus.be.server.user.domain.User;
-import kr.hhplus.be.server.user.ports.out.persistence.UserRepository;
+import kr.hhplus.be.server.user.ports.out.UserRepository;
 import lombok.RequiredArgsConstructor;
 
 @Component

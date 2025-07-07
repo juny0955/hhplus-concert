@@ -28,7 +28,7 @@ import kr.hhplus.be.server.concert.domain.seat.SeatClass;
 import kr.hhplus.be.server.concert.ports.out.SeatRepository;
 import kr.hhplus.be.server.concert.domain.seat.SeatStatus;
 import kr.hhplus.be.server.concert.domain.seat.Seats;
-import kr.hhplus.be.server.concert.application.service.concert.ConcertApplicationService;
+import kr.hhplus.be.server.concert.application.service.ConcertApplicationService;
 import kr.hhplus.be.server.framework.exception.CustomException;
 import kr.hhplus.be.server.framework.exception.ErrorCode;
 

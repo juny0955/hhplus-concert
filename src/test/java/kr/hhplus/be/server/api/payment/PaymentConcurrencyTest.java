@@ -41,7 +41,7 @@ import kr.hhplus.be.server.concert.ports.out.SeatHoldRepository;
 import kr.hhplus.be.server.concert.ports.out.SeatRepository;
 import kr.hhplus.be.server.concert.domain.seat.SeatStatus;
 import kr.hhplus.be.server.user.domain.User;
-import kr.hhplus.be.server.user.ports.out.persistence.UserRepository;
+import kr.hhplus.be.server.user.ports.out.UserRepository;
 
 
 @SpringBootTest(properties = {

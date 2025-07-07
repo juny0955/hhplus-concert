@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.concert.application;
+package kr.hhplus.be.server.concert.adapters.in.event;
 
 import kr.hhplus.be.server.concert.domain.concertDate.ConcertDate;
 import kr.hhplus.be.server.concert.ports.out.ConcertDateRepository;

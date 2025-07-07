@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.concert.adapters.in;
+package kr.hhplus.be.server.concert.adapters.in.web;
 
 import java.util.List;
 import java.util.UUID;
@@ -15,11 +15,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import kr.hhplus.be.server.concert.adapters.in.response.ConcertDateResponse;
-import kr.hhplus.be.server.concert.adapters.in.response.SeatResponse;
+import kr.hhplus.be.server.concert.adapters.in.web.response.ConcertDateResponse;
+import kr.hhplus.be.server.concert.adapters.in.web.response.SeatResponse;
 import kr.hhplus.be.server.concert.domain.concertDate.ConcertDate;
 import kr.hhplus.be.server.concert.domain.seat.Seat;
-import kr.hhplus.be.server.concert.application.service.concert.ConcertApplicationService;
+import kr.hhplus.be.server.concert.ports.in.concertDate.GetAvailableConcertDatesInput;
+import kr.hhplus.be.server.concert.ports.in.seat.GetAvailableSeatsInput;
 import kr.hhplus.be.server.framework.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 
@@ -29,7 +30,8 @@ import lombok.RequiredArgsConstructor;
 @Tag(name = "Concert API", description = "콘서트 관련 API")
 public class ConcertController {
 
-	private final ConcertApplicationService concertApplicationService;
+	private final GetAvailableSeatsInput getAvailableSeatsInput;
+	private final GetAvailableConcertDatesInput getAvailableConcertDatesInput;
 
 	@Operation(
 		summary = "콘서트 예약 가능 날짜 조회 API",
@@ -50,7 +52,7 @@ public class ConcertController {
 	public ResponseEntity<List<ConcertDateResponse>> getAvailableDates(
 		@PathVariable UUID concertId
 	) throws CustomException {
-		List<ConcertDate> availableConcertDates = concertApplicationService.getAvailableConcertDates(concertId);
+		List<ConcertDate> availableConcertDates = getAvailableConcertDatesInput.getAvailableConcertDates(concertId);
 		List<ConcertDateResponse> responses = availableConcertDates.stream()
 			.map(ConcertDateResponse::from)
 			.toList();
@@ -82,7 +84,7 @@ public class ConcertController {
 		@PathVariable UUID concertId,
 		@PathVariable UUID concertDateId
 	) throws CustomException {
-		List<Seat> availableSeats = concertApplicationService.getAvailableSeats(concertId, concertDateId);
+		List<Seat> availableSeats = getAvailableSeatsInput.getAvailableSeats(concertId, concertDateId);
 		List<SeatResponse> response = availableSeats.stream()
 			.map(SeatResponse::from)
 			.toList();

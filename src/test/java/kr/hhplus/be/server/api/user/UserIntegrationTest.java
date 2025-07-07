@@ -24,7 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import kr.hhplus.be.server.api.TestDataFactory;
 import kr.hhplus.be.server.user.adapters.in.web.dto.request.ChargePointRequest;
 import kr.hhplus.be.server.user.domain.User;
-import kr.hhplus.be.server.user.ports.out.persistence.UserRepository;
+import kr.hhplus.be.server.user.ports.out.UserRepository;
 import kr.hhplus.be.server.framework.exception.ErrorCode;
 
 @SpringBootTest(properties = {

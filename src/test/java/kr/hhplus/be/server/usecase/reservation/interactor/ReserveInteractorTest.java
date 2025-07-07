@@ -24,7 +24,6 @@ import kr.hhplus.be.server.concert.domain.seat.SeatStatus;
 import kr.hhplus.be.server.framework.exception.CustomException;
 import kr.hhplus.be.server.framework.exception.ErrorCode;
 import kr.hhplus.be.server.infrastructure.persistence.lock.DistributedLockManager;
-import kr.hhplus.be.server.reservation.application.service.CreateReservationManager;
 import kr.hhplus.be.server.reservation.application.dto.CreateReservationResult;
 import kr.hhplus.be.server.payment.domain.Payment;
 import kr.hhplus.be.server.payment.domain.PaymentStatus;
@@ -32,15 +31,15 @@ import kr.hhplus.be.server.reservation.domain.Reservation;
 import kr.hhplus.be.server.reservation.domain.ReservationCreatedEvent;
 import kr.hhplus.be.server.reservation.domain.ReservationStatus;
 import kr.hhplus.be.server.reservation.ports.in.ReserveSeatCommand;
-import kr.hhplus.be.server.reservation.application.interactor.ReserveSeatInteractor;
+import kr.hhplus.be.server.reservation.application.interactor.ReserveInteractor;
 import kr.hhplus.be.server.reservation.usecase.output.ReservationOutput;
 import kr.hhplus.be.server.reservation.application.dto.ReserveSeatResult;
 
 @ExtendWith(MockitoExtension.class)
-class ReserveSeatInteractorTest {
+class ReserveInteractorTest {
 
 	@InjectMocks
-	private ReserveSeatInteractor reserveSeatInteractor;
+	private ReserveInteractor reserveInteractor;
 
 	@Mock
 	private CreateReservationManager createReservationManager;
@@ -101,7 +100,7 @@ class ReserveSeatInteractorTest {
 		when(createReservationManager.processCreateReservation(reserveSeatCommand))
 			.thenReturn(createReservationResult);
 
-		reserveSeatInteractor.reserveSeat(reserveSeatCommand);
+		reserveInteractor.reserveSeat(reserveSeatCommand);
 
 		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(expectedLockKey), any());
 		verify(createReservationManager, times(1)).processCreateReservation(reserveSeatCommand);
@@ -125,7 +124,7 @@ class ReserveSeatInteractorTest {
 			.thenThrow(expectedException);
 
 		CustomException customException = assertThrows(CustomException.class,
-			() -> reserveSeatInteractor.reserveSeat(reserveSeatCommand));
+			() -> reserveInteractor.reserveSeat(reserveSeatCommand));
 
 		assertThat(customException.getErrorCode()).isEqualTo(ErrorCode.SEAT_NOT_FOUND);
 		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(expectedLockKey), any());
@@ -150,7 +149,7 @@ class ReserveSeatInteractorTest {
 			.thenThrow(new CustomException(ErrorCode.ALREADY_RESERVED_SEAT));
 
 		CustomException customException = assertThrows(CustomException.class,
-			() -> reserveSeatInteractor.reserveSeat(reserveSeatCommand));
+			() -> reserveInteractor.reserveSeat(reserveSeatCommand));
 
 		assertThat(customException.getErrorCode()).isEqualTo(ErrorCode.ALREADY_RESERVED_SEAT);
 		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(expectedLockKey), any());
@@ -174,7 +173,7 @@ class ReserveSeatInteractorTest {
 			.thenThrow(new CustomException(ErrorCode.INVALID_QUEUE_TOKEN));
 
 		CustomException actualException = assertThrows(CustomException.class,
-			() -> reserveSeatInteractor.reserveSeat(reserveSeatCommand));
+			() -> reserveInteractor.reserveSeat(reserveSeatCommand));
 
 		assertThat(actualException.getErrorCode()).isEqualTo(ErrorCode.INVALID_QUEUE_TOKEN);
 		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(expectedLockKey), any());
@@ -198,7 +197,7 @@ class ReserveSeatInteractorTest {
 			.thenThrow(new CustomException(ErrorCode.CONCERT_NOT_FOUND));
 
 		CustomException actualException = assertThrows(CustomException.class,
-			() -> reserveSeatInteractor.reserveSeat(reserveSeatCommand));
+			() -> reserveInteractor.reserveSeat(reserveSeatCommand));
 
 		assertThat(actualException.getErrorCode()).isEqualTo(ErrorCode.CONCERT_NOT_FOUND);
 		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(expectedLockKey), any());

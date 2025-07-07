@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import kr.hhplus.be.server.framework.exception.CustomException;
+import kr.hhplus.be.server.framework.exception.ErrorCode;
 import lombok.Builder;
 
 @Builder
@@ -38,7 +40,10 @@ public record Payment(
 			.build();
 	}
 
-	public Payment expired() {
+	public Payment expired() throws CustomException {
+		if (!status.equals(PaymentStatus.PENDING))
+			throw new CustomException(ErrorCode.PAYMENT_STATUS_NOT_PENDING);
+
 		return Payment.builder()
 				.id(id)
 				.userId(userId)
@@ -57,9 +62,5 @@ public record Payment(
 
 	public boolean checkAmount() {
 		return amount().compareTo(BigDecimal.ZERO) > 0;
-	}
-
-	public boolean isPending() {
-		return status == PaymentStatus.PENDING;
 	}
 }

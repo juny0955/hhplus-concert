@@ -28,15 +28,14 @@ import kr.hhplus.be.server.reservation.domain.ReservationStatus;
 import kr.hhplus.be.server.framework.exception.CustomException;
 import kr.hhplus.be.server.framework.exception.ErrorCode;
 import kr.hhplus.be.server.infrastructure.persistence.lock.DistributedLockManager;
-import kr.hhplus.be.server.reservation.application.service.ExpiredReservationManager;
 import kr.hhplus.be.server.reservation.application.dto.ExpiredReservationResult;
-import kr.hhplus.be.server.reservation.application.interactor.ReservationExpiredInteractor;
+import kr.hhplus.be.server.reservation.application.interactor.ReservationExpireInteractor;
 
 @ExtendWith(MockitoExtension.class)
 public class ReservationExpiredDistributedLockTest {
 
 	@InjectMocks
-	private ReservationExpiredInteractor reservationExpiredInteractor;
+	private ReservationExpireInteractor reservationExpireInteractor;
 
 	@Mock
 	private ExpiredReservationManager expiredReservationManager;
@@ -84,7 +83,7 @@ public class ReservationExpiredDistributedLockTest {
 			.when(distributedLockManager).executeWithLock(eq(schedulerLockKey), any());
 
 		CustomException exception = assertThrows(CustomException.class,
-			() -> reservationExpiredInteractor.expiredReservation());
+			() -> reservationExpireInteractor.expiredReservation());
 
 		assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.LOCK_CONFLICT);
 
@@ -111,7 +110,7 @@ public class ReservationExpiredDistributedLockTest {
 			});
 		when(expiredReservationManager.processExpiredReservation(any())).thenReturn(expiredReservationResult);
 
-		reservationExpiredInteractor.expiredReservation();
+		reservationExpireInteractor.expiredReservation();
 
 		verify(distributedLockManager, times(1)).executeWithLock(eq(schedulerLockKey), any());
 		verify(expiredReservationManager, times(1)).getPendingReservations();
@@ -133,7 +132,7 @@ public class ReservationExpiredDistributedLockTest {
 		when(distributedLockManager.executeWithLockHasReturn(eq(reservationLockKey), any()))
 			.thenThrow(new CustomException(ErrorCode.LOCK_CONFLICT));
 
-		assertDoesNotThrow(() -> reservationExpiredInteractor.expiredReservation());
+		assertDoesNotThrow(() -> reservationExpireInteractor.expiredReservation());
 
 		verify(distributedLockManager, times(1)).executeWithLock(eq(schedulerLockKey), any());
 		verify(expiredReservationManager, times(1)).getPendingReservations();
@@ -190,7 +189,7 @@ public class ReservationExpiredDistributedLockTest {
 			});
 		when(expiredReservationManager.processExpiredReservation(any())).thenReturn(expiredReservationResult);
 
-		reservationExpiredInteractor.expiredReservation();
+		reservationExpireInteractor.expiredReservation();
 
 		verify(distributedLockManager, times(1)).executeWithLock(eq(schedulerLockKey), any());
 		verify(expiredReservationManager, times(1)).getPendingReservations();
@@ -233,7 +232,7 @@ public class ReservationExpiredDistributedLockTest {
 		for (int i = 0; i < threadCount; i++) {
 			CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
 				try {
-					reservationExpiredInteractor.expiredReservation();
+					reservationExpireInteractor.expiredReservation();
 				} catch (CustomException e) {
 					if (e.getErrorCode() == ErrorCode.LOCK_CONFLICT) {
 						lockConflictCount.incrementAndGet();
@@ -271,7 +270,7 @@ public class ReservationExpiredDistributedLockTest {
 			});
 		when(expiredReservationManager.processExpiredReservation(any())).thenReturn(null);
 
-		reservationExpiredInteractor.expiredReservation();
+		reservationExpireInteractor.expiredReservation();
 
 		verify(distributedLockManager, times(1)).executeWithLock(eq(schedulerLockKey), any());
 		verify(expiredReservationManager, times(1)).getPendingReservations();

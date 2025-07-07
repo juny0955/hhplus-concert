@@ -3,6 +3,8 @@ package kr.hhplus.be.server.reservation.domain;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import kr.hhplus.be.server.framework.exception.CustomException;
+import kr.hhplus.be.server.framework.exception.ErrorCode;
 import lombok.Builder;
 
 @Builder
@@ -22,7 +24,7 @@ public record Reservation(
 			.build();
 	}
 
-	public Reservation doPay() {
+	public Reservation paid() {
 		return Reservation.builder()
 			.id(id)
 			.userId(userId)
@@ -33,7 +35,10 @@ public record Reservation(
 			.build();
 	}
 
-	public Reservation expired() {
+	public Reservation expired() throws CustomException {
+		if (!status.equals(ReservationStatus.PENDING))
+			throw new CustomException(ErrorCode.RESERVATION_STATUS_NOT_PENDING);
+
 		return Reservation.builder()
 				.id(id)
 				.userId(userId)
@@ -43,9 +48,4 @@ public record Reservation(
 				.updatedAt(LocalDateTime.now())
 				.build();
 	}
-
-	public boolean isPending() {
-		return status == ReservationStatus.PENDING;
-	}
-
 }

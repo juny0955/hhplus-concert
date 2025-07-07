@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.user.ports.out.persistence;
+package kr.hhplus.be.server.user.ports.out;
 
 import java.util.Optional;
 import java.util.UUID;

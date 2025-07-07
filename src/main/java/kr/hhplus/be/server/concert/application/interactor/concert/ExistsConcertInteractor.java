@@ -1,22 +1,22 @@
 package kr.hhplus.be.server.concert.application.interactor.concert;
 
-import java.util.List;
+import java.util.UUID;
 
 import org.springframework.stereotype.Component;
 
 import kr.hhplus.be.server.concert.application.service.ConcertApplicationService;
-import kr.hhplus.be.server.concert.domain.concert.Concert;
-import kr.hhplus.be.server.concert.ports.in.concert.GetOpenConcertInput;
+import kr.hhplus.be.server.concert.ports.in.concert.ExistsConcertInput;
+import kr.hhplus.be.server.framework.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
-public class GetOpenConcertInteractor implements GetOpenConcertInput {
+public class ExistsConcertInteractor implements ExistsConcertInput {
 
 	private final ConcertApplicationService concertApplicationService;
 
 	@Override
-	public List<Concert> getOpenConcert() {
-		return concertApplicationService.getOpenConcerts();
+	public void existsConcert(UUID concertId) throws CustomException {
+		concertApplicationService.existsConcert(concertId);
 	}
 }

@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.concert.adapters.in.response;
+package kr.hhplus.be.server.concert.adapters.in.web.response;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

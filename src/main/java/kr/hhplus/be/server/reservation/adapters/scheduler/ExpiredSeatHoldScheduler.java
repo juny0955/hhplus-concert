@@ -1,19 +1,19 @@
-package kr.hhplus.be.server.concert.adapters.scheduler;
+package kr.hhplus.be.server.reservation.adapters.scheduler;
 
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import kr.hhplus.be.server.reservation.ports.in.ReservationExpiredInput;
+import kr.hhplus.be.server.reservation.ports.in.ReservationExpireInput;
 import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
 public class ExpiredSeatHoldScheduler {
 
-    private final ReservationExpiredInput reservationExpiredInput;
+    private final ReservationExpireInput reservationExpireInput;
 
     @Scheduled(fixedRate = 60000)
     public void checkExpiredSeatHold() throws Exception {
-        reservationExpiredInput.expiredReservation();
+        reservationExpireInput.expiredReservation();
     }
 }

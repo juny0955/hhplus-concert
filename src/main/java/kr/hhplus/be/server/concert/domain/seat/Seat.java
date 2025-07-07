@@ -20,7 +20,10 @@ public record Seat(
 	LocalDateTime updatedAt
 ) {
 
-	public Seat expired() {
+	public Seat expired() throws CustomException {
+		if (!status.equals(SeatStatus.RESERVED))
+			throw new CustomException(ErrorCode.SEAT_STATUS_NOT_RESERVED);
+
 		return Seat.builder()
 				.id(id)
 				.concertDateId(concertDateId)
@@ -58,8 +61,4 @@ public record Seat(
 			.updatedAt(LocalDateTime.now())
 			.build();
 	}
-
-    public boolean isReserved() {
-		return status == SeatStatus.RESERVED;
-    }
 }

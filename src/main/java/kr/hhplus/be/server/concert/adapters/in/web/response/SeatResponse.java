@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.concert.adapters.in.response;
+package kr.hhplus.be.server.concert.adapters.in.web.response;
 
 import java.math.BigDecimal;
 import java.util.UUID;

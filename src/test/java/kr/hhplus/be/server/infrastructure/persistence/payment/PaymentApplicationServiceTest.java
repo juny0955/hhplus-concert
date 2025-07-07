@@ -21,7 +21,6 @@ import kr.hhplus.be.server.payment.application.service.PaymentApplicationService
 import kr.hhplus.be.server.payment.domain.Payment;
 import kr.hhplus.be.server.payment.domain.PaymentTransactionResult;
 import kr.hhplus.be.server.payment.domain.service.PaymentDomainResult;
-import kr.hhplus.be.server.payment.domain.service.PaymentDomainService;
 import kr.hhplus.be.server.payment.ports.out.PaymentRepository;
 import kr.hhplus.be.server.payment.domain.PaymentStatus;
 import kr.hhplus.be.server.queue.domain.QueueToken;
@@ -35,7 +34,7 @@ import kr.hhplus.be.server.concert.ports.out.SeatHoldRepository;
 import kr.hhplus.be.server.concert.ports.out.SeatRepository;
 import kr.hhplus.be.server.concert.domain.seat.SeatStatus;
 import kr.hhplus.be.server.user.domain.User;
-import kr.hhplus.be.server.user.ports.out.persistence.UserRepository;
+import kr.hhplus.be.server.user.ports.out.UserRepository;
 import kr.hhplus.be.server.framework.exception.CustomException;
 import kr.hhplus.be.server.framework.exception.ErrorCode;
 import kr.hhplus.be.server.payment.ports.in.PaymentCommand;

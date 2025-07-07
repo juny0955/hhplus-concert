@@ -19,7 +19,7 @@ import kr.hhplus.be.server.concert.domain.seat.SeatClass;
 import kr.hhplus.be.server.concert.ports.out.SeatRepository;
 import kr.hhplus.be.server.concert.domain.seat.SeatStatus;
 import kr.hhplus.be.server.user.domain.User;
-import kr.hhplus.be.server.user.ports.out.persistence.UserRepository;
+import kr.hhplus.be.server.user.ports.out.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
