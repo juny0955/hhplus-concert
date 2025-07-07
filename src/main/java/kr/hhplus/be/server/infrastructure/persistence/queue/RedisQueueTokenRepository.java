@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
 import kr.hhplus.be.server.concert.domain.concert.Concert;
 import kr.hhplus.be.server.queue.domain.QueueStatus;
 import kr.hhplus.be.server.queue.domain.QueueToken;
-import kr.hhplus.be.server.queue.domain.QueueTokenRepository;
+import kr.hhplus.be.server.queue.adapter.out.QueueTokenRepository;
 import kr.hhplus.be.server.queue.domain.QueueTokenUtil;
 import lombok.RequiredArgsConstructor;
 

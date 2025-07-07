@@ -1,0 +1,14 @@
+package kr.hhplus.be.server.payment.domain.service;
+
+import kr.hhplus.be.server.concert.domain.seat.Seat;
+import kr.hhplus.be.server.payment.domain.Payment;
+import kr.hhplus.be.server.reservation.domain.Reservation;
+import kr.hhplus.be.server.user.domain.User;
+
+public record PaymentDomainResult(
+	User user,
+	Reservation reservation,
+	Payment payment,
+	Seat seat
+) {
+}

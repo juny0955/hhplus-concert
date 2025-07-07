@@ -29,9 +29,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import kr.hhplus.be.server.api.TestDataFactory;
 import kr.hhplus.be.server.concert.domain.concert.Concert;
-import kr.hhplus.be.server.concert.domain.concert.ConcertRepository;
+import kr.hhplus.be.server.concert.ports.out.ConcertRepository;
 import kr.hhplus.be.server.concert.domain.concertDate.ConcertDate;
-import kr.hhplus.be.server.concert.domain.concertDate.ConcertDateRepository;
+import kr.hhplus.be.server.concert.ports.out.ConcertDateRepository;
 import kr.hhplus.be.server.user.domain.User;
 import kr.hhplus.be.server.user.domain.UserRepository;
 

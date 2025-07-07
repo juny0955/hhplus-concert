@@ -20,6 +20,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 import kr.hhplus.be.server.reservation.domain.ReservationExpiredEvent;
 import kr.hhplus.be.server.reservation.domain.Reservation;
@@ -42,7 +43,7 @@ public class ReservationExpiredDistributedLockTest {
 	private ExpiredReservationManager expiredReservationManager;
 
 	@Mock
-	private EventPublisher eventPublisher;
+	private ApplicationEventPublisher eventPublisher;
 
 	@Mock
 	private DistributedLockManager distributedLockManager;
@@ -91,7 +92,7 @@ public class ReservationExpiredDistributedLockTest {
 		verify(distributedLockManager, times(1)).executeWithLock(eq(schedulerLockKey), any());
 		verify(expiredReservationManager, never()).getPendingReservations();
 		verify(distributedLockManager, never()).executeWithLockHasReturn(anyString(), any());
-		verify(eventPublisher, never()).publish(any());
+		verify(eventPublisher, never()).publishEvent(any());
 	}
 
 	@Test
@@ -117,7 +118,7 @@ public class ReservationExpiredDistributedLockTest {
 		verify(expiredReservationManager, times(1)).getPendingReservations();
 		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(reservationLockKey), any());
 		verify(expiredReservationManager, times(1)).processExpiredReservation(any());
-		verify(eventPublisher, times(1)).publish(any(ReservationExpiredEvent.class));
+		verify(eventPublisher, times(1)).publishEvent(any(ReservationExpiredEvent.class));
 	}
 
 	@Test
@@ -139,7 +140,7 @@ public class ReservationExpiredDistributedLockTest {
 		verify(expiredReservationManager, times(1)).getPendingReservations();
 		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(reservationLockKey), any());
 		verify(expiredReservationManager, never()).processExpiredReservation(any());
-		verify(eventPublisher, never()).publish(any());
+		verify(eventPublisher, never()).publishEvent(any());
 	}
 
 	@Test
@@ -199,7 +200,7 @@ public class ReservationExpiredDistributedLockTest {
 		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq("reservation:" + reservationId2), any());
 		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq("reservation:" + reservationId3), any());
 		verify(expiredReservationManager, times(3)).processExpiredReservation(any());
-		verify(eventPublisher, times(3)).publish(any(ReservationExpiredEvent.class));
+		verify(eventPublisher, times(3)).publishEvent(any(ReservationExpiredEvent.class));
 	}
 
 	@Test
@@ -277,7 +278,7 @@ public class ReservationExpiredDistributedLockTest {
 		verify(expiredReservationManager, times(1)).getPendingReservations();
 		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(reservationLockKey), any());
 		verify(expiredReservationManager, times(1)).processExpiredReservation(any());
-		verify(eventPublisher, never()).publish(any());
+		verify(eventPublisher, never()).publishEvent(any());
 	}
 
 }

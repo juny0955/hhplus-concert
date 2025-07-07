@@ -26,7 +26,7 @@ import org.testcontainers.utility.TestcontainersConfiguration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import kr.hhplus.be.server.api.TestDataFactory;
-import kr.hhplus.be.server.user.api.dto.request.ChargePointRequest;
+import kr.hhplus.be.server.user.adapter.web.dto.request.ChargePointRequest;
 import kr.hhplus.be.server.user.domain.User;
 import kr.hhplus.be.server.user.domain.UserRepository;
 

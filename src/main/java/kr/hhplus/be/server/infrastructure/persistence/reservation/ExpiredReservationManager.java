@@ -8,14 +8,14 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import kr.hhplus.be.server.payment.domain.Payment;
-import kr.hhplus.be.server.payment.domain.PaymentRepository;
+import kr.hhplus.be.server.payment.ports.out.PaymentRepository;
 import kr.hhplus.be.server.reservation.domain.Reservation;
 import kr.hhplus.be.server.reservation.domain.ReservationDomainResult;
 import kr.hhplus.be.server.reservation.domain.ReservationDomainService;
-import kr.hhplus.be.server.reservation.domain.ReservationRepository;
+import kr.hhplus.be.server.reservation.adapter.out.persistence.ReservationRepository;
 import kr.hhplus.be.server.concert.domain.seat.Seat;
-import kr.hhplus.be.server.concert.domain.seat.SeatHoldRepository;
-import kr.hhplus.be.server.concert.domain.seat.SeatRepository;
+import kr.hhplus.be.server.concert.ports.out.SeatHoldRepository;
+import kr.hhplus.be.server.concert.ports.out.SeatRepository;
 import kr.hhplus.be.server.framework.exception.CustomException;
 import kr.hhplus.be.server.framework.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;

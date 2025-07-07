@@ -5,9 +5,9 @@ import java.util.UUID;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import kr.hhplus.be.server.concert.domain.concert.ConcertRepository;
+import kr.hhplus.be.server.concert.ports.out.ConcertRepository;
 import kr.hhplus.be.server.queue.domain.QueueToken;
-import kr.hhplus.be.server.queue.domain.QueueTokenRepository;
+import kr.hhplus.be.server.queue.adapter.out.QueueTokenRepository;
 import kr.hhplus.be.server.user.domain.UserRepository;
 import kr.hhplus.be.server.framework.exception.CustomException;
 import kr.hhplus.be.server.framework.exception.ErrorCode;

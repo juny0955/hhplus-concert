@@ -11,12 +11,12 @@ import org.springframework.stereotype.Component;
 import net.datafaker.Faker;
 
 import kr.hhplus.be.server.concert.domain.concert.Concert;
-import kr.hhplus.be.server.concert.domain.concert.ConcertRepository;
+import kr.hhplus.be.server.concert.ports.out.ConcertRepository;
 import kr.hhplus.be.server.concert.domain.concertDate.ConcertDate;
-import kr.hhplus.be.server.concert.domain.concertDate.ConcertDateRepository;
+import kr.hhplus.be.server.concert.ports.out.ConcertDateRepository;
 import kr.hhplus.be.server.concert.domain.seat.Seat;
 import kr.hhplus.be.server.concert.domain.seat.SeatClass;
-import kr.hhplus.be.server.concert.domain.seat.SeatRepository;
+import kr.hhplus.be.server.concert.ports.out.SeatRepository;
 import kr.hhplus.be.server.concert.domain.seat.SeatStatus;
 import kr.hhplus.be.server.user.domain.User;
 import kr.hhplus.be.server.user.domain.UserRepository;

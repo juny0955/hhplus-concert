@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 import kr.hhplus.be.server.reservation.domain.Reservation;
 import kr.hhplus.be.server.framework.exception.CustomException;
-import kr.hhplus.be.server.reservation.domain.ReservationRepository;
+import kr.hhplus.be.server.reservation.adapter.out.persistence.ReservationRepository;
 import lombok.RequiredArgsConstructor;
 
 @Component

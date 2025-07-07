@@ -9,9 +9,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import kr.hhplus.be.server.concert.domain.concert.Concert;
-import kr.hhplus.be.server.concert.domain.concert.ConcertRepository;
+import kr.hhplus.be.server.concert.ports.out.ConcertRepository;
 import kr.hhplus.be.server.concert.domain.concert.SoldOutRank;
-import kr.hhplus.be.server.concert.domain.concert.SoldOutRankRepository;
+import kr.hhplus.be.server.concert.ports.out.SoldOutRankRepository;
 import kr.hhplus.be.server.payment.domain.PaymentSuccessEvent;
 import kr.hhplus.be.server.framework.exception.CustomException;
 import kr.hhplus.be.server.framework.exception.ErrorCode;

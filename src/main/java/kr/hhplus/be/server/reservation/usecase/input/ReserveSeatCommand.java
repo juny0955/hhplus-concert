@@ -2,7 +2,7 @@ package kr.hhplus.be.server.reservation.usecase.input;
 
 import java.util.UUID;
 
-import kr.hhplus.be.server.reservation.api.dto.request.ReservationRequest;
+import kr.hhplus.be.server.reservation.adapter.in.web.request.ReservationRequest;
 
 public record ReserveSeatCommand(
 	UUID concertId,
