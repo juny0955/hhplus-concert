@@ -20,11 +20,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import kr.hhplus.be.server.queue.adapter.out.persistence.QueueApplicationService;
 import kr.hhplus.be.server.queue.domain.QueueToken;
 import kr.hhplus.be.server.framework.exception.CustomException;
 import kr.hhplus.be.server.framework.exception.ErrorCode;
 import kr.hhplus.be.server.infrastructure.persistence.lock.DistributedLockManager;
-import kr.hhplus.be.server.infrastructure.persistence.queue.QueueTokenManager;
 import kr.hhplus.be.server.queue.usecase.QueueService;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,7 +34,7 @@ public class QueueDistributedLockTest {
 	private QueueService queueService;
 
 	@Mock
-	private QueueTokenManager queueTokenManager;
+	private QueueApplicationService queueApplicationService;
 
 	@Mock
 	private DistributedLockManager distributedLockManager;
@@ -65,7 +65,7 @@ public class QueueDistributedLockTest {
 		assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.LOCK_CONFLICT);
 
 		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(queueLockKey), any());
-		verify(queueTokenManager, never()).processIssueQueueToken(any(), any());
+		verify(queueApplicationService, never()).processIssueQueueToken(any(), any());
 	}
 
 	@Test
@@ -76,13 +76,13 @@ public class QueueDistributedLockTest {
 				Callable<QueueToken> callable = invocation.getArgument(1);
 				return callable.call();
 			});
-		when(queueTokenManager.processIssueQueueToken(userId, concertId)).thenReturn(activeToken);
+		when(queueApplicationService.processIssueQueueToken(userId, concertId)).thenReturn(activeToken);
 
 		QueueToken result = queueService.issueQueueToken(userId, concertId);
 
 		assertThat(result).isEqualTo(activeToken);
 		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(queueLockKey), any());
-		verify(queueTokenManager, times(1)).processIssueQueueToken(userId, concertId);
+		verify(queueApplicationService, times(1)).processIssueQueueToken(userId, concertId);
 	}
 
 	@Test
@@ -104,7 +104,7 @@ public class QueueDistributedLockTest {
 					throw new CustomException(ErrorCode.LOCK_CONFLICT);
 				}
 			});
-		when(queueTokenManager.processIssueQueueToken(userId, concertId)).thenReturn(activeToken);
+		when(queueApplicationService.processIssueQueueToken(userId, concertId)).thenReturn(activeToken);
 
 		List<CompletableFuture<Void>> futures = new ArrayList<>();
 		for (int i = 0; i < threadCount; i++) {
@@ -157,7 +157,7 @@ public class QueueDistributedLockTest {
 					Callable<QueueToken> callable = invocation.getArgument(1);
 					return callable.call();
 				});
-			when(queueTokenManager.processIssueQueueToken(userId, differentConcertId)).thenReturn(token);
+			when(queueApplicationService.processIssueQueueToken(userId, differentConcertId)).thenReturn(token);
 		}
 
 		List<CompletableFuture<Void>> futures = new ArrayList<>();
@@ -182,7 +182,7 @@ public class QueueDistributedLockTest {
 
 		for (int i = 0; i < threadCount; i++) {
 			verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(lockKeys.get(i)), any());
-			verify(queueTokenManager, times(1)).processIssueQueueToken(userId, concertIds.get(i));
+			verify(queueApplicationService, times(1)).processIssueQueueToken(userId, concertIds.get(i));
 		}
 	}
 

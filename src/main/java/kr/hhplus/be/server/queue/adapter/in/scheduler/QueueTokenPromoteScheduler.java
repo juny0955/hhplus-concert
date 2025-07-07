@@ -6,8 +6,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import kr.hhplus.be.server.concert.domain.concert.Concert;
-import kr.hhplus.be.server.concert.ports.out.ConcertRepository;
-import kr.hhplus.be.server.queue.adapter.out.QueueTokenRepository;
+import kr.hhplus.be.server.concert.ports.in.concert.GetOpenConcertInput;
+import kr.hhplus.be.server.queue.ports.in.PromoteQueueTokenInput;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -16,8 +16,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class QueueTokenPromoteScheduler {
 
-    private final QueueTokenRepository queueTokenRepository;
-    private final ConcertRepository concertRepository;
+    private final PromoteQueueTokenInput promoteQueueTokenInput;
+    private final GetOpenConcertInput getOpenConcertInput;
 
     /**
      * 대기열 토큰을 활성 토큰으로 승급하는 스케줄러
@@ -25,7 +25,7 @@ public class QueueTokenPromoteScheduler {
      */
     @Scheduled(fixedRate = 5000)
     public void promoteWaitingTokens() {
-        List<Concert> openConcerts = concertRepository.findByOpenConcerts();
-        queueTokenRepository.promoteQueueToken(openConcerts);
+        List<Concert> openConcerts = getOpenConcertInput.getOpenConcert();
+        promoteQueueTokenInput.promoteQueueToken(openConcerts);
     }
 }

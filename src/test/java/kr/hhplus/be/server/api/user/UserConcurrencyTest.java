@@ -26,9 +26,9 @@ import org.testcontainers.utility.TestcontainersConfiguration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import kr.hhplus.be.server.api.TestDataFactory;
-import kr.hhplus.be.server.user.adapter.web.dto.request.ChargePointRequest;
+import kr.hhplus.be.server.user.adapters.in.web.dto.request.ChargePointRequest;
 import kr.hhplus.be.server.user.domain.User;
-import kr.hhplus.be.server.user.domain.UserRepository;
+import kr.hhplus.be.server.user.ports.out.persistence.UserRepository;
 
 @SpringBootTest(properties = {
 	"spring.jpa.hibernate.ddl-auto=create-drop"
@@ -67,7 +67,7 @@ public class UserConcurrencyTest {
 	@Test
 	@DisplayName("유저_포인트_동시충전")
 	@Rollback
-	void chargePoint_concurrency_test() throws Exception {
+	void chargePointPoint_concurrency_test() throws Exception {
 		BigDecimal chargePoint = BigDecimal.valueOf(5000);
 		ChargePointRequest request = new ChargePointRequest(chargePoint);
 

@@ -28,10 +28,9 @@ import kr.hhplus.be.server.reservation.domain.ReservationStatus;
 import kr.hhplus.be.server.framework.exception.CustomException;
 import kr.hhplus.be.server.framework.exception.ErrorCode;
 import kr.hhplus.be.server.infrastructure.persistence.lock.DistributedLockManager;
-import kr.hhplus.be.server.infrastructure.persistence.reservation.ExpiredReservationManager;
-import kr.hhplus.be.server.infrastructure.persistence.reservation.ExpiredReservationResult;
-import kr.hhplus.be.server.reservation.usecase.interactor.ReservationExpiredInteractor;
-import kr.hhplus.be.server.infrastructure.event.EventPublisher;
+import kr.hhplus.be.server.reservation.application.service.ExpiredReservationManager;
+import kr.hhplus.be.server.reservation.application.dto.ExpiredReservationResult;
+import kr.hhplus.be.server.reservation.application.interactor.ReservationExpiredInteractor;
 
 @ExtendWith(MockitoExtension.class)
 public class ReservationExpiredDistributedLockTest {

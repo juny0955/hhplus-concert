@@ -25,21 +25,21 @@ import org.testcontainers.utility.TestcontainersConfiguration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import kr.hhplus.be.server.api.TestDataFactory;
-import kr.hhplus.be.server.reservation.adapter.in.web.request.ReservationRequest;
+import kr.hhplus.be.server.reservation.adapters.in.web.request.ReservationRequest;
 import kr.hhplus.be.server.concert.domain.concert.Concert;
 import kr.hhplus.be.server.concert.ports.out.ConcertRepository;
 import kr.hhplus.be.server.concert.domain.concertDate.ConcertDate;
 import kr.hhplus.be.server.concert.ports.out.ConcertDateRepository;
 import kr.hhplus.be.server.payment.ports.out.PaymentRepository;
 import kr.hhplus.be.server.queue.domain.QueueToken;
-import kr.hhplus.be.server.queue.adapter.out.QueueTokenRepository;
+import kr.hhplus.be.server.queue.ports.out.QueueTokenRepository;
 import kr.hhplus.be.server.reservation.domain.Reservation;
-import kr.hhplus.be.server.reservation.adapter.out.persistence.ReservationRepository;
+import kr.hhplus.be.server.reservation.ports.out.ReservationRepository;
 import kr.hhplus.be.server.concert.domain.seat.Seat;
 import kr.hhplus.be.server.concert.ports.out.SeatRepository;
 import kr.hhplus.be.server.concert.domain.seat.SeatStatus;
 import kr.hhplus.be.server.user.domain.User;
-import kr.hhplus.be.server.user.domain.UserRepository;
+import kr.hhplus.be.server.user.ports.out.persistence.UserRepository;
 
 @SpringBootTest(properties = {
 	"spring.jpa.hibernate.ddl-auto=create-drop"

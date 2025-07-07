@@ -26,14 +26,14 @@ import kr.hhplus.be.server.user.domain.User;
 import kr.hhplus.be.server.framework.exception.CustomException;
 import kr.hhplus.be.server.framework.exception.ErrorCode;
 import kr.hhplus.be.server.infrastructure.persistence.lock.DistributedLockManager;
-import kr.hhplus.be.server.infrastructure.persistence.user.UserManager;
-import kr.hhplus.be.server.user.usecase.UserService;
+import kr.hhplus.be.server.user.application.service.UserManager;
+import kr.hhplus.be.server.user.application.service.UserApplicationService;
 
 @ExtendWith(MockitoExtension.class)
 public class UserDistributedLockTest {
 
 	@InjectMocks
-	private UserService userService;
+	private UserApplicationService userApplicationService;
 
 	@Mock
 	private UserManager userManager;
@@ -67,7 +67,7 @@ public class UserDistributedLockTest {
 			.thenThrow(new CustomException(ErrorCode.LOCK_CONFLICT));
 
 		CustomException exception = assertThrows(CustomException.class,
-			() -> userService.chargePoint(userId, chargePoint));
+			() -> userApplicationService.chargePoint(userId, chargePoint));
 
 		assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.LOCK_CONFLICT);
 
@@ -85,7 +85,7 @@ public class UserDistributedLockTest {
 			});
 		when(userManager.chargePoint(userId, chargePoint)).thenReturn(user);
 
-		User result = userService.chargePoint(userId, chargePoint);
+		User result = userApplicationService.chargePoint(userId, chargePoint);
 
 		assertThat(result).isEqualTo(user);
 		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(userLockKey), any());
@@ -94,11 +94,11 @@ public class UserDistributedLockTest {
 
 	@Test
 	@DisplayName("최소 충전 금액 미만시 예외가 발생한다")
-	void NotEnoughMinChargePoint() throws Exception {
+	void NotEnoughMinChargePointPoint() throws Exception {
 		BigDecimal invalidPoint = BigDecimal.valueOf(500); // 최소 충전 금액 1000원 미만
 
 		CustomException exception = assertThrows(CustomException.class,
-			() -> userService.chargePoint(userId, invalidPoint));
+			() -> userApplicationService.chargePoint(userId, invalidPoint));
 
 		assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.NOT_ENOUGH_MIN_CHARGE_POINT);
 
@@ -108,7 +108,7 @@ public class UserDistributedLockTest {
 
 	@Test
 	@DisplayName("동시에 포인트 충전시 하나만 성공한다")
-	void ConcurrentChargePointSameUser() throws Exception {
+	void ConcurrentChargePointPointSameUser() throws Exception {
 		int threadCount = 5;
 		CountDownLatch latch = new CountDownLatch(threadCount);
 		AtomicInteger successCount = new AtomicInteger(0);
@@ -130,7 +130,7 @@ public class UserDistributedLockTest {
 		for (int i = 0; i < threadCount; i++) {
 			CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
 				try {
-					userService.chargePoint(userId, chargePoint);
+					userApplicationService.chargePoint(userId, chargePoint);
 				} catch (CustomException e) {
 					if (e.getErrorCode() == ErrorCode.LOCK_CONFLICT) {
 						lockConflictCount.incrementAndGet();
@@ -153,7 +153,7 @@ public class UserDistributedLockTest {
 
 	@Test
 	@DisplayName("다른 사용자가 동시에 포인트 충전시 모두 성공한다")
-	void ConcurrentChargePointDifferentUsers() throws Exception {
+	void ConcurrentChargePointPointDifferentUsers() throws Exception {
 		int threadCount = 3;
 		CountDownLatch latch = new CountDownLatch(threadCount);
 		AtomicInteger successCount = new AtomicInteger(0);
@@ -190,7 +190,7 @@ public class UserDistributedLockTest {
 			final int index = i;
 			CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
 				try {
-					userService.chargePoint(userIds.get(index), chargePoint);
+					userApplicationService.chargePoint(userIds.get(index), chargePoint);
 				} catch (Exception e) {
 
 				} finally {

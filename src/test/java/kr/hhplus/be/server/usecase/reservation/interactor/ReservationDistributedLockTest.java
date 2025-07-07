@@ -27,13 +27,12 @@ import kr.hhplus.be.server.concert.domain.seat.Seat;
 import kr.hhplus.be.server.framework.exception.CustomException;
 import kr.hhplus.be.server.framework.exception.ErrorCode;
 import kr.hhplus.be.server.infrastructure.persistence.lock.DistributedLockManager;
-import kr.hhplus.be.server.infrastructure.persistence.reservation.CreateReservationManager;
-import kr.hhplus.be.server.infrastructure.persistence.reservation.CreateReservationResult;
-import kr.hhplus.be.server.reservation.usecase.interactor.ReserveSeatInteractor;
-import kr.hhplus.be.server.infrastructure.event.EventPublisher;
-import kr.hhplus.be.server.reservation.usecase.input.ReserveSeatCommand;
+import kr.hhplus.be.server.reservation.application.service.CreateReservationManager;
+import kr.hhplus.be.server.reservation.application.dto.CreateReservationResult;
+import kr.hhplus.be.server.reservation.application.interactor.ReserveSeatInteractor;
+import kr.hhplus.be.server.reservation.ports.in.ReserveSeatCommand;
 import kr.hhplus.be.server.reservation.usecase.output.ReservationOutput;
-import kr.hhplus.be.server.reservation.usecase.output.ReserveSeatResult;
+import kr.hhplus.be.server.reservation.application.dto.ReserveSeatResult;
 
 @ExtendWith(MockitoExtension.class)
 public class ReservationDistributedLockTest {

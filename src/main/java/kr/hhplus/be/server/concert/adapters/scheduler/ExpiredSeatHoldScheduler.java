@@ -3,7 +3,7 @@ package kr.hhplus.be.server.concert.adapters.scheduler;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import kr.hhplus.be.server.reservation.usecase.input.ReservationExpiredInput;
+import kr.hhplus.be.server.reservation.ports.in.ReservationExpiredInput;
 import lombok.RequiredArgsConstructor;
 
 @Component

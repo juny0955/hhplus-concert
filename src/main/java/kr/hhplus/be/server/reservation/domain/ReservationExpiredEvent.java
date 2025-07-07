@@ -1,8 +1,6 @@
 package kr.hhplus.be.server.reservation.domain;
 
-import kr.hhplus.be.server.infrastructure.event.Event;
-import kr.hhplus.be.server.infrastructure.event.EventTopic;
-import kr.hhplus.be.server.infrastructure.persistence.reservation.ExpiredReservationResult;
+import kr.hhplus.be.server.reservation.application.dto.ExpiredReservationResult;
 import lombok.Builder;
 
 import java.time.LocalDateTime;
@@ -15,7 +13,7 @@ public record ReservationExpiredEvent (
     UUID seatId,
     UUID userId,
     LocalDateTime occurredAt
-) implements Event {
+) {
 
     public static ReservationExpiredEvent from(ExpiredReservationResult expiredReservationResult) {
         return ReservationExpiredEvent.builder()
@@ -25,15 +23,5 @@ public record ReservationExpiredEvent (
                 .userId(expiredReservationResult.userId())
                 .occurredAt(LocalDateTime.now())
                 .build();
-    }
-
-    @Override
-    public EventTopic getTopic() {
-        return EventTopic.RESERVATION_EXPIRED;
-    }
-
-    @Override
-    public String getKey() {
-        return reservationId.toString();
     }
 }

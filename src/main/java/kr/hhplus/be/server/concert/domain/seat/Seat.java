@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import kr.hhplus.be.server.framework.exception.CustomException;
+import kr.hhplus.be.server.framework.exception.ErrorCode;
 import lombok.Builder;
 
 @Builder
@@ -30,7 +32,10 @@ public record Seat(
 				.build();
 	}
 
-	public Seat reserve() {
+	public Seat reserve() throws CustomException {
+		if (!status.equals(SeatStatus.AVAILABLE))
+			throw new CustomException(ErrorCode.ALREADY_RESERVED_SEAT);
+
 		return Seat.builder()
 			.id(id)
 			.concertDateId(concertDateId)
@@ -52,10 +57,6 @@ public record Seat(
 			.status(SeatStatus.ASSIGNED)
 			.updatedAt(LocalDateTime.now())
 			.build();
-	}
-
-	public boolean isAvailable() {
-		return status.equals(SeatStatus.AVAILABLE);
 	}
 
     public boolean isReserved() {

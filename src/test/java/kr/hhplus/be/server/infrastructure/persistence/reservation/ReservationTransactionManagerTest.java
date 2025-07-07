@@ -26,11 +26,13 @@ import kr.hhplus.be.server.payment.domain.Payment;
 import kr.hhplus.be.server.payment.ports.out.PaymentRepository;
 import kr.hhplus.be.server.payment.domain.PaymentStatus;
 import kr.hhplus.be.server.queue.domain.QueueToken;
-import kr.hhplus.be.server.queue.adapter.out.QueueTokenRepository;
+import kr.hhplus.be.server.queue.ports.out.QueueTokenRepository;
+import kr.hhplus.be.server.reservation.application.dto.CreateReservationResult;
+import kr.hhplus.be.server.reservation.application.service.CreateReservationManager;
 import kr.hhplus.be.server.reservation.domain.Reservation;
-import kr.hhplus.be.server.reservation.domain.ReservationDomainResult;
-import kr.hhplus.be.server.reservation.domain.ReservationDomainService;
-import kr.hhplus.be.server.reservation.adapter.out.persistence.ReservationRepository;
+import kr.hhplus.be.server.reservation.domain.service.ReservationDomainResult;
+import kr.hhplus.be.server.reservation.domain.service.ReservationDomainService;
+import kr.hhplus.be.server.reservation.ports.out.ReservationRepository;
 import kr.hhplus.be.server.reservation.domain.ReservationStatus;
 import kr.hhplus.be.server.concert.domain.seat.Seat;
 import kr.hhplus.be.server.concert.domain.seat.SeatClass;
@@ -39,7 +41,7 @@ import kr.hhplus.be.server.concert.ports.out.SeatRepository;
 import kr.hhplus.be.server.concert.domain.seat.SeatStatus;
 import kr.hhplus.be.server.framework.exception.CustomException;
 import kr.hhplus.be.server.framework.exception.ErrorCode;
-import kr.hhplus.be.server.reservation.usecase.input.ReserveSeatCommand;
+import kr.hhplus.be.server.reservation.ports.in.ReserveSeatCommand;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationTransactionManagerTest {

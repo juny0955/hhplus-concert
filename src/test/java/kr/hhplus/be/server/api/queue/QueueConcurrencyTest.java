@@ -33,7 +33,7 @@ import kr.hhplus.be.server.concert.ports.out.ConcertRepository;
 import kr.hhplus.be.server.concert.domain.concertDate.ConcertDate;
 import kr.hhplus.be.server.concert.ports.out.ConcertDateRepository;
 import kr.hhplus.be.server.user.domain.User;
-import kr.hhplus.be.server.user.domain.UserRepository;
+import kr.hhplus.be.server.user.ports.out.persistence.UserRepository;
 
 @SpringBootTest(properties = {
 	"spring.jpa.hibernate.ddl-auto=create-drop"

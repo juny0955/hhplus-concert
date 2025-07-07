@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import kr.hhplus.be.server.framework.exception.CustomException;
+import kr.hhplus.be.server.framework.exception.ErrorCode;
 import lombok.Builder;
 
 @Builder
@@ -14,7 +16,7 @@ public record User (
 	LocalDateTime updatedAt
 ) {
 
-	public User charge(BigDecimal point) {
+	public User chargePoint(BigDecimal point) {
 		return User.builder()
 			.id(id)
 			.amount(amount.add(point))
@@ -22,7 +24,10 @@ public record User (
 			.build();
 	}
 
-	public User doPay(BigDecimal balance) {
+	public User usePoint(BigDecimal balance) throws CustomException {
+		if (!checkEnoughAmount(balance))
+			throw new CustomException(ErrorCode.INSUFFICIENT_BALANCE);
+
 		return User.builder()
 			.id(id)
 			.amount(amount.subtract(balance))

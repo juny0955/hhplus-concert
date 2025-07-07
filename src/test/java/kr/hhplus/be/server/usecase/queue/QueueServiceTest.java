@@ -20,7 +20,7 @@ import kr.hhplus.be.server.queue.domain.QueueToken;
 import kr.hhplus.be.server.framework.exception.CustomException;
 import kr.hhplus.be.server.framework.exception.ErrorCode;
 import kr.hhplus.be.server.infrastructure.persistence.lock.DistributedLockManager;
-import kr.hhplus.be.server.infrastructure.persistence.queue.QueueTokenManager;
+import kr.hhplus.be.server.queue.adapter.out.persistence.QueueApplicationService;
 import kr.hhplus.be.server.queue.usecase.QueueService;
 
 import java.util.concurrent.Callable;
@@ -32,7 +32,7 @@ class QueueServiceTest {
 	private QueueService queueService;
 
 	@Mock
-	private QueueTokenManager queueTokenManager;
+	private QueueApplicationService queueApplicationService;
 
 	@Mock
 	private DistributedLockManager distributedLockManager;
@@ -71,12 +71,12 @@ class QueueServiceTest {
 				Callable<QueueToken> callable = invocation.getArgument(1);
 				return callable.call();
 			});
-		when(queueTokenManager.processIssueQueueToken(userId, concertId)).thenReturn(waitingToken);
+		when(queueApplicationService.processIssueQueueToken(userId, concertId)).thenReturn(waitingToken);
 
 		QueueToken queueToken = queueService.issueQueueToken(userId, concertId);
 
 		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(expectedLockKey), any());
-		verify(queueTokenManager, times(1)).processIssueQueueToken(userId, concertId);
+		verify(queueApplicationService, times(1)).processIssueQueueToken(userId, concertId);
 
 		assertThat(queueToken.status()).isEqualTo(QueueStatus.WAITING);
 		assertThat(queueToken.position()).isEqualTo(11);
@@ -96,12 +96,12 @@ class QueueServiceTest {
 				Callable<QueueToken> callable = invocation.getArgument(1);
 				return callable.call();
 			});
-		when(queueTokenManager.processIssueQueueToken(userId, concertId)).thenReturn(activeToken);
+		when(queueApplicationService.processIssueQueueToken(userId, concertId)).thenReturn(activeToken);
 
 		QueueToken queueToken = queueService.issueQueueToken(userId, concertId);
 
 		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(expectedLockKey), any());
-		verify(queueTokenManager, times(1)).processIssueQueueToken(userId, concertId);
+		verify(queueApplicationService, times(1)).processIssueQueueToken(userId, concertId);
 
 		assertThat(queueToken.status()).isEqualTo(QueueStatus.ACTIVE);
 		assertThat(queueToken.issuedAt()).isNotNull();
@@ -120,12 +120,12 @@ class QueueServiceTest {
 				Callable<QueueToken> callable = invocation.getArgument(1);
 				return callable.call();
 			});
-		when(queueTokenManager.processIssueQueueToken(userId, concertId)).thenReturn(existingToken);
+		when(queueApplicationService.processIssueQueueToken(userId, concertId)).thenReturn(existingToken);
 
 		QueueToken queueToken = queueService.issueQueueToken(userId, concertId);
 
 		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(expectedLockKey), any());
-		verify(queueTokenManager, times(1)).processIssueQueueToken(userId, concertId);
+		verify(queueApplicationService, times(1)).processIssueQueueToken(userId, concertId);
 
 		assertThat(queueToken.tokenId()).isEqualTo(tokenId);
 		assertThat(queueToken.status()).isEqualTo(QueueStatus.ACTIVE);
@@ -144,14 +144,14 @@ class QueueServiceTest {
 				Callable<QueueToken> callable = invocation.getArgument(1);
 				return callable.call();
 			});
-		when(queueTokenManager.processIssueQueueToken(userId, concertId))
+		when(queueApplicationService.processIssueQueueToken(userId, concertId))
 			.thenThrow(new CustomException(ErrorCode.USER_NOT_FOUND));
 
 		CustomException customException = assertThrows(CustomException.class,
 			() -> queueService.issueQueueToken(userId, concertId));
 
 		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(expectedLockKey), any());
-		verify(queueTokenManager, times(1)).processIssueQueueToken(userId, concertId);
+		verify(queueApplicationService, times(1)).processIssueQueueToken(userId, concertId);
 
 		assertThat(customException.getErrorCode()).isEqualTo(ErrorCode.USER_NOT_FOUND);
 	}
@@ -167,14 +167,14 @@ class QueueServiceTest {
 				Callable<QueueToken> callable = invocation.getArgument(1);
 				return callable.call();
 			});
-		when(queueTokenManager.processIssueQueueToken(userId, concertId))
+		when(queueApplicationService.processIssueQueueToken(userId, concertId))
 			.thenThrow(new CustomException(ErrorCode.CONCERT_NOT_FOUND));
 
 		CustomException customException = assertThrows(CustomException.class,
 			() -> queueService.issueQueueToken(userId, concertId));
 
 		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(expectedLockKey), any());
-		verify(queueTokenManager, times(1)).processIssueQueueToken(userId, concertId);
+		verify(queueApplicationService, times(1)).processIssueQueueToken(userId, concertId);
 
 		assertThat(customException.getErrorCode()).isEqualTo(ErrorCode.CONCERT_NOT_FOUND);
 	}
@@ -184,11 +184,11 @@ class QueueServiceTest {
 	void getQueueInfo_Success() throws CustomException {
 		String tokenIdString = tokenId.toString();
 		
-		when(queueTokenManager.getQueueInfo(concertId, tokenIdString)).thenReturn(existingToken);
+		when(queueApplicationService.getQueueInfo(concertId, tokenIdString)).thenReturn(existingToken);
 
 		QueueToken queueToken = queueService.getQueueInfo(concertId, tokenIdString);
 
-		verify(queueTokenManager, times(1)).getQueueInfo(concertId, tokenIdString);
+		verify(queueApplicationService, times(1)).getQueueInfo(concertId, tokenIdString);
 		
 		assertThat(queueToken.tokenId()).isEqualTo(tokenId);
 		assertThat(queueToken.status()).isEqualTo(QueueStatus.ACTIVE);
@@ -201,13 +201,13 @@ class QueueServiceTest {
 	void getQueueInfo_Failure_TokenNotFound() throws CustomException {
 		String tokenIdString = tokenId.toString();
 		
-		when(queueTokenManager.getQueueInfo(concertId, tokenIdString))
+		when(queueApplicationService.getQueueInfo(concertId, tokenIdString))
 			.thenThrow(new CustomException(ErrorCode.INVALID_QUEUE_TOKEN));
 
 		CustomException customException = assertThrows(CustomException.class,
 			() -> queueService.getQueueInfo(concertId, tokenIdString));
 
-		verify(queueTokenManager, times(1)).getQueueInfo(concertId, tokenIdString);
+		verify(queueApplicationService, times(1)).getQueueInfo(concertId, tokenIdString);
 		
 		assertThat(customException.getErrorCode()).isEqualTo(ErrorCode.INVALID_QUEUE_TOKEN);
 	}

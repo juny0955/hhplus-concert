@@ -22,9 +22,9 @@ import org.testcontainers.utility.TestcontainersConfiguration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import kr.hhplus.be.server.api.TestDataFactory;
-import kr.hhplus.be.server.user.adapter.web.dto.request.ChargePointRequest;
+import kr.hhplus.be.server.user.adapters.in.web.dto.request.ChargePointRequest;
 import kr.hhplus.be.server.user.domain.User;
-import kr.hhplus.be.server.user.domain.UserRepository;
+import kr.hhplus.be.server.user.ports.out.persistence.UserRepository;
 import kr.hhplus.be.server.framework.exception.ErrorCode;
 
 @SpringBootTest(properties = {
@@ -79,7 +79,7 @@ class UserIntegrationTest {
 
 	@Test
 	@DisplayName("유저_포인트_충전_성공")
-	void chargeUserPoint_Success() throws Exception {
+	void chargePointUserPoint_Success() throws Exception {
 		BigDecimal chargePoint = BigDecimal.valueOf(5000);
 		ChargePointRequest request = new ChargePointRequest(chargePoint);
 
@@ -98,7 +98,7 @@ class UserIntegrationTest {
 
 	@Test
 	@DisplayName("유저_포인트_충전_실패_유저못찾음")
-	void chargeUserPoint_Failure_UserNotFound() throws Exception {
+	void chargePointUserPoint_Failure_UserNotFound() throws Exception {
 		UUID userId = UUID.randomUUID();
 		BigDecimal chargePoint = BigDecimal.valueOf(5000);
 		ChargePointRequest request = new ChargePointRequest(chargePoint);
@@ -114,7 +114,7 @@ class UserIntegrationTest {
 
 	@Test
 	@DisplayName("유저_포인트_충전_실패_최소충전금액미만(1000원)")
-	void chargeUserPoint_Failure_NotEnoughMinChargePoint() throws Exception {
+	void chargeUserPoint_Failure_NotEnoughMinChargePointPoint() throws Exception {
 		UUID otherUserId = UUID.randomUUID();
 		BigDecimal chargePoint = BigDecimal.valueOf(500);
 		ChargePointRequest request = new ChargePointRequest(chargePoint);
@@ -133,7 +133,7 @@ class UserIntegrationTest {
 
 	@Test
 	@DisplayName("유저_포인트_충전_성공_충전금액경계값(1000원)")
-	void chargeUserPoint_Success_ChargePoint_1000Won() throws Exception {
+	void chargeUserPoint_Success_ChargePointPoint_1000Won() throws Exception {
 		BigDecimal chargePoint = BigDecimal.valueOf(1000);
 		ChargePointRequest request = new ChargePointRequest(chargePoint);
 

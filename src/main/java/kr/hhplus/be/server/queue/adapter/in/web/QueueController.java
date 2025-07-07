@@ -20,7 +20,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.hhplus.be.server.queue.adapter.in.web.response.QueueTokenResponse;
 import kr.hhplus.be.server.queue.domain.QueueToken;
 import kr.hhplus.be.server.framework.exception.CustomException;
-import kr.hhplus.be.server.queue.usecase.QueueService;
+import kr.hhplus.be.server.queue.ports.in.GetQueueTokenInput;
+import kr.hhplus.be.server.queue.ports.in.IssueQueueTokenInput;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -29,7 +30,8 @@ import lombok.RequiredArgsConstructor;
 @Tag(name = "Queue API", description = "대기열 관련 API")
 public class QueueController {
 
-	private final QueueService queueService;
+	private final GetQueueTokenInput getQueueTokenInput;
+	private final IssueQueueTokenInput issueQueueTokenInput;
 
 	@Operation(
 		summary = "콘서트 대기열 토큰 발급",
@@ -55,7 +57,7 @@ public class QueueController {
 		@PathVariable UUID concertId,
 		@PathVariable UUID userId
 	) throws Exception {
-		QueueToken queueToken = queueService.issueQueueToken(userId, concertId);
+		QueueToken queueToken = issueQueueTokenInput.issueQueueToken(userId, concertId);
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(QueueTokenResponse.from(queueToken));
 	}
@@ -84,7 +86,7 @@ public class QueueController {
 		@PathVariable UUID concertId,
 		@RequestHeader(value = "Authorization") String queueToken
 	) throws CustomException {
-		QueueToken result = queueService.getQueueInfo(concertId, queueToken);
+		QueueToken result = getQueueTokenInput.getQueueTokenInfo(concertId, queueToken);
 
 		return ResponseEntity.ok(QueueTokenResponse.from(result));
 	}
