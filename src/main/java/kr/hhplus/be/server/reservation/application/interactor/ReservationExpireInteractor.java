@@ -2,6 +2,7 @@ package kr.hhplus.be.server.reservation.application.interactor;
 
 import java.util.List;
 
+import kr.hhplus.be.server.concert.ports.in.seatHold.CheckSeatHoldInput;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
@@ -23,6 +24,7 @@ public class ReservationExpireInteractor implements ReservationExpireInput {
     private final static String RESERVATION_LOCK_KEY = "reservation:";
 
     private final ReservationApplicationService reservationApplicationService;
+    private final CheckSeatHoldInput checkSeatHoldInput;
     private final ApplicationEventPublisher eventPublisher;
     private final DistributedLockManager distributedLockManager;
 
@@ -45,6 +47,7 @@ public class ReservationExpireInteractor implements ReservationExpireInput {
 
         for (Reservation reservation : reservations) {
             String lockKey = RESERVATION_LOCK_KEY + reservation.id();
+            checkSeatHoldInput.checkSeatHold(reservation.seatId(), reservation.userId());
 
             // reservation:{reservationId} 락 획득 후 임시배정 만료 트랜잭션 수행
             ExpiredReservationResult expiredReservationResult = distributedLockManager.executeWithLockHasReturn(

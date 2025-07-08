@@ -158,7 +158,7 @@ class PaymentIntegrationTest {
 		User updatedUser = userRepository.findById(userId).get();
 		assertThat(updatedUser.amount()).isEqualTo(BigDecimal.valueOf(50000)); // 100000 - 50000
 
-		assertThat(seatHoldRepository.isHoldSeat(seatId, userId)).isFalse();
+		assertThat(seatHoldRepository.hasHoldByUser(seatId, userId)).isFalse();
 
 		QueueToken expiredToken = queueTokenRepository.findQueueTokenByTokenId(activeTokenId.toString());
 		assertThat(expiredToken).isNull();

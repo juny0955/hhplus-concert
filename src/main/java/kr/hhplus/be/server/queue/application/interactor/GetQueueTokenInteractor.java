@@ -2,6 +2,7 @@ package kr.hhplus.be.server.queue.application.interactor;
 
 import java.util.UUID;
 
+import kr.hhplus.be.server.concert.ports.in.concert.ExistsConcertInput;
 import org.springframework.stereotype.Component;
 
 import kr.hhplus.be.server.framework.exception.CustomException;
@@ -15,9 +16,11 @@ import lombok.RequiredArgsConstructor;
 public class GetQueueTokenInteractor implements GetQueueTokenInput {
 
 	private final QueueApplicationService queueApplicationService;
+	private final ExistsConcertInput existsConcertInput;
 
 	@Override
 	public QueueToken getQueueTokenInfo(UUID concertId, String queueToken) throws CustomException {
-		return queueApplicationService.getQueueInfo(concertId, queueToken);
+		existsConcertInput.existsConcert(concertId);
+		return queueApplicationService.getQueueInfo(queueToken);
 	}
 }

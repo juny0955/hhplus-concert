@@ -132,7 +132,7 @@ class ReservationIntegrationTest {
 		Seat seat = seatRepository.findById(seatId).get();
 		assertThat(seat.status()).isEqualTo(SeatStatus.RESERVED);
 
-		boolean isHoldSeat = seatHoldRepository.isHoldSeat(seatId, userId);
+		boolean isHoldSeat = seatHoldRepository.hasHoldByUser(seatId, userId);
 		assertThat(isHoldSeat).isTrue();
 
 		TestTransaction.end();

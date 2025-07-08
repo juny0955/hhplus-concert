@@ -2,6 +2,8 @@ package kr.hhplus.be.server.queue.application.interactor;
 
 import java.util.UUID;
 
+import kr.hhplus.be.server.concert.ports.in.concert.ExistsConcertInput;
+import kr.hhplus.be.server.user.ports.in.ExistsUserInput;
 import org.springframework.stereotype.Component;
 
 import kr.hhplus.be.server.infrastructure.persistence.lock.DistributedLockManager;
@@ -19,9 +21,14 @@ public class IssueQueueTokenInteractor implements IssueQueueTokenInput {
 
 	private final QueueApplicationService queueApplicationService;
 	private final DistributedLockManager distributedLockManager;
+	private final ExistsConcertInput existsConcertInput;
+	private final ExistsUserInput existsUserInput;
 
 	@Override
 	public QueueToken issueQueueToken(UUID userId, UUID concertId) throws Exception {
+		existsConcertInput.existsConcert(concertId);
+		existsUserInput.existsUser(userId);
+
 		String lockKey = LOCK_KEY + concertId;
 
 		return distributedLockManager.executeWithLockHasReturn(

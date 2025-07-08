@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.concert.adapters.out.persistence.seat;
+package kr.hhplus.be.server.concert.adapters.out.persistence.seatHold;
 
 import java.time.Duration;
 import java.util.UUID;
@@ -27,7 +27,7 @@ public class RedisSeatHoldRepository implements SeatHoldRepository {
 	}
 
 	@Override
-	public boolean isHoldSeat(UUID seatId, UUID userId) {
+	public boolean hasHoldByUser(UUID seatId, UUID userId) {
 		String key = SEAT_HOLD_PREFIX + seatId;
 		String holdUserId = seatHoldRedisTemplate.opsForValue().get(key);
 
@@ -37,14 +37,14 @@ public class RedisSeatHoldRepository implements SeatHoldRepository {
 		return holdUserId.equals(userId.toString());
 	}
 
+	public boolean isHoldSeat(UUID seatId) {
+		String key = SEAT_HOLD_PREFIX + seatId;
+		return seatHoldRedisTemplate.hasKey(key);
+	}
+
 	@Override
 	public void deleteHold(UUID seatId, UUID userId) {
 		String key = SEAT_HOLD_PREFIX + seatId;
-		String holdUserId = seatHoldRedisTemplate.opsForValue().get(key);
-
-		// 해당 사용자가 임시배정한 좌석인 경우에만 삭제
-		if (holdUserId != null && holdUserId.equals(userId.toString())) {
-			seatHoldRedisTemplate.delete(key);
-		}
+		seatHoldRedisTemplate.delete(key);
 	}
 }

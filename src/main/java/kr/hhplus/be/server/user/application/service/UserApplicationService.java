@@ -21,23 +21,24 @@ public class UserApplicationService {
 	private final UserRepository userRepository;
 
 	public User getUser(UUID userId) throws CustomException {
-		return findUser(userId);
+		return userRepository.findById(userId)
+				.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 	}
 
 	@Transactional
 	public User chargePoint(UUID userId, BigDecimal point) throws CustomException {
-		User user = findUser(userId);
+		User user = getUser(userId);
 		return userRepository.save(user.chargePoint(point));
 	}
 
 	@Transactional
 	public User usePoint(UUID userId, BigDecimal point) throws CustomException {
-		User user = findUser(userId);
+		User user = getUser(userId);
 		return userRepository.save(user.usePoint(point));
 	}
 
-	private User findUser(UUID userId) throws CustomException {
-		return userRepository.findById(userId)
-			.orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+	public void existsUser(UUID userId) throws CustomException {
+		if (!userRepository.existsById(userId))
+			throw new CustomException(ErrorCode.USER_NOT_FOUND);
 	}
 }

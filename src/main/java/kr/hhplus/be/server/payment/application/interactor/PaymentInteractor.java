@@ -1,5 +1,6 @@
 package kr.hhplus.be.server.payment.application.interactor;
 
+import kr.hhplus.be.server.concert.ports.in.seatHold.CheckSeatHoldInput;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
@@ -24,12 +25,15 @@ public class PaymentInteractor implements PaymentInput {
 
 	private final PaymentApplicationService paymentApplicationService;
 	private final GetActiveQueueTokenInput getActiveQueueTokenInput;
+	private final CheckSeatHoldInput checkSeatHoldInput;
 	private final ApplicationEventPublisher eventPublisher;
 	private final DistributedLockManager distributedLockManager;
 
 	@Override
 	public PaymentResult payment(PaymentCommand command) throws Exception {
 		QueueToken queueToken = getActiveQueueTokenInput.getActiveQueueToken(command.queueTokenId());
+		checkSeatHoldInput.checkSeatHold(command.seatId(), queueToken.userId());
+
 		String reservationLockKey = RESERVATION_LOCK_KEY + command.reservationId();
 
 		// payment:reservation:{reservationId} 락 획득 후 결제 트랜잭션 수행

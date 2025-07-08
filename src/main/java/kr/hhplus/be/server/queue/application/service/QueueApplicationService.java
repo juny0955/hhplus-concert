@@ -1,20 +1,17 @@
 package kr.hhplus.be.server.queue.application.service;
 
-import java.util.List;
-import java.util.UUID;
-
+import kr.hhplus.be.server.concert.domain.concert.Concert;
+import kr.hhplus.be.server.framework.exception.CustomException;
+import kr.hhplus.be.server.framework.exception.ErrorCode;
+import kr.hhplus.be.server.queue.domain.QueueToken;
+import kr.hhplus.be.server.queue.ports.out.QueueTokenRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import kr.hhplus.be.server.concert.domain.concert.Concert;
-import kr.hhplus.be.server.concert.ports.out.ConcertRepository;
-import kr.hhplus.be.server.queue.domain.QueueToken;
-import kr.hhplus.be.server.queue.ports.out.QueueTokenRepository;
-import kr.hhplus.be.server.user.ports.out.UserRepository;
-import kr.hhplus.be.server.framework.exception.CustomException;
-import kr.hhplus.be.server.framework.exception.ErrorCode;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.List;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -25,14 +22,9 @@ public class QueueApplicationService {
 	private static final long QUEUE_EXPIRES_TIME = 30L;
 
 	private final QueueTokenRepository queueTokenRepository;
-	private final ConcertRepository concertRepository;
-	private final UserRepository userRepository;
 
 	@Transactional
-	public QueueToken processIssueQueueToken(UUID userId, UUID concertId) throws CustomException {
-		validateUserId(userId);
-		validateConcertId(concertId);
-
+	public QueueToken processIssueQueueToken(UUID userId, UUID concertId) {
 		String findTokenId = queueTokenRepository.findTokenIdByUserIdAndConcertId(userId, concertId);
 		if (findTokenId != null)
 			return getQueueToken(findTokenId);
@@ -45,9 +37,7 @@ public class QueueApplicationService {
 		return queueToken;
 	}
 
-	public QueueToken getQueueInfo(UUID concertId, String tokenId) throws CustomException {
-		validateConcertId(concertId);
-
+	public QueueToken getQueueInfo(String tokenId) throws CustomException {
 		QueueToken queueToken = getQueueToken(tokenId);
 		if (queueToken == null || queueToken.isExpired())
 			throw new CustomException(ErrorCode.INVALID_QUEUE_TOKEN);
@@ -70,14 +60,8 @@ public class QueueApplicationService {
 		}
 	}
 
-	private void validateUserId(UUID userId) throws CustomException {
-		if (!userRepository.existsById(userId))
-			throw new CustomException(ErrorCode.USER_NOT_FOUND);
-	}
-
-	private void validateConcertId(UUID concertId) throws CustomException {
-		if (!concertRepository.existsById(concertId))
-			throw new CustomException(ErrorCode.CONCERT_NOT_FOUND);
+	public void expireQueueToken(String tokenId) {
+		queueTokenRepository.expiresQueueToken(tokenId);
 	}
 
 	private QueueToken createQueueToken(Integer activeTokens, UUID userId, UUID concertId) {
@@ -89,4 +73,5 @@ public class QueueApplicationService {
 		Integer waitingTokens = queueTokenRepository.countWaitingTokens(concertId);
 		return QueueToken.waitingTokenOf(tokenId, userId, concertId, waitingTokens);
 	}
+
 }

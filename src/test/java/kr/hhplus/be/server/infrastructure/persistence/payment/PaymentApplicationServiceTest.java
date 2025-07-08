@@ -113,7 +113,7 @@ class PaymentApplicationServiceTest {
 		when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(reservation));
 		when(seatRepository.findById(seatId)).thenReturn(Optional.of(seat));
 		when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-		when(seatHoldRepository.isHoldSeat(seatId, userId)).thenReturn(true);
+		when(seatHoldRepository.hasHoldByUser(seatId, userId)).thenReturn(true);
 		when(paymentRepository.findByReservationId(reservationId)).thenReturn(Optional.of(payment));
 		when(paymentDomainService.processPayment(reservation, payment, seat, user)).thenReturn(paymentDomainResult);
 		
@@ -133,7 +133,7 @@ class PaymentApplicationServiceTest {
 		verify(reservationRepository, times(1)).findById(reservationId);
 		verify(seatRepository, times(1)).findById(seatId);
 		verify(userRepository, times(1)).findById(userId);
-		verify(seatHoldRepository, times(1)).isHoldSeat(seatId, userId);
+		verify(seatHoldRepository, times(1)).hasHoldByUser(seatId, userId);
 		verify(paymentRepository, times(1)).findByReservationId(reservationId);
 		verify(paymentDomainService, times(1)).processPayment(reservation, payment, seat, user);
 		verify(paymentRepository, times(1)).save(paymentDomainResult.payment());
@@ -191,7 +191,7 @@ class PaymentApplicationServiceTest {
 		verify(reservationRepository, times(1)).findById(reservationId);
 		verify(seatRepository, times(1)).findById(seatId);
 		verify(userRepository, times(1)).findById(userId);
-		verify(seatHoldRepository, never()).isHoldSeat(any(), any());
+		verify(seatHoldRepository, never()).hasHoldByUser(any(), any());
 		verify(paymentRepository, never()).findByReservationId(any());
 		verify(paymentDomainService, never()).processPayment(any(), any(), any(), any());
 	}
@@ -202,7 +202,7 @@ class PaymentApplicationServiceTest {
 		when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(reservation));
 		when(seatRepository.findById(seatId)).thenReturn(Optional.of(seat));
 		when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-		when(seatHoldRepository.isHoldSeat(seatId, userId)).thenReturn(false);
+		when(seatHoldRepository.hasHoldByUser(seatId, userId)).thenReturn(false);
 
 		CustomException exception = assertThrows(CustomException.class,
 			() -> paymentApplicationService.processPayment(paymentCommand, queueToken));
@@ -211,7 +211,7 @@ class PaymentApplicationServiceTest {
 		verify(reservationRepository, times(1)).findById(reservationId);
 		verify(seatRepository, times(1)).findById(seatId);
 		verify(userRepository, times(1)).findById(userId);
-		verify(seatHoldRepository, times(1)).isHoldSeat(seatId, userId);
+		verify(seatHoldRepository, times(1)).hasHoldByUser(seatId, userId);
 		verify(paymentRepository, never()).findByReservationId(any());
 		verify(paymentDomainService, never()).processPayment(any(), any(), any(), any());
 	}
@@ -222,7 +222,7 @@ class PaymentApplicationServiceTest {
 		when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(reservation));
 		when(seatRepository.findById(seatId)).thenReturn(Optional.of(seat));
 		when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-		when(seatHoldRepository.isHoldSeat(seatId, userId)).thenReturn(true);
+		when(seatHoldRepository.hasHoldByUser(seatId, userId)).thenReturn(true);
 		when(paymentRepository.findByReservationId(reservationId)).thenReturn(Optional.empty());
 
 		CustomException exception = assertThrows(CustomException.class,
@@ -232,7 +232,7 @@ class PaymentApplicationServiceTest {
 		verify(reservationRepository, times(1)).findById(reservationId);
 		verify(seatRepository, times(1)).findById(seatId);
 		verify(userRepository, times(1)).findById(userId);
-		verify(seatHoldRepository, times(1)).isHoldSeat(seatId, userId);
+		verify(seatHoldRepository, times(1)).hasHoldByUser(seatId, userId);
 		verify(paymentRepository, times(1)).findByReservationId(reservationId);
 		verify(paymentDomainService, never()).processPayment(any(), any(), any(), any());
 	}
@@ -243,7 +243,7 @@ class PaymentApplicationServiceTest {
 		when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(reservation));
 		when(seatRepository.findById(seatId)).thenReturn(Optional.of(seat));
 		when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-		when(seatHoldRepository.isHoldSeat(seatId, userId)).thenReturn(true);
+		when(seatHoldRepository.hasHoldByUser(seatId, userId)).thenReturn(true);
 		when(paymentRepository.findByReservationId(reservationId)).thenReturn(Optional.of(payment));
 		when(paymentDomainService.processPayment(reservation, payment, seat, user))
 			.thenThrow(new CustomException(ErrorCode.INSUFFICIENT_BALANCE));
@@ -255,7 +255,7 @@ class PaymentApplicationServiceTest {
 		verify(reservationRepository, times(1)).findById(reservationId);
 		verify(seatRepository, times(1)).findById(seatId);
 		verify(userRepository, times(1)).findById(userId);
-		verify(seatHoldRepository, times(1)).isHoldSeat(seatId, userId);
+		verify(seatHoldRepository, times(1)).hasHoldByUser(seatId, userId);
 		verify(paymentRepository, times(1)).findByReservationId(reservationId);
 		verify(paymentDomainService, times(1)).processPayment(reservation, payment, seat, user);
 
