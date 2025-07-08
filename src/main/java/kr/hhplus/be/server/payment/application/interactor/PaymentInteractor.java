@@ -1,14 +1,13 @@
 package kr.hhplus.be.server.payment.application.interactor;
 
-import kr.hhplus.be.server.concert.ports.in.seatHold.CheckSeatHoldInput;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 import kr.hhplus.be.server.common.infrastructure.persistence.lock.DistributedLockManager;
+import kr.hhplus.be.server.concert.ports.in.seatHold.CheckSeatHoldInput;
 import kr.hhplus.be.server.payment.application.dto.PaymentResult;
 import kr.hhplus.be.server.payment.application.service.PaymentApplicationService;
-import kr.hhplus.be.server.payment.domain.UpdateRankEvent;
-import kr.hhplus.be.server.payment.domain.PaymentTransactionResult;
+import kr.hhplus.be.server.payment.domain.PaymentSuccessEvent;
 import kr.hhplus.be.server.payment.ports.in.PaymentCommand;
 import kr.hhplus.be.server.payment.ports.in.PaymentInput;
 import kr.hhplus.be.server.queue.domain.QueueToken;
@@ -37,12 +36,12 @@ public class PaymentInteractor implements PaymentInput {
 		String reservationLockKey = RESERVATION_LOCK_KEY + command.reservationId();
 
 		// payment:reservation:{reservationId} 락 획득 후 결제 트랜잭션 수행
-		PaymentTransactionResult paymentTransactionResult = distributedLockManager.executeWithLockHasReturn(
+		PaymentResult paymentResult = distributedLockManager.executeWithLockHasReturn(
 			reservationLockKey,
 			() -> paymentApplicationService.processPayment(command, queueToken)
 		);
 
-		eventPublisher.publishEvent(UpdateRankEvent.from(paymentTransactionResult));
-		return PaymentResult.from(paymentTransactionResult);
+		eventPublisher.publishEvent(PaymentSuccessEvent.from(paymentResult));
+		return paymentResult;
 	}
 }

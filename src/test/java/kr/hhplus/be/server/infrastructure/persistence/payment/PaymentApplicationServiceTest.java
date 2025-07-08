@@ -19,7 +19,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import kr.hhplus.be.server.payment.application.service.PaymentApplicationService;
 import kr.hhplus.be.server.payment.domain.Payment;
-import kr.hhplus.be.server.payment.domain.PaymentTransactionResult;
 import kr.hhplus.be.server.payment.domain.service.PaymentDomainResult;
 import kr.hhplus.be.server.payment.ports.out.PaymentRepository;
 import kr.hhplus.be.server.payment.domain.PaymentStatus;

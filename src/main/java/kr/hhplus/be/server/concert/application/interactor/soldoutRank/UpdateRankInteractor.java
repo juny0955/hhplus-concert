@@ -8,7 +8,7 @@ import kr.hhplus.be.server.concert.domain.seat.Seat;
 import kr.hhplus.be.server.concert.domain.seat.SeatStatus;
 import kr.hhplus.be.server.concert.ports.out.ConcertDateRepository;
 import kr.hhplus.be.server.concert.ports.out.SeatRepository;
-import kr.hhplus.be.server.payment.domain.UpdateRankEvent;
+import kr.hhplus.be.server.payment.domain.PaymentSuccessEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
@@ -27,7 +27,7 @@ public class UpdateRankInteractor {
 
     @Async
     @EventListener
-    public void handleEvent(UpdateRankEvent event) {
+    public void handleEvent(PaymentSuccessEvent event) {
         try {
             ConcertDate concertDate = getConcertDate(event.seat().concertDateId());
 

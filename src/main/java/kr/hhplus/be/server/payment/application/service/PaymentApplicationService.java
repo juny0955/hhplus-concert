@@ -1,12 +1,18 @@
 package kr.hhplus.be.server.payment.application.service;
 
+import java.math.BigDecimal;
+import java.util.UUID;
+
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import kr.hhplus.be.server.common.framework.exception.CustomException;
+import kr.hhplus.be.server.common.framework.exception.ErrorCode;
 import kr.hhplus.be.server.concert.domain.seat.Seat;
 import kr.hhplus.be.server.concert.ports.in.seat.PaidSeatInput;
 import kr.hhplus.be.server.concert.ports.in.seatHold.ReleaseSeatHoldInput;
-import kr.hhplus.be.server.common.framework.exception.CustomException;
-import kr.hhplus.be.server.common.framework.exception.ErrorCode;
+import kr.hhplus.be.server.payment.application.dto.PaymentResult;
 import kr.hhplus.be.server.payment.domain.Payment;
-import kr.hhplus.be.server.payment.domain.PaymentTransactionResult;
 import kr.hhplus.be.server.payment.ports.in.PaymentCommand;
 import kr.hhplus.be.server.payment.ports.out.PaymentRepository;
 import kr.hhplus.be.server.queue.domain.QueueToken;
@@ -16,11 +22,6 @@ import kr.hhplus.be.server.reservation.ports.in.PaidReservationInput;
 import kr.hhplus.be.server.user.domain.User;
 import kr.hhplus.be.server.user.ports.in.UsePointInput;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
-import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -34,7 +35,7 @@ public class PaymentApplicationService {
 	private final ReleaseSeatHoldInput releaseSeatHoldInput;
 
 	@Transactional
-	public PaymentTransactionResult processPayment(PaymentCommand command, QueueToken queueToken) throws Exception {
+	public PaymentResult processPayment(PaymentCommand command, QueueToken queueToken) throws Exception {
 		Payment payment = getPayment(command.reservationId());
 
 		Payment savedPayment		 = paymentRepository.save(payment.success());
@@ -45,7 +46,7 @@ public class PaymentApplicationService {
 		releaseSeatHoldInput.releaseSeatHold(savedSeat.id(), savedUser.id());
 		expireQueueTokenInput.expireQueueToken(queueToken.tokenId().toString());
 
-		return new PaymentTransactionResult(savedPayment, savedReservation, savedSeat, savedUser);
+		return new PaymentResult(savedPayment, savedSeat, savedReservation, savedUser);
 	}
 
 	public Payment getPayment(UUID reservationId) throws CustomException {

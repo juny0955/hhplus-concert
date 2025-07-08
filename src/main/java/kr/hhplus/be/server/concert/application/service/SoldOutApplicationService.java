@@ -13,7 +13,7 @@ import kr.hhplus.be.server.concert.domain.concert.Concert;
 import kr.hhplus.be.server.concert.ports.out.ConcertRepository;
 import kr.hhplus.be.server.concert.domain.concert.SoldOutRank;
 import kr.hhplus.be.server.concert.ports.out.SoldOutRankRepository;
-import kr.hhplus.be.server.payment.domain.UpdateRankEvent;
+import kr.hhplus.be.server.payment.domain.PaymentSuccessEvent;
 import kr.hhplus.be.server.common.framework.exception.CustomException;
 import kr.hhplus.be.server.common.framework.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +31,7 @@ public class SoldOutApplicationService {
 	private final SoldOutRankRepository soldOutRankRepository;
 
 	@Transactional
-	public void processUpdateRanking(UpdateRankEvent event, UUID concertId, int seatSize) throws CustomException {
+	public void processUpdateRanking(PaymentSuccessEvent event, UUID concertId, int seatSize) throws CustomException {
 		Concert concert = getConcert(concertId);
 
 		long soldOutTime = Duration.between(concert.openTime(), event.payment().updatedAt()).getSeconds();

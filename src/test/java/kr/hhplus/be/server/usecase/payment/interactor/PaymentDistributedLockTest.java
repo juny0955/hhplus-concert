@@ -20,7 +20,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import kr.hhplus.be.server.payment.domain.UpdateRankEvent;
+import kr.hhplus.be.server.payment.domain.PaymentSuccessEvent;
 import kr.hhplus.be.server.payment.domain.Payment;
 import kr.hhplus.be.server.queue.adapter.out.persistence.QueueApplicationService;
 import kr.hhplus.be.server.queue.domain.QueueToken;
@@ -32,7 +32,6 @@ import kr.hhplus.be.server.common.framework.exception.CustomException;
 import kr.hhplus.be.server.common.framework.exception.ErrorCode;
 import kr.hhplus.be.server.common.infrastructure.persistence.lock.DistributedLockManager;
 import kr.hhplus.be.server.payment.application.service.PaymentApplicationService;
-import kr.hhplus.be.server.payment.domain.PaymentTransactionResult;
 import kr.hhplus.be.server.payment.ports.in.PaymentCommand;
 import kr.hhplus.be.server.payment.application.dto.PaymentResult;
 
@@ -158,7 +157,7 @@ public class PaymentDistributedLockTest {
 		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(userLockKey), any());
 		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(reservationLockKey), any());
 		verify(paymentApplicationService, times(1)).processPayment(paymentCommand, queueToken);
-		verify(eventPublisher, times(1)).publish(any(UpdateRankEvent.class));
+		verify(eventPublisher, times(1)).publish(any(PaymentSuccessEvent.class));
 		verify(paymentOutput, times(1)).ok(any(PaymentResult.class));
 	}
 
