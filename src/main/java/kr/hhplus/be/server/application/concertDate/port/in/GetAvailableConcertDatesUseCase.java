@@ -6,6 +6,6 @@ import java.util.UUID;
 import kr.hhplus.be.server.domain.concertDate.ConcertDate;
 import kr.hhplus.be.server.exception.CustomException;
 
-public interface GetAvailableConcertDatesInput {
+public interface GetAvailableConcertDatesUseCase {
 	List<ConcertDate> getAvailableConcertDates(UUID concertId) throws CustomException;
 }

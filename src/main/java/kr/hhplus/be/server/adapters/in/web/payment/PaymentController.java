@@ -15,7 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.hhplus.be.server.adapters.in.web.payment.response.PaymentResponse;
 import kr.hhplus.be.server.application.payment.port.in.PaymentCommand;
-import kr.hhplus.be.server.application.payment.port.in.PaymentInput;
+import kr.hhplus.be.server.application.payment.port.in.PaymentUseCase;
 import kr.hhplus.be.server.application.payment.dto.PaymentResult;
 import lombok.RequiredArgsConstructor;
 
@@ -26,7 +26,7 @@ import lombok.RequiredArgsConstructor;
 @Tag(name = "Payment API", description = "결제 관련 API")
 public class PaymentController {
 
-	private final PaymentInput paymentInput;
+	private final PaymentUseCase paymentUseCase;
 
 	@Operation(
 		summary = "예약 결제 API",
@@ -61,7 +61,7 @@ public class PaymentController {
 		@RequestBody PayReservationRequest request,
 		@RequestHeader(value = "Authorization") String queueToken
 	) throws Exception {
-		PaymentResult result = paymentInput.payment(PaymentCommand.of(reservationId, request.seatId(), queueToken));
+		PaymentResult result = paymentUseCase.payment(PaymentCommand.of(reservationId, request.seatId(), queueToken));
 
 		return ResponseEntity.ok(PaymentResponse.from(result));
 	}

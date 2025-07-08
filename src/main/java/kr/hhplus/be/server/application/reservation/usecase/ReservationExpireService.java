@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import kr.hhplus.be.server.application.reservation.dto.ExpiredReservationResult;
 import kr.hhplus.be.server.application.reservation.port.in.ReservationExpireInput;
 import kr.hhplus.be.server.application.reservation.service.ReservationService;
-import kr.hhplus.be.server.application.seatHold.port.in.CheckSeatHoldInput;
+import kr.hhplus.be.server.application.seatHold.port.in.CheckSeatHoldUseCase;
 import kr.hhplus.be.server.domain.reservation.Reservation;
 import kr.hhplus.be.server.domain.reservation.ReservationExpiredEvent;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ReservationExpireService implements ReservationExpireInput {
 
     private final ReservationService reservationService;
-    private final CheckSeatHoldInput checkSeatHoldInput;
+    private final CheckSeatHoldUseCase checkSeatHoldUseCase;
     private final ApplicationEventPublisher eventPublisher;
 
 	@Override
@@ -29,7 +29,7 @@ public class ReservationExpireService implements ReservationExpireInput {
             List<Reservation> reservations = reservationService.getPendingReservations();
 
             for (Reservation reservation : reservations) {
-                checkSeatHoldInput.checkSeatHold(reservation.seatId(), reservation.userId());
+                checkSeatHoldUseCase.checkSeatHold(reservation.seatId(), reservation.userId());
 
                 ExpiredReservationResult expiredReservationResult = reservationService.expireReservation(reservation);
 

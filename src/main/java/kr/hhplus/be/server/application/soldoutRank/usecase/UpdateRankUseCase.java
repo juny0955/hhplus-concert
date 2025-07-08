@@ -3,9 +3,10 @@ package kr.hhplus.be.server.application.soldoutRank.usecase;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 import kr.hhplus.be.server.application.concertDate.port.out.ConcertDateRepository;
 import kr.hhplus.be.server.application.seat.port.out.SeatRepository;
@@ -27,7 +28,7 @@ public class UpdateRankUseCase {
     private final SeatRepository seatRepository;
 
     @Async
-    @EventListener
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void updateRank(PaymentSuccessEvent event) {
         try {
             ConcertDate concertDate = getConcertDate(event.seat().concertDateId());

@@ -8,30 +8,27 @@ import java.util.UUID;
 import org.springframework.stereotype.Component;
 
 import kr.hhplus.be.server.application.concertDate.port.out.ConcertDateRepository;
+import kr.hhplus.be.server.application.concertDate.port.out.GetConcertDatePort;
 import kr.hhplus.be.server.domain.concertDate.ConcertDate;
 import kr.hhplus.be.server.domain.concertDate.ConcertDates;
+import kr.hhplus.be.server.exception.CustomException;
+import kr.hhplus.be.server.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
-public class ConcertDateJpaGateway implements ConcertDateRepository {
+public class ConcertDateJpaGateway implements ConcertDateRepository, GetConcertDatePort {
 
 	private final JpaConcertDateRepository jpaConcertDateRepository;
 
 	@Override
-	public ConcertDate save(ConcertDate concertDate) {
-		ConcertDateEntity concertDateEntity = jpaConcertDateRepository.save(ConcertDateEntity.from(concertDate));
-		return concertDateEntity.toDomain();
+	public void existsConcertDate(UUID concertDateId) throws CustomException {
+		if (!jpaConcertDateRepository.existsById(concertDateId.toString()))
+			throw new CustomException(ErrorCode.CONCERT_DATE_NOT_FOUND);
 	}
 
 	@Override
-	public Optional<ConcertDate> findById(UUID concertDateId) {
-		return jpaConcertDateRepository.findById(concertDateId.toString())
-			.map(ConcertDateEntity::toDomain);
-	}
-
-	@Override
-	public ConcertDates findAvailableDatesWithAvailableSeatCount(UUID concertId) {
+	public ConcertDates getAvailableDatesWithSeatCount(UUID concertId) {
 		List<Object[]> results = jpaConcertDateRepository.findAvailableDatesWithAvailableSeatCount(concertId.toString());
 
 		return new ConcertDates(results.stream()
@@ -58,8 +55,15 @@ public class ConcertDateJpaGateway implements ConcertDateRepository {
 	}
 
 	@Override
-	public boolean existsById(UUID concertDateId) {
-		return jpaConcertDateRepository.existsById(concertDateId.toString());
+	public ConcertDate save(ConcertDate concertDate) {
+		ConcertDateEntity concertDateEntity = jpaConcertDateRepository.save(ConcertDateEntity.from(concertDate));
+		return concertDateEntity.toDomain();
+	}
+
+	@Override
+	public Optional<ConcertDate> findById(UUID concertDateId) {
+		return jpaConcertDateRepository.findById(concertDateId.toString())
+			.map(ConcertDateEntity::toDomain);
 	}
 
 	@Override

@@ -19,7 +19,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.hhplus.be.server.adapters.in.web.reservation.request.ReservationRequest;
 import kr.hhplus.be.server.adapters.in.web.reservation.response.ReservationResponse;
-import kr.hhplus.be.server.application.reservation.port.in.ReservationCreateInput;
+import kr.hhplus.be.server.application.reservation.dto.ReserveSeatResult;
+import kr.hhplus.be.server.application.reservation.port.in.ReservationCreateUseCase;
 import kr.hhplus.be.server.application.reservation.port.in.ReserveSeatCommand;
 import lombok.RequiredArgsConstructor;
 
@@ -30,8 +31,7 @@ import lombok.RequiredArgsConstructor;
 @Tag(name = "Reservation API", description = "예약 관련 API")
 public class ReservationController {
 
-	private final ReservationCreateInput reservationCreateInput;
-	private ReservationResponse reservationResponse;
+	private final ReservationCreateUseCase reservationCreateUseCase;
 
 	@Operation(
 		summary = "콘서트 좌석 예약 API",
@@ -74,8 +74,8 @@ public class ReservationController {
 		@RequestBody ReservationRequest request,
 		@RequestHeader(value = "Authorization") String queueToken
 	) throws Exception {
-		reservationCreateInput.reserveSeat(ReserveSeatCommand.of(request, seatId, queueToken));
+		ReserveSeatResult reserveSeatResult = reservationCreateUseCase.reserveSeat(ReserveSeatCommand.of(request, seatId, queueToken));
 
-		return ResponseEntity.ok(reservationResponse);
+		return ResponseEntity.ok(ReservationResponse.from(reserveSeatResult));
 	}
 }

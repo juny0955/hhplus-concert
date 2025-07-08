@@ -17,8 +17,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.hhplus.be.server.adapters.in.web.concert.response.ConcertDateResponse;
 import kr.hhplus.be.server.adapters.in.web.concert.response.SeatResponse;
-import kr.hhplus.be.server.application.concertDate.port.in.GetAvailableConcertDatesInput;
-import kr.hhplus.be.server.application.seat.port.in.GetAvailableSeatsInput;
+import kr.hhplus.be.server.application.concertDate.port.in.GetAvailableConcertDatesUseCase;
+import kr.hhplus.be.server.application.seat.port.in.GetAvailableSeatsUseCase;
 import kr.hhplus.be.server.domain.concertDate.ConcertDate;
 import kr.hhplus.be.server.domain.seat.Seat;
 import kr.hhplus.be.server.exception.CustomException;
@@ -30,8 +30,8 @@ import lombok.RequiredArgsConstructor;
 @Tag(name = "Concert API", description = "콘서트 관련 API")
 public class ConcertController {
 
-	private final GetAvailableSeatsInput getAvailableSeatsInput;
-	private final GetAvailableConcertDatesInput getAvailableConcertDatesInput;
+	private final GetAvailableSeatsUseCase getAvailableSeatsUseCase;
+	private final GetAvailableConcertDatesUseCase getAvailableConcertDatesUseCase;
 
 	@Operation(
 		summary = "콘서트 예약 가능 날짜 조회 API",
@@ -52,7 +52,7 @@ public class ConcertController {
 	public ResponseEntity<List<ConcertDateResponse>> getAvailableDates(
 		@PathVariable UUID concertId
 	) throws CustomException {
-		List<ConcertDate> availableConcertDates = getAvailableConcertDatesInput.getAvailableConcertDates(concertId);
+		List<ConcertDate> availableConcertDates = getAvailableConcertDatesUseCase.getAvailableConcertDates(concertId);
 		List<ConcertDateResponse> responses = availableConcertDates.stream()
 			.map(ConcertDateResponse::from)
 			.toList();
@@ -84,7 +84,7 @@ public class ConcertController {
 		@PathVariable UUID concertId,
 		@PathVariable UUID concertDateId
 	) throws CustomException {
-		List<Seat> availableSeats = getAvailableSeatsInput.getAvailableSeats(concertId, concertDateId);
+		List<Seat> availableSeats = getAvailableSeatsUseCase.getAvailableSeats(concertId, concertDateId);
 		List<SeatResponse> response = availableSeats.stream()
 			.map(SeatResponse::from)
 			.toList();

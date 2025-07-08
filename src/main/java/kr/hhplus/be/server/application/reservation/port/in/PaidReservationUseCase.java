@@ -6,6 +6,6 @@ import kr.hhplus.be.server.domain.reservation.Reservation;
 import kr.hhplus.be.server.exception.CustomException;
 
 
-public interface PaidReservationInput {
+public interface PaidReservationUseCase {
 	Reservation paidReservation(UUID reservationId) throws CustomException;
 }

@@ -1,5 +1,5 @@
 package kr.hhplus.be.server.application.queue.port.in;
 
-public interface ExpireQueueTokenInput {
+public interface ExpireQueueTokenUseCase {
     void expireQueueToken(String tokenId);
 }

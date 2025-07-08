@@ -5,6 +5,6 @@ import java.util.UUID;
 import kr.hhplus.be.server.domain.seat.Seat;
 import kr.hhplus.be.server.exception.CustomException;
 
-public interface PaidSeatInput {
+public interface PaidSeatUseCase {
 	Seat paidSeat(UUID seatId) throws CustomException;
 }

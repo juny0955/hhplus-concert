@@ -4,6 +4,6 @@ import java.util.UUID;
 
 import kr.hhplus.be.server.exception.CustomException;
 
-public interface ExistsConcertInput {
-	void existsConcert(UUID concertId) throws CustomException;
+public interface ValidOpenConcertUseCase {
+	void validOpenConcert(UUID concertId) throws CustomException;
 }

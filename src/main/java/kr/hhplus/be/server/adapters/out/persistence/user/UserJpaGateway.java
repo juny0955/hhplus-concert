@@ -4,7 +4,6 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Component;
 
-import kr.hhplus.be.server.application.user.port.out.ExistsUserPort;
 import kr.hhplus.be.server.application.user.port.out.GetUserPort;
 import kr.hhplus.be.server.application.user.port.out.SaveUserPort;
 import kr.hhplus.be.server.domain.user.User;
@@ -14,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
-public class UserJpaGateway implements GetUserPort, SaveUserPort, ExistsUserPort {
+public class UserJpaGateway implements GetUserPort, SaveUserPort {
 
 	private final JpaUserRepository jpaUserRepository;
 

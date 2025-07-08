@@ -4,6 +4,6 @@ import java.util.UUID;
 
 import kr.hhplus.be.server.exception.CustomException;
 
-public interface ValidDeadLineInput {
+public interface ValidDeadLineUseCase {
 	void validDeadLine(UUID concertDateId) throws CustomException;
 }

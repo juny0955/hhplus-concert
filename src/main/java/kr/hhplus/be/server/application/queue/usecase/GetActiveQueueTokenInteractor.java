@@ -2,7 +2,7 @@ package kr.hhplus.be.server.application.queue.usecase;
 
 import org.springframework.stereotype.Component;
 
-import kr.hhplus.be.server.application.queue.port.in.GetActiveQueueTokenInput;
+import kr.hhplus.be.server.application.queue.port.in.GetActiveQueueTokenUseCase;
 import kr.hhplus.be.server.application.queue.service.QueueService;
 import kr.hhplus.be.server.domain.queue.QueueToken;
 import kr.hhplus.be.server.domain.queue.QueueTokenUtil;
@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
-public class GetActiveQueueTokenInteractor implements GetActiveQueueTokenInput {
+public class GetActiveQueueTokenInteractor implements GetActiveQueueTokenUseCase {
 
 	private final QueueService queueService;
 

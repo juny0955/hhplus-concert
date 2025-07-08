@@ -7,4 +7,5 @@ import kr.hhplus.be.server.exception.CustomException;
 
 public interface GetUserPort {
 	User getUser(UUID userId) throws CustomException;
+	void existsUser(UUID userId) throws CustomException;
 }

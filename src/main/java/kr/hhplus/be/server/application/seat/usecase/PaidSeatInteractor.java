@@ -4,7 +4,7 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Component;
 
-import kr.hhplus.be.server.application.seat.port.in.PaidSeatInput;
+import kr.hhplus.be.server.application.seat.port.in.PaidSeatUseCase;
 import kr.hhplus.be.server.application.seat.service.SeatService;
 import kr.hhplus.be.server.domain.seat.Seat;
 import kr.hhplus.be.server.exception.CustomException;
@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
-public class PaidSeatInteractor implements PaidSeatInput {
+public class PaidSeatInteractor implements PaidSeatUseCase {
 
 	private final SeatService seatService;
 

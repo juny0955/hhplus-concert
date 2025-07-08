@@ -4,8 +4,7 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Component;
 
-import kr.hhplus.be.server.application.concert.port.in.ExistsConcertInput;
-import kr.hhplus.be.server.application.concert.port.out.ExistsConcertPort;
+import kr.hhplus.be.server.application.concert.port.out.GetConcertPort;
 import kr.hhplus.be.server.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 
@@ -13,11 +12,10 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ExistsConcertInteractor implements ExistsConcertInput {
 
-
-	private final ExistsConcertPort existsConcertPort;
+	private final GetConcertPort getConcertPort;
 
 	@Override
 	public void existsConcert(UUID concertId) throws CustomException {
-		existsConcertPort.existsConcert(concertId);
+		getConcertPort.existsConcert(concertId);
 	}
 }
