@@ -20,7 +20,7 @@ import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
-public class UpdateRankInteractor {
+public class UpdateRankUseCase {
 
     private final SoldOutService soldOutService;
     private final ConcertDateRepository concertDateRepository;
@@ -28,7 +28,7 @@ public class UpdateRankInteractor {
 
     @Async
     @EventListener
-    public void handleEvent(PaymentSuccessEvent event) {
+    public void updateRank(PaymentSuccessEvent event) {
         try {
             ConcertDate concertDate = getConcertDate(event.seat().concertDateId());
 
@@ -48,5 +48,4 @@ public class UpdateRankInteractor {
         return concertDateRepository.findById(concertDateId)
                 .orElseThrow(() -> new CustomException(ErrorCode.CONCERT_DATE_NOT_FOUND));
     }
-
 }

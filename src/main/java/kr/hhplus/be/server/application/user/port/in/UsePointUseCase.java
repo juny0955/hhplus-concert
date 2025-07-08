@@ -5,6 +5,6 @@ import java.util.UUID;
 
 import kr.hhplus.be.server.domain.user.User;
 
-public interface UsePointInput {
+public interface UsePointUseCase {
 	User usePoint(UUID userId, BigDecimal point) throws Exception;
 }

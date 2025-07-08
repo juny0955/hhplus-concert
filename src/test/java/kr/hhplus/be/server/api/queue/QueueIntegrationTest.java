@@ -33,7 +33,6 @@ import kr.hhplus.be.server.application.queue.domain.QueueStatus;
 import kr.hhplus.be.server.application.queue.domain.QueueToken;
 import kr.hhplus.be.server.application.queue.port.out.QueueTokenRepository;
 import kr.hhplus.be.server.application.user.domain.User;
-import kr.hhplus.be.server.application.user.port.out.UserRepository;
 import kr.hhplus.be.server.exception.ErrorCode;
 
 @SpringBootTest(properties = {

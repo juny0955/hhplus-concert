@@ -1,6 +1,5 @@
 package kr.hhplus.be.server.api.user;
 
-import static org.assertj.core.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -24,7 +23,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import kr.hhplus.be.server.api.TestDataFactory;
 import kr.hhplus.be.server.adapters.in.web.user.request.ChargePointRequest;
 import kr.hhplus.be.server.application.user.domain.User;
-import kr.hhplus.be.server.application.user.port.out.UserRepository;
 import kr.hhplus.be.server.exception.ErrorCode;
 
 @SpringBootTest(properties = {

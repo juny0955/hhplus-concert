@@ -16,7 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import kr.hhplus.be.server.adapters.out.persistence.lock.DistributedLockManager;
+import kr.hhplus.be.server.adapters.out.persistence.lock.DistributedLockAspect;
 import kr.hhplus.be.server.application.queue.service.QueueService;
 import kr.hhplus.be.server.domain.queue.QueueStatus;
 import kr.hhplus.be.server.domain.queue.QueueToken;
@@ -34,7 +34,7 @@ class QueueServiceTest {
 	private QueueApplicationService queueApplicationService;
 
 	@Mock
-	private DistributedLockManager distributedLockManager;
+	private DistributedLockAspect distributedLockAspect;
 
 	private UUID userId;
 	private UUID concertId;
@@ -65,7 +65,7 @@ class QueueServiceTest {
 		QueueToken waitingToken = QueueToken.waitingTokenOf(tokenId, userId, concertId, 10);
 		String expectedLockKey = "queue:" + concertId;
 
-		when(distributedLockManager.executeWithLockHasReturn(eq(expectedLockKey), any()))
+		when(distributedLockAspect.executeWithLockHasReturn(eq(expectedLockKey), any()))
 			.thenAnswer(invocation -> {
 				Callable<QueueToken> callable = invocation.getArgument(1);
 				return callable.call();
@@ -74,7 +74,7 @@ class QueueServiceTest {
 
 		QueueToken queueToken = queueService.issueQueueToken(userId, concertId);
 
-		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(expectedLockKey), any());
+		verify(distributedLockAspect, times(1)).executeWithLockHasReturn(eq(expectedLockKey), any());
 		verify(queueApplicationService, times(1)).processIssueQueueToken(userId, concertId);
 
 		assertThat(queueToken.status()).isEqualTo(QueueStatus.WAITING);
@@ -90,7 +90,7 @@ class QueueServiceTest {
 		QueueToken activeToken = QueueToken.activeTokenOf(tokenId, userId, concertId, 1800000L);
 		String expectedLockKey = "queue:" + concertId;
 
-		when(distributedLockManager.executeWithLockHasReturn(eq(expectedLockKey), any()))
+		when(distributedLockAspect.executeWithLockHasReturn(eq(expectedLockKey), any()))
 			.thenAnswer(invocation -> {
 				Callable<QueueToken> callable = invocation.getArgument(1);
 				return callable.call();
@@ -99,7 +99,7 @@ class QueueServiceTest {
 
 		QueueToken queueToken = queueService.issueQueueToken(userId, concertId);
 
-		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(expectedLockKey), any());
+		verify(distributedLockAspect, times(1)).executeWithLockHasReturn(eq(expectedLockKey), any());
 		verify(queueApplicationService, times(1)).processIssueQueueToken(userId, concertId);
 
 		assertThat(queueToken.status()).isEqualTo(QueueStatus.ACTIVE);
@@ -114,7 +114,7 @@ class QueueServiceTest {
 		String expectedLockKey = "queue:" + concertId;
 
 		// 분산락 Mock 설정
-		when(distributedLockManager.executeWithLockHasReturn(eq(expectedLockKey), any()))
+		when(distributedLockAspect.executeWithLockHasReturn(eq(expectedLockKey), any()))
 			.thenAnswer(invocation -> {
 				Callable<QueueToken> callable = invocation.getArgument(1);
 				return callable.call();
@@ -123,7 +123,7 @@ class QueueServiceTest {
 
 		QueueToken queueToken = queueService.issueQueueToken(userId, concertId);
 
-		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(expectedLockKey), any());
+		verify(distributedLockAspect, times(1)).executeWithLockHasReturn(eq(expectedLockKey), any());
 		verify(queueApplicationService, times(1)).processIssueQueueToken(userId, concertId);
 
 		assertThat(queueToken.tokenId()).isEqualTo(tokenId);
@@ -138,7 +138,7 @@ class QueueServiceTest {
 	void issueQueueToken_Failure_UserNotFound() throws Exception {
 		String expectedLockKey = "queue:" + concertId;
 
-		when(distributedLockManager.executeWithLockHasReturn(eq(expectedLockKey), any()))
+		when(distributedLockAspect.executeWithLockHasReturn(eq(expectedLockKey), any()))
 			.thenAnswer(invocation -> {
 				Callable<QueueToken> callable = invocation.getArgument(1);
 				return callable.call();
@@ -149,7 +149,7 @@ class QueueServiceTest {
 		CustomException customException = assertThrows(CustomException.class,
 			() -> queueService.issueQueueToken(userId, concertId));
 
-		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(expectedLockKey), any());
+		verify(distributedLockAspect, times(1)).executeWithLockHasReturn(eq(expectedLockKey), any());
 		verify(queueApplicationService, times(1)).processIssueQueueToken(userId, concertId);
 
 		assertThat(customException.getErrorCode()).isEqualTo(ErrorCode.USER_NOT_FOUND);
@@ -161,7 +161,7 @@ class QueueServiceTest {
 		String expectedLockKey = "queue:" + concertId;
 
 		// 분산락 Mock 설정 - 내부에서 예외 발생
-		when(distributedLockManager.executeWithLockHasReturn(eq(expectedLockKey), any()))
+		when(distributedLockAspect.executeWithLockHasReturn(eq(expectedLockKey), any()))
 			.thenAnswer(invocation -> {
 				Callable<QueueToken> callable = invocation.getArgument(1);
 				return callable.call();
@@ -172,7 +172,7 @@ class QueueServiceTest {
 		CustomException customException = assertThrows(CustomException.class,
 			() -> queueService.issueQueueToken(userId, concertId));
 
-		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(expectedLockKey), any());
+		verify(distributedLockAspect, times(1)).executeWithLockHasReturn(eq(expectedLockKey), any());
 		verify(queueApplicationService, times(1)).processIssueQueueToken(userId, concertId);
 
 		assertThat(customException.getErrorCode()).isEqualTo(ErrorCode.CONCERT_NOT_FOUND);

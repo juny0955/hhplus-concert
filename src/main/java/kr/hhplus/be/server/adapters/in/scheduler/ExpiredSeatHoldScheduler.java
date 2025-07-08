@@ -4,6 +4,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import kr.hhplus.be.server.application.reservation.port.in.ReservationExpireInput;
+import kr.hhplus.be.server.config.aop.DistributedLock;
 import lombok.RequiredArgsConstructor;
 
 @Component
@@ -13,6 +14,7 @@ public class ExpiredSeatHoldScheduler {
     private final ReservationExpireInput reservationExpireInput;
 
     @Scheduled(fixedRate = 60000)
+    @DistributedLock(key = "scheduler:reservation-expired")
     public void checkExpiredSeatHold() throws Exception {
         reservationExpireInput.expiredReservation();
     }

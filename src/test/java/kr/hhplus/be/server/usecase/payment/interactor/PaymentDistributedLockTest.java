@@ -30,7 +30,7 @@ import kr.hhplus.be.server.application.payment.usecase.PaymentInteractor;
 import kr.hhplus.be.server.application.user.domain.User;
 import kr.hhplus.be.server.exception.CustomException;
 import kr.hhplus.be.server.exception.ErrorCode;
-import kr.hhplus.be.server.adapters.out.persistence.lock.DistributedLockManager;
+import kr.hhplus.be.server.adapters.out.persistence.lock.DistributedLockAspect;
 import kr.hhplus.be.server.application.payment.service.PaymentService;
 import kr.hhplus.be.server.application.payment.port.in.PaymentCommand;
 import kr.hhplus.be.server.application.payment.dto.PaymentResult;
@@ -54,7 +54,7 @@ public class PaymentDistributedLockTest {
 	private EventPublisher eventPublisher;
 
 	@Mock
-	private DistributedLockManager distributedLockManager;
+	private DistributedLockAspect distributedLockAspect;
 
 	private PaymentCommand paymentCommand;
 	private PaymentTransactionResult paymentTransactionResult;
@@ -93,7 +93,7 @@ public class PaymentDistributedLockTest {
 	@DisplayName("User 락을 획득하지 못하면 트랜잭션을 실행하지 않는다")
 	void NotHasUserLock() throws Exception {
 		when(queueApplicationService.getQueueToken(queueTokenId.toString())).thenReturn(queueToken);
-		when(distributedLockManager.executeWithLockHasReturn(eq(userLockKey), any()))
+		when(distributedLockAspect.executeWithLockHasReturn(eq(userLockKey), any()))
 			.thenThrow(new CustomException(ErrorCode.LOCK_CONFLICT));
 
 		CustomException exception = assertThrows(CustomException.class,
@@ -102,8 +102,8 @@ public class PaymentDistributedLockTest {
 		assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.LOCK_CONFLICT);
 
 		verify(queueApplicationService, times(1)).getQueueToken(queueTokenId.toString());
-		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(userLockKey), any());
-		verify(distributedLockManager, never()).executeWithLockHasReturn(eq(reservationLockKey), any());
+		verify(distributedLockAspect, times(1)).executeWithLockHasReturn(eq(userLockKey), any());
+		verify(distributedLockAspect, never()).executeWithLockHasReturn(eq(reservationLockKey), any());
 		verify(paymentService, never()).processPayment(any(), any());
 		verify(eventPublisher, never()).publish(any());
 		verify(paymentOutput, never()).ok(any());
@@ -113,12 +113,12 @@ public class PaymentDistributedLockTest {
 	@DisplayName("Reservation 락을 획득하지 못하면 트랜잭션을 실행하지 않는다")
 	void NotHasReservationLock() throws Exception {
 		when(queueApplicationService.getQueueToken(queueTokenId.toString())).thenReturn(queueToken);
-		when(distributedLockManager.executeWithLockHasReturn(eq(userLockKey), any()))
+		when(distributedLockAspect.executeWithLockHasReturn(eq(userLockKey), any()))
 			.thenAnswer(invocation -> {
 				Callable<?> callable = invocation.getArgument(1);
 				return callable.call();
 			});
-		when(distributedLockManager.executeWithLockHasReturn(eq(reservationLockKey), any()))
+		when(distributedLockAspect.executeWithLockHasReturn(eq(reservationLockKey), any()))
 			.thenThrow(new CustomException(ErrorCode.LOCK_CONFLICT));
 
 		CustomException exception = assertThrows(CustomException.class,
@@ -127,8 +127,8 @@ public class PaymentDistributedLockTest {
 		assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.LOCK_CONFLICT);
 
 		verify(queueApplicationService, times(1)).getQueueToken(queueTokenId.toString());
-		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(userLockKey), any());
-		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(reservationLockKey), any());
+		verify(distributedLockAspect, times(1)).executeWithLockHasReturn(eq(userLockKey), any());
+		verify(distributedLockAspect, times(1)).executeWithLockHasReturn(eq(reservationLockKey), any());
 		verify(paymentService, never()).processPayment(any(), any());
 		verify(eventPublisher, never()).publish(any());
 		verify(paymentOutput, never()).ok(any());
@@ -138,13 +138,13 @@ public class PaymentDistributedLockTest {
 	@DisplayName("User 락, Reservation 락 획득시 트랜잭션 수행한다")
 	void GetUserLockAndReservationLock() throws Exception {
 		when(queueApplicationService.getQueueToken(queueTokenId.toString())).thenReturn(queueToken);
-		when(distributedLockManager.executeWithLockHasReturn(eq(userLockKey), any()))
+		when(distributedLockAspect.executeWithLockHasReturn(eq(userLockKey), any()))
 			.thenAnswer(invocation -> {
 				Callable<?> userLockCallable = invocation.getArgument(1);
 				return userLockCallable.call();
 			});
 
-		when(distributedLockManager.executeWithLockHasReturn(eq(reservationLockKey), any()))
+		when(distributedLockAspect.executeWithLockHasReturn(eq(reservationLockKey), any()))
 			.thenAnswer(invocation -> {
 				Callable<PaymentTransactionResult> reservationLockCallable = invocation.getArgument(1);
 				return reservationLockCallable.call();
@@ -154,8 +154,8 @@ public class PaymentDistributedLockTest {
 		paymentInteractor.payment(paymentCommand);
 
 		verify(queueApplicationService, times(1)).getQueueToken(queueTokenId.toString());
-		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(userLockKey), any());
-		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(reservationLockKey), any());
+		verify(distributedLockAspect, times(1)).executeWithLockHasReturn(eq(userLockKey), any());
+		verify(distributedLockAspect, times(1)).executeWithLockHasReturn(eq(reservationLockKey), any());
 		verify(paymentService, times(1)).processPayment(paymentCommand, queueToken);
 		verify(eventPublisher, times(1)).publish(any(PaymentSuccessEvent.class));
 		verify(paymentOutput, times(1)).ok(any(PaymentResult.class));
@@ -170,7 +170,7 @@ public class PaymentDistributedLockTest {
 		AtomicInteger lockConflictCount = new AtomicInteger(0);
 
 		when(queueApplicationService.getQueueToken(anyString())).thenReturn(queueToken);
-		when(distributedLockManager.executeWithLockHasReturn(eq(userLockKey), any()))
+		when(distributedLockAspect.executeWithLockHasReturn(eq(userLockKey), any()))
 			.thenAnswer(invocation -> {
 				if (successCount.get() == 0) {
 					successCount.incrementAndGet();
@@ -180,7 +180,7 @@ public class PaymentDistributedLockTest {
 					throw new CustomException(ErrorCode.LOCK_CONFLICT);
 				}
 			});
-		when(distributedLockManager.executeWithLockHasReturn(eq(reservationLockKey), any()))
+		when(distributedLockAspect.executeWithLockHasReturn(eq(reservationLockKey), any()))
 			.thenAnswer(invocation -> {
 				Callable<PaymentTransactionResult> callable = invocation.getArgument(1);
 				return callable.call();

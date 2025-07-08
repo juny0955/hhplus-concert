@@ -22,20 +22,20 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
+import kr.hhplus.be.server.adapters.out.persistence.lock.DistributedLockAspect;
 import kr.hhplus.be.server.application.reservation.domain.ReservationExpiredEvent;
 import kr.hhplus.be.server.application.reservation.domain.Reservation;
 import kr.hhplus.be.server.application.reservation.domain.ReservationStatus;
 import kr.hhplus.be.server.exception.CustomException;
 import kr.hhplus.be.server.exception.ErrorCode;
-import kr.hhplus.be.server.adapters.out.persistence.lock.DistributedLockManager;
 import kr.hhplus.be.server.application.reservation.dto.ExpiredReservationResult;
-import kr.hhplus.be.server.application.reservation.usecase.ReservationExpireInteractor;
+import kr.hhplus.be.server.application.reservation.usecase.ReservationExpireService;
 
 @ExtendWith(MockitoExtension.class)
 public class ReservationExpiredDistributedLockTest {
 
 	@InjectMocks
-	private ReservationExpireInteractor reservationExpireInteractor;
+	private ReservationExpireService reservationExpireService;
 
 	@Mock
 	private ExpiredReservationManager expiredReservationManager;
@@ -44,7 +44,7 @@ public class ReservationExpiredDistributedLockTest {
 	private ApplicationEventPublisher eventPublisher;
 
 	@Mock
-	private DistributedLockManager distributedLockManager;
+	private DistributedLockAspect distributedLockAspect;
 
 	private List<Reservation> expiredReservations;
 	private ExpiredReservationResult expiredReservationResult;
@@ -80,16 +80,16 @@ public class ReservationExpiredDistributedLockTest {
 	@DisplayName("스케줄러 락을 획득하지 못하면 예약 만료 처리를 실행하지 않는다")
 	void NotHasSchedulerLock() throws Exception {
 		doThrow(new CustomException(ErrorCode.LOCK_CONFLICT))
-			.when(distributedLockManager).executeWithLock(eq(schedulerLockKey), any());
+			.when(distributedLockAspect).executeWithLock(eq(schedulerLockKey), any());
 
 		CustomException exception = assertThrows(CustomException.class,
-			() -> reservationExpireInteractor.expiredReservation());
+			() -> reservationExpireService.expiredReservation());
 
 		assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.LOCK_CONFLICT);
 
-		verify(distributedLockManager, times(1)).executeWithLock(eq(schedulerLockKey), any());
+		verify(distributedLockAspect, times(1)).executeWithLock(eq(schedulerLockKey), any());
 		verify(expiredReservationManager, never()).getPendingReservations();
-		verify(distributedLockManager, never()).executeWithLockHasReturn(anyString(), any());
+		verify(distributedLockAspect, never()).executeWithLockHasReturn(anyString(), any());
 		verify(eventPublisher, never()).publishEvent(any());
 	}
 
@@ -100,21 +100,21 @@ public class ReservationExpiredDistributedLockTest {
 			Runnable runnable = invocation.getArgument(1);
 			runnable.run();
 			return null;
-		}).when(distributedLockManager).executeWithLock(eq(schedulerLockKey), any());
+		}).when(distributedLockAspect).executeWithLock(eq(schedulerLockKey), any());
 
 		when(expiredReservationManager.getPendingReservations()).thenReturn(expiredReservations);
-		when(distributedLockManager.executeWithLockHasReturn(eq(reservationLockKey), any()))
+		when(distributedLockAspect.executeWithLockHasReturn(eq(reservationLockKey), any()))
 			.thenAnswer(invocation -> {
 				Callable<ExpiredReservationResult> callable = invocation.getArgument(1);
 				return callable.call();
 			});
 		when(expiredReservationManager.processExpiredReservation(any())).thenReturn(expiredReservationResult);
 
-		reservationExpireInteractor.expiredReservation();
+		reservationExpireService.expiredReservation();
 
-		verify(distributedLockManager, times(1)).executeWithLock(eq(schedulerLockKey), any());
+		verify(distributedLockAspect, times(1)).executeWithLock(eq(schedulerLockKey), any());
 		verify(expiredReservationManager, times(1)).getPendingReservations();
-		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(reservationLockKey), any());
+		verify(distributedLockAspect, times(1)).executeWithLockHasReturn(eq(reservationLockKey), any());
 		verify(expiredReservationManager, times(1)).processExpiredReservation(any());
 		verify(eventPublisher, times(1)).publishEvent(any(ReservationExpiredEvent.class));
 	}
@@ -126,17 +126,17 @@ public class ReservationExpiredDistributedLockTest {
 			Runnable runnable = invocation.getArgument(1);
 			runnable.run();
 			return null;
-		}).when(distributedLockManager).executeWithLock(eq(schedulerLockKey), any());
+		}).when(distributedLockAspect).executeWithLock(eq(schedulerLockKey), any());
 
 		when(expiredReservationManager.getPendingReservations()).thenReturn(expiredReservations);
-		when(distributedLockManager.executeWithLockHasReturn(eq(reservationLockKey), any()))
+		when(distributedLockAspect.executeWithLockHasReturn(eq(reservationLockKey), any()))
 			.thenThrow(new CustomException(ErrorCode.LOCK_CONFLICT));
 
-		assertDoesNotThrow(() -> reservationExpireInteractor.expiredReservation());
+		assertDoesNotThrow(() -> reservationExpireService.expiredReservation());
 
-		verify(distributedLockManager, times(1)).executeWithLock(eq(schedulerLockKey), any());
+		verify(distributedLockAspect, times(1)).executeWithLock(eq(schedulerLockKey), any());
 		verify(expiredReservationManager, times(1)).getPendingReservations();
-		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(reservationLockKey), any());
+		verify(distributedLockAspect, times(1)).executeWithLockHasReturn(eq(reservationLockKey), any());
 		verify(expiredReservationManager, never()).processExpiredReservation(any());
 		verify(eventPublisher, never()).publishEvent(any());
 	}
@@ -179,24 +179,24 @@ public class ReservationExpiredDistributedLockTest {
 			Runnable runnable = invocation.getArgument(1);
 			runnable.run();
 			return null;
-		}).when(distributedLockManager).executeWithLock(eq(schedulerLockKey), any());
+		}).when(distributedLockAspect).executeWithLock(eq(schedulerLockKey), any());
 
 		when(expiredReservationManager.getPendingReservations()).thenReturn(reservations);
-		when(distributedLockManager.executeWithLockHasReturn(anyString(), any()))
+		when(distributedLockAspect.executeWithLockHasReturn(anyString(), any()))
 			.thenAnswer(invocation -> {
 				Callable<ExpiredReservationResult> callable = invocation.getArgument(1);
 				return callable.call();
 			});
 		when(expiredReservationManager.processExpiredReservation(any())).thenReturn(expiredReservationResult);
 
-		reservationExpireInteractor.expiredReservation();
+		reservationExpireService.expiredReservation();
 
-		verify(distributedLockManager, times(1)).executeWithLock(eq(schedulerLockKey), any());
+		verify(distributedLockAspect, times(1)).executeWithLock(eq(schedulerLockKey), any());
 		verify(expiredReservationManager, times(1)).getPendingReservations();
-		verify(distributedLockManager, times(3)).executeWithLockHasReturn(anyString(), any());
-		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq("reservation:" + reservationId1), any());
-		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq("reservation:" + reservationId2), any());
-		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq("reservation:" + reservationId3), any());
+		verify(distributedLockAspect, times(3)).executeWithLockHasReturn(anyString(), any());
+		verify(distributedLockAspect, times(1)).executeWithLockHasReturn(eq("reservation:" + reservationId1), any());
+		verify(distributedLockAspect, times(1)).executeWithLockHasReturn(eq("reservation:" + reservationId2), any());
+		verify(distributedLockAspect, times(1)).executeWithLockHasReturn(eq("reservation:" + reservationId3), any());
 		verify(expiredReservationManager, times(3)).processExpiredReservation(any());
 		verify(eventPublisher, times(3)).publishEvent(any(ReservationExpiredEvent.class));
 	}
@@ -218,10 +218,10 @@ public class ReservationExpiredDistributedLockTest {
 				throw new CustomException(ErrorCode.LOCK_CONFLICT);
 			}
 			return null;
-		}).when(distributedLockManager).executeWithLock(eq(schedulerLockKey), any());
+		}).when(distributedLockAspect).executeWithLock(eq(schedulerLockKey), any());
 
 		when(expiredReservationManager.getPendingReservations()).thenReturn(expiredReservations);
-		when(distributedLockManager.executeWithLockHasReturn(eq(reservationLockKey), any()))
+		when(distributedLockAspect.executeWithLockHasReturn(eq(reservationLockKey), any()))
 			.thenAnswer(invocation -> {
 				Callable<ExpiredReservationResult> callable = invocation.getArgument(1);
 				return callable.call();
@@ -232,7 +232,7 @@ public class ReservationExpiredDistributedLockTest {
 		for (int i = 0; i < threadCount; i++) {
 			CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
 				try {
-					reservationExpireInteractor.expiredReservation();
+					reservationExpireService.expiredReservation();
 				} catch (CustomException e) {
 					if (e.getErrorCode() == ErrorCode.LOCK_CONFLICT) {
 						lockConflictCount.incrementAndGet();
@@ -260,21 +260,21 @@ public class ReservationExpiredDistributedLockTest {
 			Runnable runnable = invocation.getArgument(1);
 			runnable.run();
 			return null;
-		}).when(distributedLockManager).executeWithLock(eq(schedulerLockKey), any());
+		}).when(distributedLockAspect).executeWithLock(eq(schedulerLockKey), any());
 
 		when(expiredReservationManager.getPendingReservations()).thenReturn(expiredReservations);
-		when(distributedLockManager.executeWithLockHasReturn(eq(reservationLockKey), any()))
+		when(distributedLockAspect.executeWithLockHasReturn(eq(reservationLockKey), any()))
 			.thenAnswer(invocation -> {
 				Callable<ExpiredReservationResult> callable = invocation.getArgument(1);
 				return callable.call();
 			});
 		when(expiredReservationManager.processExpiredReservation(any())).thenReturn(null);
 
-		reservationExpireInteractor.expiredReservation();
+		reservationExpireService.expiredReservation();
 
-		verify(distributedLockManager, times(1)).executeWithLock(eq(schedulerLockKey), any());
+		verify(distributedLockAspect, times(1)).executeWithLock(eq(schedulerLockKey), any());
 		verify(expiredReservationManager, times(1)).getPendingReservations();
-		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(reservationLockKey), any());
+		verify(distributedLockAspect, times(1)).executeWithLockHasReturn(eq(reservationLockKey), any());
 		verify(expiredReservationManager, times(1)).processExpiredReservation(any());
 		verify(eventPublisher, never()).publishEvent(any());
 	}

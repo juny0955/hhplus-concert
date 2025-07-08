@@ -23,7 +23,7 @@ import kr.hhplus.be.server.application.seat.domain.SeatClass;
 import kr.hhplus.be.server.application.seat.domain.SeatStatus;
 import kr.hhplus.be.server.exception.CustomException;
 import kr.hhplus.be.server.exception.ErrorCode;
-import kr.hhplus.be.server.adapters.out.persistence.lock.DistributedLockManager;
+import kr.hhplus.be.server.adapters.out.persistence.lock.DistributedLockAspect;
 import kr.hhplus.be.server.application.reservation.dto.CreateReservationResult;
 import kr.hhplus.be.server.application.payment.domain.Payment;
 import kr.hhplus.be.server.application.payment.domain.PaymentStatus;
@@ -51,7 +51,7 @@ class ReserveInteractorTest {
 	private ApplicationEventPublisher eventPublisher;
 
 	@Mock
-	private DistributedLockManager distributedLockManager;
+	private DistributedLockAspect distributedLockAspect;
 
 	private UUID userId;
 	private UUID concertId;
@@ -92,7 +92,7 @@ class ReserveInteractorTest {
 		String expectedLockKey = "seat:" + seatId;
 
 		// 분산락 Mock 설정
-		when(distributedLockManager.executeWithLockHasReturn(eq(expectedLockKey), any()))
+		when(distributedLockAspect.executeWithLockHasReturn(eq(expectedLockKey), any()))
 			.thenAnswer(invocation -> {
 				Callable<CreateReservationResult> callable = invocation.getArgument(1);
 				return callable.call();
@@ -102,7 +102,7 @@ class ReserveInteractorTest {
 
 		reserveInteractor.reserveSeat(reserveSeatCommand);
 
-		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(expectedLockKey), any());
+		verify(distributedLockAspect, times(1)).executeWithLockHasReturn(eq(expectedLockKey), any());
 		verify(createReservationManager, times(1)).processCreateReservation(reserveSeatCommand);
 		verify(eventPublisher, times(1)).publishEvent(any(ReservationCreatedEvent.class));
 		verify(reservationOutput, times(1)).ok(any(ReserveSeatResult.class));
@@ -115,7 +115,7 @@ class ReserveInteractorTest {
 		CustomException expectedException = new CustomException(ErrorCode.SEAT_NOT_FOUND);
 
 		// 분산락 Mock 설정 - 내부에서 예외 발생
-		when(distributedLockManager.executeWithLockHasReturn(eq(expectedLockKey), any()))
+		when(distributedLockAspect.executeWithLockHasReturn(eq(expectedLockKey), any()))
 			.thenAnswer(invocation -> {
 				Callable<CreateReservationResult> callable = invocation.getArgument(1);
 				return callable.call();
@@ -127,7 +127,7 @@ class ReserveInteractorTest {
 			() -> reserveInteractor.reserveSeat(reserveSeatCommand));
 
 		assertThat(customException.getErrorCode()).isEqualTo(ErrorCode.SEAT_NOT_FOUND);
-		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(expectedLockKey), any());
+		verify(distributedLockAspect, times(1)).executeWithLockHasReturn(eq(expectedLockKey), any());
 		verify(createReservationManager, times(1)).processCreateReservation(reserveSeatCommand);
 		verify(eventPublisher, never()).publishEvent(any());
 		verify(reservationOutput, never()).ok(any());
@@ -139,7 +139,7 @@ class ReserveInteractorTest {
 		String expectedLockKey = "seat:" + seatId;
 
 		// 분산락 Mock 설정 - 내부에서 예외 발생
-		when(distributedLockManager.executeWithLockHasReturn(eq(expectedLockKey), any()))
+		when(distributedLockAspect.executeWithLockHasReturn(eq(expectedLockKey), any()))
 			.thenAnswer(invocation -> {
 				@SuppressWarnings("unchecked")
 				Callable<CreateReservationResult> callable = invocation.getArgument(1);
@@ -152,7 +152,7 @@ class ReserveInteractorTest {
 			() -> reserveInteractor.reserveSeat(reserveSeatCommand));
 
 		assertThat(customException.getErrorCode()).isEqualTo(ErrorCode.ALREADY_RESERVED_SEAT);
-		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(expectedLockKey), any());
+		verify(distributedLockAspect, times(1)).executeWithLockHasReturn(eq(expectedLockKey), any());
 		verify(createReservationManager, times(1)).processCreateReservation(reserveSeatCommand);
 		verify(eventPublisher, never()).publishEvent(any());
 		verify(reservationOutput, never()).ok(any());
@@ -164,7 +164,7 @@ class ReserveInteractorTest {
 		String expectedLockKey = "seat:" + seatId;
 
 		// 분산락 Mock 설정 - 내부에서 예외 발생
-		when(distributedLockManager.executeWithLockHasReturn(eq(expectedLockKey), any()))
+		when(distributedLockAspect.executeWithLockHasReturn(eq(expectedLockKey), any()))
 			.thenAnswer(invocation -> {
 				Callable<CreateReservationResult> callable = invocation.getArgument(1);
 				return callable.call();
@@ -176,7 +176,7 @@ class ReserveInteractorTest {
 			() -> reserveInteractor.reserveSeat(reserveSeatCommand));
 
 		assertThat(actualException.getErrorCode()).isEqualTo(ErrorCode.INVALID_QUEUE_TOKEN);
-		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(expectedLockKey), any());
+		verify(distributedLockAspect, times(1)).executeWithLockHasReturn(eq(expectedLockKey), any());
 		verify(createReservationManager, times(1)).processCreateReservation(reserveSeatCommand);
 		verify(eventPublisher, never()).publishEvent(any());
 		verify(reservationOutput, never()).ok(any());
@@ -188,7 +188,7 @@ class ReserveInteractorTest {
 		String expectedLockKey = "seat:" + seatId;
 
 		// 분산락 Mock 설정 - 내부에서 예외 발생
-		when(distributedLockManager.executeWithLockHasReturn(eq(expectedLockKey), any()))
+		when(distributedLockAspect.executeWithLockHasReturn(eq(expectedLockKey), any()))
 			.thenAnswer(invocation -> {
 				Callable<CreateReservationResult> callable = invocation.getArgument(1);
 				return callable.call();
@@ -200,7 +200,7 @@ class ReserveInteractorTest {
 			() -> reserveInteractor.reserveSeat(reserveSeatCommand));
 
 		assertThat(actualException.getErrorCode()).isEqualTo(ErrorCode.CONCERT_NOT_FOUND);
-		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(expectedLockKey), any());
+		verify(distributedLockAspect, times(1)).executeWithLockHasReturn(eq(expectedLockKey), any());
 		verify(createReservationManager, times(1)).processCreateReservation(reserveSeatCommand);
 		verify(eventPublisher, never()).publishEvent(any());
 		verify(reservationOutput, never()).ok(any());

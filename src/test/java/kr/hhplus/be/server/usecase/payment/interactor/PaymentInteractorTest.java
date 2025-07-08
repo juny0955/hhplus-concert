@@ -31,7 +31,7 @@ import kr.hhplus.be.server.application.payment.usecase.PaymentInteractor;
 import kr.hhplus.be.server.application.user.domain.User;
 import kr.hhplus.be.server.exception.CustomException;
 import kr.hhplus.be.server.exception.ErrorCode;
-import kr.hhplus.be.server.adapters.out.persistence.lock.DistributedLockManager;
+import kr.hhplus.be.server.adapters.out.persistence.lock.DistributedLockAspect;
 import kr.hhplus.be.server.application.payment.service.PaymentService;
 import kr.hhplus.be.server.application.payment.port.in.PaymentCommand;
 import kr.hhplus.be.server.application.payment.dto.PaymentResult;
@@ -52,7 +52,7 @@ class PaymentInteractorTest {
 	private EventPublisher eventPublisher;
 
 	@Mock
-	private DistributedLockManager distributedLockManager;
+	private DistributedLockAspect distributedLockAspect;
 
 	@Mock
 	private QueueApplicationService queueApplicationService;
@@ -98,7 +98,7 @@ class PaymentInteractorTest {
 	@DisplayName("결제_성공")
 	void payment_Success() throws Exception {
 		when(queueApplicationService.getQueueToken(queueTokenId.toString())).thenReturn(queueToken);
-		when(distributedLockManager.executeWithLockHasReturn(anyString(), any()))
+		when(distributedLockAspect.executeWithLockHasReturn(anyString(), any()))
 			.thenAnswer(invocation -> {
 				Callable<PaymentTransactionResult> callable = invocation.getArgument(1);
 				return callable.call();
@@ -109,7 +109,7 @@ class PaymentInteractorTest {
 		paymentInteractor.payment(paymentCommand);
 
 		verify(queueApplicationService, times(1)).getQueueToken(queueTokenId.toString());
-		verify(distributedLockManager, times(2)).executeWithLockHasReturn(anyString(), any());
+		verify(distributedLockAspect, times(2)).executeWithLockHasReturn(anyString(), any());
 		verify(paymentService, times(1)).processPayment(paymentCommand, queueToken);
 		verify(eventPublisher, times(1)).publish(any(PaymentSuccessEvent.class));
 		verify(paymentOutput, times(1)).ok(any(PaymentResult.class));
@@ -119,7 +119,7 @@ class PaymentInteractorTest {
 	@DisplayName("결제_실패_유저못찾음")
 	void payment_Failure_UserNotFount() throws Exception {
 		when(queueApplicationService.getQueueToken(queueTokenId.toString())).thenReturn(queueToken);
-		when(distributedLockManager.executeWithLockHasReturn(anyString(), any()))
+		when(distributedLockAspect.executeWithLockHasReturn(anyString(), any()))
 			.thenAnswer(invocation -> {
 				Callable<PaymentTransactionResult> callable = invocation.getArgument(1);
 				return callable.call();
@@ -133,7 +133,7 @@ class PaymentInteractorTest {
 		assertThat(customException.getErrorCode()).isEqualTo(ErrorCode.USER_NOT_FOUND);
 
 		verify(queueApplicationService, times(1)).getQueueToken(queueTokenId.toString());
-		verify(distributedLockManager, times(2)).executeWithLockHasReturn(anyString(), any());
+		verify(distributedLockAspect, times(2)).executeWithLockHasReturn(anyString(), any());
 		verify(paymentService, times(1)).processPayment(paymentCommand, queueToken);
 		verify(eventPublisher, never()).publish(any());
 		verify(paymentOutput, never()).ok(any());
@@ -143,7 +143,7 @@ class PaymentInteractorTest {
 	@DisplayName("결제_실패_잔액부족")
 	void payment_Failure_InsufficientBalance() throws Exception {
 		when(queueApplicationService.getQueueToken(queueTokenId.toString())).thenReturn(queueToken);
-		when(distributedLockManager.executeWithLockHasReturn(anyString(), any()))
+		when(distributedLockAspect.executeWithLockHasReturn(anyString(), any()))
 			.thenAnswer(invocation -> {
 				Callable<PaymentTransactionResult> callable = invocation.getArgument(1);
 				return callable.call();
@@ -157,7 +157,7 @@ class PaymentInteractorTest {
 		assertThat(customException.getErrorCode()).isEqualTo(ErrorCode.INSUFFICIENT_BALANCE);
 
 		verify(queueApplicationService, times(1)).getQueueToken(queueTokenId.toString());
-		verify(distributedLockManager, times(2)).executeWithLockHasReturn(anyString(), any());
+		verify(distributedLockAspect, times(2)).executeWithLockHasReturn(anyString(), any());
 		verify(paymentService, times(1)).processPayment(paymentCommand, queueToken);
 		verify(eventPublisher, never()).publish(any());
 		verify(paymentOutput, never()).ok(any());
@@ -167,7 +167,7 @@ class PaymentInteractorTest {
 	@DisplayName("결제_실패_이미결제됨")
 	void payment_Failure_AlreadyPaid() throws Exception {
 		when(queueApplicationService.getQueueToken(queueTokenId.toString())).thenReturn(queueToken);
-		when(distributedLockManager.executeWithLockHasReturn(anyString(), any()))
+		when(distributedLockAspect.executeWithLockHasReturn(anyString(), any()))
 			.thenAnswer(invocation -> {
 				Callable<PaymentTransactionResult> callable = invocation.getArgument(1);
 				return callable.call();
@@ -181,7 +181,7 @@ class PaymentInteractorTest {
 		assertThat(customException.getErrorCode()).isEqualTo(ErrorCode.ALREADY_PAID);
 
 		verify(queueApplicationService, times(1)).getQueueToken(queueTokenId.toString());
-		verify(distributedLockManager, times(2)).executeWithLockHasReturn(anyString(), any());
+		verify(distributedLockAspect, times(2)).executeWithLockHasReturn(anyString(), any());
 		verify(paymentService, times(1)).processPayment(paymentCommand, queueToken);
 		verify(eventPublisher, never()).publish(any());
 		verify(paymentOutput, never()).ok(any());

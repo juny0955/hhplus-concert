@@ -20,13 +20,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import kr.hhplus.be.server.adapters.out.persistence.lock.DistributedLockAspect;
 import kr.hhplus.be.server.application.reservation.domain.ReservationCreatedEvent;
 import kr.hhplus.be.server.application.payment.domain.Payment;
 import kr.hhplus.be.server.application.reservation.domain.Reservation;
 import kr.hhplus.be.server.application.seat.domain.Seat;
 import kr.hhplus.be.server.exception.CustomException;
 import kr.hhplus.be.server.exception.ErrorCode;
-import kr.hhplus.be.server.adapters.out.persistence.lock.DistributedLockManager;
 import kr.hhplus.be.server.application.reservation.dto.CreateReservationResult;
 import kr.hhplus.be.server.application.reservation.usecase.ReserveInteractor;
 import kr.hhplus.be.server.application.reservation.port.in.ReserveSeatCommand;
@@ -49,7 +49,7 @@ public class ReservationDistributedLockTest {
 	private EventPublisher eventPublisher;
 
 	@Mock
-	private DistributedLockManager distributedLockManager;
+	private DistributedLockAspect distributedLockAspect;
 
 	private ReserveSeatCommand reserveSeatCommand;
 	private CreateReservationResult createReservationResult;
@@ -82,7 +82,7 @@ public class ReservationDistributedLockTest {
 	@Test
 	@DisplayName("Seat 락을 획득하지 못하면 트랜잭션을 실행하지 않는다")
 	void NotHasSeatLock() throws Exception {
-		when(distributedLockManager.executeWithSimpleLockHasReturn(eq(seatLockKey), any()))
+		when(distributedLockAspect.executeWithSimpleLockHasReturn(eq(seatLockKey), any()))
 			.thenThrow(new CustomException(ErrorCode.LOCK_CONFLICT));
 
 		CustomException exception = assertThrows(CustomException.class,
@@ -90,7 +90,7 @@ public class ReservationDistributedLockTest {
 
 		assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.LOCK_CONFLICT);
 
-		verify(distributedLockManager, times(1)).executeWithSimpleLockHasReturn(eq(seatLockKey), any());
+		verify(distributedLockAspect, times(1)).executeWithSimpleLockHasReturn(eq(seatLockKey), any());
 		verify(createReservationManager, never()).processCreateReservation(any());
 		verify(eventPublisher, never()).publish(any());
 		verify(reservationOutput, never()).ok(any());
@@ -99,7 +99,7 @@ public class ReservationDistributedLockTest {
 	@Test
 	@DisplayName("Seat 락 획득시 예약 트랜잭션을 수행한다")
 	void GetSeatLock() throws Exception {
-		when(distributedLockManager.executeWithSimpleLockHasReturn(eq(seatLockKey), any()))
+		when(distributedLockAspect.executeWithSimpleLockHasReturn(eq(seatLockKey), any()))
 			.thenAnswer(invocation -> {
 				Callable<CreateReservationResult> callable = invocation.getArgument(1);
 				return callable.call();
@@ -108,7 +108,7 @@ public class ReservationDistributedLockTest {
 
 		reserveInteractor.reserveSeat(reserveSeatCommand);
 
-		verify(distributedLockManager, times(1)).executeWithSimpleLockHasReturn(eq(seatLockKey), any());
+		verify(distributedLockAspect, times(1)).executeWithSimpleLockHasReturn(eq(seatLockKey), any());
 		verify(createReservationManager, times(1)).processCreateReservation(reserveSeatCommand);
 		verify(eventPublisher, times(1)).publish(any(ReservationCreatedEvent.class));
 		verify(reservationOutput, times(1)).ok(any(ReserveSeatResult.class));
@@ -122,7 +122,7 @@ public class ReservationDistributedLockTest {
 		AtomicInteger successCount = new AtomicInteger(0);
 		AtomicInteger lockConflictCount = new AtomicInteger(0);
 
-		when(distributedLockManager.executeWithSimpleLockHasReturn(eq(seatLockKey), any()))
+		when(distributedLockAspect.executeWithSimpleLockHasReturn(eq(seatLockKey), any()))
 			.thenAnswer(invocation -> {
 				if (successCount.get() == 0) {
 					successCount.incrementAndGet();
@@ -177,7 +177,7 @@ public class ReservationDistributedLockTest {
 			commands.add(command);
 			lockKeys.add(lockKey);
 			
-			when(distributedLockManager.executeWithSimpleLockHasReturn(eq(lockKey), any()))
+			when(distributedLockAspect.executeWithSimpleLockHasReturn(eq(lockKey), any()))
 				.thenAnswer(invocation -> {
 					successCount.incrementAndGet();
 					Callable<CreateReservationResult> callable = invocation.getArgument(1);
@@ -208,6 +208,6 @@ public class ReservationDistributedLockTest {
 		assertThat(successCount.get()).isEqualTo(threadCount);
 		
 		for (String lockKey : lockKeys)
-			verify(distributedLockManager, times(1)).executeWithSimpleLockHasReturn(eq(lockKey), any());
+			verify(distributedLockAspect, times(1)).executeWithSimpleLockHasReturn(eq(lockKey), any());
 	}
 }

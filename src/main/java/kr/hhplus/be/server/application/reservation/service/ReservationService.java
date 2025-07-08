@@ -15,6 +15,7 @@ import kr.hhplus.be.server.application.reservation.port.out.ReservationRepositor
 import kr.hhplus.be.server.application.seat.port.in.ExpireSeatInput;
 import kr.hhplus.be.server.application.seat.port.in.ReserveSeatInput;
 import kr.hhplus.be.server.application.seatHold.port.in.SeatHoldInput;
+import kr.hhplus.be.server.config.aop.DistributedLock;
 import kr.hhplus.be.server.domain.payment.Payment;
 import kr.hhplus.be.server.domain.queue.QueueToken;
 import kr.hhplus.be.server.domain.reservation.Reservation;
@@ -46,6 +47,7 @@ public class ReservationService {
 	}
 
 	@Transactional
+	@DistributedLock(key = "reservation:#reservation.id()")
 	public ExpiredReservationResult expireReservation(Reservation reservation) throws CustomException {
 		Seat updatedSeat 		= expireSeatInput.expireSeat(reservation.seatId());
 		Reservation updatedReservation 	= reservationRepository.save(reservation.expired());

@@ -15,8 +15,11 @@ public record User (
 	LocalDateTime createdAt,
 	LocalDateTime updatedAt
 ) {
+	private static final BigDecimal MIN_CHARGE_POINT = BigDecimal.valueOf(1000);
 
-	public User chargePoint(BigDecimal point) {
+	public User chargePoint(BigDecimal point) throws CustomException {
+		validateChargeAmount(point);
+
 		return User.builder()
 			.id(id)
 			.amount(amount.add(point))
@@ -37,5 +40,10 @@ public record User (
 
 	public boolean checkEnoughAmount(BigDecimal balance) {
 		return amount.compareTo(balance) >= 0;
+	}
+
+	private void validateChargeAmount(BigDecimal chargeAmount) throws CustomException {
+		if (chargeAmount.compareTo(MIN_CHARGE_POINT) < 0)
+			throw new CustomException(ErrorCode.NOT_ENOUGH_MIN_CHARGE_POINT);
 	}
 }

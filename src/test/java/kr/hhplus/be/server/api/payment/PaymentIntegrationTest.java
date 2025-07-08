@@ -40,7 +40,6 @@ import kr.hhplus.be.server.application.seatHold.port.out.SeatHoldRepository;
 import kr.hhplus.be.server.application.seat.port.out.SeatRepository;
 import kr.hhplus.be.server.application.seat.domain.SeatStatus;
 import kr.hhplus.be.server.application.user.domain.User;
-import kr.hhplus.be.server.application.user.port.out.UserRepository;
 import kr.hhplus.be.server.exception.ErrorCode;
 
 @SpringBootTest(properties = {

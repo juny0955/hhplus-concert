@@ -13,7 +13,7 @@ import kr.hhplus.be.server.application.queue.port.in.ExpireQueueTokenInput;
 import kr.hhplus.be.server.application.reservation.port.in.PaidReservationInput;
 import kr.hhplus.be.server.application.seat.port.in.PaidSeatInput;
 import kr.hhplus.be.server.application.seatHold.port.in.ReleaseSeatHoldInput;
-import kr.hhplus.be.server.application.user.port.in.UsePointInput;
+import kr.hhplus.be.server.application.user.port.in.UsePointUseCase;
 import kr.hhplus.be.server.domain.payment.Payment;
 import kr.hhplus.be.server.domain.queue.QueueToken;
 import kr.hhplus.be.server.domain.reservation.Reservation;
@@ -29,7 +29,7 @@ public class PaymentService {
 
 	private final ExpireQueueTokenInput expireQueueTokenInput;
 	private final PaidReservationInput paidReservationInput;
-	private final UsePointInput usePointInput;
+	private final UsePointUseCase usePointUseCase;
 	private final PaidSeatInput paidSeatInput;
 	private final PaymentRepository paymentRepository;
 	private final ReleaseSeatHoldInput releaseSeatHoldInput;
@@ -39,7 +39,7 @@ public class PaymentService {
 		Payment payment = getPayment(command.reservationId());
 
 		Payment savedPayment		 = paymentRepository.save(payment.success());
-		User savedUser          	 = usePointInput.usePoint(queueToken.userId(), payment.amount());
+		User savedUser          	 = usePointUseCase.usePoint(queueToken.userId(), payment.amount());
 		Reservation savedReservation = paidReservationInput.paidReservation(command.reservationId());
 		Seat savedSeat       	 	 = paidSeatInput.paidSeat(savedReservation.seatId());
 

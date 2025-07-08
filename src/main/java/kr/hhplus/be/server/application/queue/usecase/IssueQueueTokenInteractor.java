@@ -4,11 +4,11 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Component;
 
-import kr.hhplus.be.server.adapters.out.persistence.lock.DistributedLockManager;
-import kr.hhplus.be.server.application.concert.port.in.ExistsConcertInput;
+import kr.hhplus.be.server.application.concert.port.out.ExistsConcertPort;
 import kr.hhplus.be.server.application.queue.port.in.IssueQueueTokenInput;
 import kr.hhplus.be.server.application.queue.service.QueueService;
-import kr.hhplus.be.server.application.user.port.in.ExistsUserInput;
+import kr.hhplus.be.server.application.user.port.out.ExistsUserPort;
+import kr.hhplus.be.server.config.aop.DistributedLock;
 import kr.hhplus.be.server.domain.queue.QueueToken;
 import lombok.RequiredArgsConstructor;
 
@@ -16,23 +16,16 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class IssueQueueTokenInteractor implements IssueQueueTokenInput {
 
-	private static final String LOCK_KEY = "queue:issue:";
-
 	private final QueueService queueService;
-	private final DistributedLockManager distributedLockManager;
-	private final ExistsConcertInput existsConcertInput;
-	private final ExistsUserInput existsUserInput;
+	private final ExistsConcertPort existsConcertPort;
+	private final ExistsUserPort existsUserPort;
 
 	@Override
+	@DistributedLock(key = "queue:issue:#concertId")
 	public QueueToken issueQueueToken(UUID userId, UUID concertId) throws Exception {
-		existsConcertInput.existsConcert(concertId);
-		existsUserInput.existsUser(userId);
+		existsConcertPort.existsConcert(concertId);
+		existsUserPort.existsUser(userId);
 
-		String lockKey = LOCK_KEY + concertId;
-
-		return distributedLockManager.executeWithLockHasReturn(
-			lockKey,
-			() -> queueService.processIssueQueueToken(userId, concertId)
-		);
+		return queueService.processIssueQueueToken(userId, concertId);
 	}
 }

@@ -19,7 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import kr.hhplus.be.server.application.user.domain.User;
 import kr.hhplus.be.server.exception.CustomException;
 import kr.hhplus.be.server.exception.ErrorCode;
-import kr.hhplus.be.server.adapters.out.persistence.lock.DistributedLockManager;
+import kr.hhplus.be.server.adapters.out.persistence.lock.DistributedLockAspect;
 import kr.hhplus.be.server.user.application.service.UserManager;
 import kr.hhplus.be.server.application.user.service.UserService;
 
@@ -33,7 +33,7 @@ class UserServiceTest {
 	private UserManager userManager;
 
 	@Mock
-	private DistributedLockManager distributedLockManager;
+	private DistributedLockAspect distributedLockAspect;
 
 	private UUID userId;
 	private BigDecimal initAmount;
@@ -82,7 +82,7 @@ class UserServiceTest {
 		String expectedLockKey = "user:" + userId;
 
 		// 분산락 Mock 설정
-		when(distributedLockManager.executeWithLockHasReturn(eq(expectedLockKey), any()))
+		when(distributedLockAspect.executeWithLockHasReturn(eq(expectedLockKey), any()))
 			.thenAnswer(invocation -> {
 				Callable<User> callable = invocation.getArgument(1);
 				return callable.call();
@@ -91,7 +91,7 @@ class UserServiceTest {
 
 		User result = userService.chargePoint(userId, chargePoint);
 
-		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(expectedLockKey), any());
+		verify(distributedLockAspect, times(1)).executeWithLockHasReturn(eq(expectedLockKey), any());
 		verify(userManager, times(1)).chargePoint(userId, chargePoint);
 		assertThat(result).isNotNull();
 		assertThat(result.amount()).isEqualTo(initAmount.add(chargePoint));
@@ -103,7 +103,7 @@ class UserServiceTest {
 		BigDecimal chargePoint = BigDecimal.valueOf(5000);
 		String expectedLockKey = "user:" + userId;
 
-		when(distributedLockManager.executeWithLockHasReturn(eq(expectedLockKey), any()))
+		when(distributedLockAspect.executeWithLockHasReturn(eq(expectedLockKey), any()))
 			.thenAnswer(invocation -> {
 				Callable<User> callable = invocation.getArgument(1);
 				return callable.call();
@@ -113,7 +113,7 @@ class UserServiceTest {
 		CustomException customException = assertThrows(CustomException.class,
 			() -> userService.chargePoint(userId, chargePoint));
 
-		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(expectedLockKey), any());
+		verify(distributedLockAspect, times(1)).executeWithLockHasReturn(eq(expectedLockKey), any());
 		verify(userManager, times(1)).chargePoint(userId, chargePoint);
 		assertThat(customException.getErrorCode()).isEqualTo(ErrorCode.USER_NOT_FOUND);
 	}
@@ -126,7 +126,7 @@ class UserServiceTest {
 		CustomException customException = assertThrows(CustomException.class,
 			() -> userService.chargePoint(userId, chargePoint));
 
-		verify(distributedLockManager, never()).executeWithLockHasReturn(anyString(), any());
+		verify(distributedLockAspect, never()).executeWithLockHasReturn(anyString(), any());
 		verify(userManager, never()).chargePoint(userId, chargePoint);
 
 		assertThat(customException.getErrorCode()).isEqualTo(ErrorCode.NOT_ENOUGH_MIN_CHARGE_POINT);

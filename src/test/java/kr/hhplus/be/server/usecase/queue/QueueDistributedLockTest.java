@@ -20,11 +20,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import kr.hhplus.be.server.adapters.out.persistence.lock.DistributedLockAspect;
 import kr.hhplus.be.server.queue.adapter.out.persistence.QueueApplicationService;
 import kr.hhplus.be.server.application.queue.domain.QueueToken;
 import kr.hhplus.be.server.exception.CustomException;
 import kr.hhplus.be.server.exception.ErrorCode;
-import kr.hhplus.be.server.adapters.out.persistence.lock.DistributedLockManager;
 import kr.hhplus.be.server.queue.usecase.QueueService;
 
 @ExtendWith(MockitoExtension.class)
@@ -37,7 +37,7 @@ public class QueueDistributedLockTest {
 	private QueueApplicationService queueApplicationService;
 
 	@Mock
-	private DistributedLockManager distributedLockManager;
+	private DistributedLockAspect distributedLockAspect;
 
 	private QueueToken activeToken;
 	private UUID userId;
@@ -56,7 +56,7 @@ public class QueueDistributedLockTest {
 	@Test
 	@DisplayName("Queue 락을 획득하지 못하면 토큰 발급을 실행하지 않는다")
 	void NotHasQueueLock() throws Exception {
-		when(distributedLockManager.executeWithLockHasReturn(eq(queueLockKey), any()))
+		when(distributedLockAspect.executeWithLockHasReturn(eq(queueLockKey), any()))
 			.thenThrow(new CustomException(ErrorCode.LOCK_CONFLICT));
 
 		CustomException exception = assertThrows(CustomException.class,
@@ -64,14 +64,14 @@ public class QueueDistributedLockTest {
 
 		assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.LOCK_CONFLICT);
 
-		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(queueLockKey), any());
+		verify(distributedLockAspect, times(1)).executeWithLockHasReturn(eq(queueLockKey), any());
 		verify(queueApplicationService, never()).processIssueQueueToken(any(), any());
 	}
 
 	@Test
 	@DisplayName("Queue 락 획득시 토큰 발급을 수행한다")
 	void GetQueueLock() throws Exception {
-		when(distributedLockManager.executeWithLockHasReturn(eq(queueLockKey), any()))
+		when(distributedLockAspect.executeWithLockHasReturn(eq(queueLockKey), any()))
 			.thenAnswer(invocation -> {
 				Callable<QueueToken> callable = invocation.getArgument(1);
 				return callable.call();
@@ -81,7 +81,7 @@ public class QueueDistributedLockTest {
 		QueueToken result = queueService.issueQueueToken(userId, concertId);
 
 		assertThat(result).isEqualTo(activeToken);
-		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(queueLockKey), any());
+		verify(distributedLockAspect, times(1)).executeWithLockHasReturn(eq(queueLockKey), any());
 		verify(queueApplicationService, times(1)).processIssueQueueToken(userId, concertId);
 	}
 
@@ -94,7 +94,7 @@ public class QueueDistributedLockTest {
 		AtomicInteger lockConflictCount = new AtomicInteger(0);
 
 		// 첫 번째 요청만 성공, 나머지는 락 충돌
-		when(distributedLockManager.executeWithLockHasReturn(eq(queueLockKey), any()))
+		when(distributedLockAspect.executeWithLockHasReturn(eq(queueLockKey), any()))
 			.thenAnswer(invocation -> {
 				if (successCount.get() == 0) {
 					successCount.incrementAndGet();
@@ -151,7 +151,7 @@ public class QueueDistributedLockTest {
 			lockKeys.add(lockKey);
 			tokens.add(token);
 
-			when(distributedLockManager.executeWithLockHasReturn(eq(lockKey), any()))
+			when(distributedLockAspect.executeWithLockHasReturn(eq(lockKey), any()))
 				.thenAnswer(invocation -> {
 					successCount.incrementAndGet();
 					Callable<QueueToken> callable = invocation.getArgument(1);
@@ -181,7 +181,7 @@ public class QueueDistributedLockTest {
 		assertThat(successCount.get()).isEqualTo(threadCount);
 
 		for (int i = 0; i < threadCount; i++) {
-			verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(lockKeys.get(i)), any());
+			verify(distributedLockAspect, times(1)).executeWithLockHasReturn(eq(lockKeys.get(i)), any());
 			verify(queueApplicationService, times(1)).processIssueQueueToken(userId, concertIds.get(i));
 		}
 	}

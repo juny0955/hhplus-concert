@@ -22,10 +22,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import kr.hhplus.be.server.adapters.out.persistence.lock.DistributedLockAspect;
 import kr.hhplus.be.server.application.user.domain.User;
 import kr.hhplus.be.server.exception.CustomException;
 import kr.hhplus.be.server.exception.ErrorCode;
-import kr.hhplus.be.server.adapters.out.persistence.lock.DistributedLockManager;
 import kr.hhplus.be.server.user.application.service.UserManager;
 import kr.hhplus.be.server.application.user.service.UserService;
 
@@ -39,7 +39,7 @@ public class UserDistributedLockTest {
 	private UserManager userManager;
 
 	@Mock
-	private DistributedLockManager distributedLockManager;
+	private DistributedLockAspect distributedLockAspect;
 
 	private User user;
 	private UUID userId;
@@ -63,7 +63,7 @@ public class UserDistributedLockTest {
 	@Test
 	@DisplayName("User 락을 획득하지 못하면 포인트 충전을 실행하지 않는다")
 	void NotHasUserLock() throws Exception {
-		when(distributedLockManager.executeWithLockHasReturn(eq(userLockKey), any()))
+		when(distributedLockAspect.executeWithLockHasReturn(eq(userLockKey), any()))
 			.thenThrow(new CustomException(ErrorCode.LOCK_CONFLICT));
 
 		CustomException exception = assertThrows(CustomException.class,
@@ -71,14 +71,14 @@ public class UserDistributedLockTest {
 
 		assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.LOCK_CONFLICT);
 
-		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(userLockKey), any());
+		verify(distributedLockAspect, times(1)).executeWithLockHasReturn(eq(userLockKey), any());
 		verify(userManager, never()).chargePoint(any(), any());
 	}
 
 	@Test
 	@DisplayName("User 락 획득시 포인트 충전을 수행한다")
 	void GetUserLock() throws Exception {
-		when(distributedLockManager.executeWithLockHasReturn(eq(userLockKey), any()))
+		when(distributedLockAspect.executeWithLockHasReturn(eq(userLockKey), any()))
 			.thenAnswer(invocation -> {
 				Callable<User> callable = invocation.getArgument(1);
 				return callable.call();
@@ -88,7 +88,7 @@ public class UserDistributedLockTest {
 		User result = userService.chargePoint(userId, chargePoint);
 
 		assertThat(result).isEqualTo(user);
-		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(userLockKey), any());
+		verify(distributedLockAspect, times(1)).executeWithLockHasReturn(eq(userLockKey), any());
 		verify(userManager, times(1)).chargePoint(userId, chargePoint);
 	}
 
@@ -102,7 +102,7 @@ public class UserDistributedLockTest {
 
 		assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.NOT_ENOUGH_MIN_CHARGE_POINT);
 
-		verify(distributedLockManager, never()).executeWithLockHasReturn(anyString(), any());
+		verify(distributedLockAspect, never()).executeWithLockHasReturn(anyString(), any());
 		verify(userManager, never()).chargePoint(any(), any());
 	}
 
@@ -114,7 +114,7 @@ public class UserDistributedLockTest {
 		AtomicInteger successCount = new AtomicInteger(0);
 		AtomicInteger lockConflictCount = new AtomicInteger(0);
 
-		when(distributedLockManager.executeWithLockHasReturn(eq(userLockKey), any()))
+		when(distributedLockAspect.executeWithLockHasReturn(eq(userLockKey), any()))
 			.thenAnswer(invocation -> {
 				if (successCount.get() == 0) {
 					successCount.incrementAndGet();
@@ -176,7 +176,7 @@ public class UserDistributedLockTest {
 			lockKeys.add(lockKey);
 			users.add(differentUser);
 
-			when(distributedLockManager.executeWithLockHasReturn(eq(lockKey), any()))
+			when(distributedLockAspect.executeWithLockHasReturn(eq(lockKey), any()))
 				.thenAnswer(invocation -> {
 					successCount.incrementAndGet();
 					Callable<User> callable = invocation.getArgument(1);
@@ -206,7 +206,7 @@ public class UserDistributedLockTest {
 		assertThat(successCount.get()).isEqualTo(threadCount);
 
 		for (int i = 0; i < threadCount; i++) {
-			verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(lockKeys.get(i)), any());
+			verify(distributedLockAspect, times(1)).executeWithLockHasReturn(eq(lockKeys.get(i)), any());
 			verify(userManager, times(1)).chargePoint(userIds.get(i), chargePoint);
 		}
 	}

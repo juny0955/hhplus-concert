@@ -18,8 +18,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.hhplus.be.server.adapters.in.web.user.request.ChargePointRequest;
 import kr.hhplus.be.server.adapters.in.web.user.response.UserPointResponse;
-import kr.hhplus.be.server.application.user.port.in.ChargePointInput;
-import kr.hhplus.be.server.application.user.port.in.GetUserInput;
+import kr.hhplus.be.server.application.user.port.in.ChargePointUseCase;
+import kr.hhplus.be.server.application.user.port.in.FindUserUseCase;
 import kr.hhplus.be.server.domain.user.User;
 import kr.hhplus.be.server.exception.CustomException;
 import lombok.RequiredArgsConstructor;
@@ -30,8 +30,8 @@ import lombok.RequiredArgsConstructor;
 @Tag(name = "User API", description = "유저 관련 API")
 public class UserController {
 
-	private final GetUserInput getUserInput;
-	private final ChargePointInput chargePointInput;
+	private final FindUserUseCase findUserUseCase;
+	private final ChargePointUseCase chargePointUseCase;
 
 	@Operation(
 		summary = "유저 포인트 조회",
@@ -52,7 +52,7 @@ public class UserController {
 	public ResponseEntity<UserPointResponse> getPoint(
 		@PathVariable UUID userId
 	) throws CustomException {
-		User user = getUserInput.getUser(userId);
+		User user = findUserUseCase.find(userId);
 
 		return ResponseEntity.ok(UserPointResponse.from(user));
 	}
@@ -81,7 +81,7 @@ public class UserController {
 		@PathVariable UUID userId,
 		@RequestBody ChargePointRequest request
 	) throws Exception {
-		User user = chargePointInput.chargePoint(userId, request.point());
+		User user = chargePointUseCase.chargePoint(userId, request.point());
 
 		return ResponseEntity.ok(UserPointResponse.from(user));
 	}
