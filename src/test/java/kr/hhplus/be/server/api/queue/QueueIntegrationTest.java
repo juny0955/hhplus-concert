@@ -25,16 +25,16 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import kr.hhplus.be.server.api.TestDataFactory;
-import kr.hhplus.be.server.concert.domain.concert.Concert;
-import kr.hhplus.be.server.concert.ports.out.ConcertRepository;
-import kr.hhplus.be.server.concert.domain.concertDate.ConcertDate;
-import kr.hhplus.be.server.concert.ports.out.ConcertDateRepository;
-import kr.hhplus.be.server.queue.domain.QueueStatus;
-import kr.hhplus.be.server.queue.domain.QueueToken;
-import kr.hhplus.be.server.queue.ports.out.QueueTokenRepository;
-import kr.hhplus.be.server.user.domain.User;
-import kr.hhplus.be.server.user.ports.out.UserRepository;
-import kr.hhplus.be.server.common.framework.exception.ErrorCode;
+import kr.hhplus.be.server.domain.concert.Concert;
+import kr.hhplus.be.server.application.concert.port.out.ConcertRepository;
+import kr.hhplus.be.server.application.concertDate.domain.ConcertDate;
+import kr.hhplus.be.server.application.concertDate.port.out.ConcertDateRepository;
+import kr.hhplus.be.server.application.queue.domain.QueueStatus;
+import kr.hhplus.be.server.application.queue.domain.QueueToken;
+import kr.hhplus.be.server.application.queue.port.out.QueueTokenRepository;
+import kr.hhplus.be.server.application.user.domain.User;
+import kr.hhplus.be.server.application.user.port.out.UserRepository;
+import kr.hhplus.be.server.exception.ErrorCode;
 
 @SpringBootTest(properties = {
 	"spring.jpa.hibernate.ddl-auto=create-drop"

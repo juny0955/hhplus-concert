@@ -22,18 +22,18 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import kr.hhplus.be.server.user.domain.User;
-import kr.hhplus.be.server.common.framework.exception.CustomException;
-import kr.hhplus.be.server.common.framework.exception.ErrorCode;
-import kr.hhplus.be.server.common.infrastructure.persistence.lock.DistributedLockManager;
+import kr.hhplus.be.server.application.user.domain.User;
+import kr.hhplus.be.server.exception.CustomException;
+import kr.hhplus.be.server.exception.ErrorCode;
+import kr.hhplus.be.server.adapters.out.persistence.lock.DistributedLockManager;
 import kr.hhplus.be.server.user.application.service.UserManager;
-import kr.hhplus.be.server.user.application.service.UserApplicationService;
+import kr.hhplus.be.server.application.user.service.UserService;
 
 @ExtendWith(MockitoExtension.class)
 public class UserDistributedLockTest {
 
 	@InjectMocks
-	private UserApplicationService userApplicationService;
+	private UserService userService;
 
 	@Mock
 	private UserManager userManager;
@@ -67,7 +67,7 @@ public class UserDistributedLockTest {
 			.thenThrow(new CustomException(ErrorCode.LOCK_CONFLICT));
 
 		CustomException exception = assertThrows(CustomException.class,
-			() -> userApplicationService.chargePoint(userId, chargePoint));
+			() -> userService.chargePoint(userId, chargePoint));
 
 		assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.LOCK_CONFLICT);
 
@@ -85,7 +85,7 @@ public class UserDistributedLockTest {
 			});
 		when(userManager.chargePoint(userId, chargePoint)).thenReturn(user);
 
-		User result = userApplicationService.chargePoint(userId, chargePoint);
+		User result = userService.chargePoint(userId, chargePoint);
 
 		assertThat(result).isEqualTo(user);
 		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(userLockKey), any());
@@ -98,7 +98,7 @@ public class UserDistributedLockTest {
 		BigDecimal invalidPoint = BigDecimal.valueOf(500); // 최소 충전 금액 1000원 미만
 
 		CustomException exception = assertThrows(CustomException.class,
-			() -> userApplicationService.chargePoint(userId, invalidPoint));
+			() -> userService.chargePoint(userId, invalidPoint));
 
 		assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.NOT_ENOUGH_MIN_CHARGE_POINT);
 
@@ -130,7 +130,7 @@ public class UserDistributedLockTest {
 		for (int i = 0; i < threadCount; i++) {
 			CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
 				try {
-					userApplicationService.chargePoint(userId, chargePoint);
+					userService.chargePoint(userId, chargePoint);
 				} catch (CustomException e) {
 					if (e.getErrorCode() == ErrorCode.LOCK_CONFLICT) {
 						lockConflictCount.incrementAndGet();
@@ -190,7 +190,7 @@ public class UserDistributedLockTest {
 			final int index = i;
 			CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
 				try {
-					userApplicationService.chargePoint(userIds.get(index), chargePoint);
+					userService.chargePoint(userIds.get(index), chargePoint);
 				} catch (Exception e) {
 
 				} finally {

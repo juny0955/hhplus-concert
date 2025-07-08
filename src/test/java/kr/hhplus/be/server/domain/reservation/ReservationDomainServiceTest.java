@@ -15,15 +15,15 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import kr.hhplus.be.server.api.TestDataFactory;
-import kr.hhplus.be.server.concert.domain.concert.Concert;
-import kr.hhplus.be.server.concert.domain.concertDate.ConcertDate;
-import kr.hhplus.be.server.concert.domain.seat.Seat;
-import kr.hhplus.be.server.concert.domain.seat.SeatClass;
-import kr.hhplus.be.server.concert.domain.seat.SeatStatus;
-import kr.hhplus.be.server.common.framework.exception.CustomException;
-import kr.hhplus.be.server.common.framework.exception.ErrorCode;
+import kr.hhplus.be.server.domain.concert.Concert;
+import kr.hhplus.be.server.application.concertDate.domain.ConcertDate;
+import kr.hhplus.be.server.application.seat.domain.Seat;
+import kr.hhplus.be.server.application.seat.domain.SeatClass;
+import kr.hhplus.be.server.application.seat.domain.SeatStatus;
+import kr.hhplus.be.server.exception.CustomException;
+import kr.hhplus.be.server.exception.ErrorCode;
 import kr.hhplus.be.server.reservation.domain.service.ReservationDomainResult;
-import kr.hhplus.be.server.reservation.domain.ReservationStatus;
+import kr.hhplus.be.server.application.reservation.domain.ReservationStatus;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationDomainServiceTest {

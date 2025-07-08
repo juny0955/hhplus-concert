@@ -1,0 +1,10 @@
+package kr.hhplus.be.server.application.payment.port.in;
+
+import java.math.BigDecimal;
+import java.util.UUID;
+
+import kr.hhplus.be.server.domain.payment.Payment;
+
+public interface CreatePaymentInput {
+	Payment createPayment(UUID userId, UUID reservationId, BigDecimal price);
+}

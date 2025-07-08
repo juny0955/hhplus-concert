@@ -1,0 +1,17 @@
+package kr.hhplus.be.server.application.payment.dto;
+
+
+import kr.hhplus.be.server.domain.payment.Payment;
+import kr.hhplus.be.server.domain.reservation.Reservation;
+import kr.hhplus.be.server.domain.seat.Seat;
+import kr.hhplus.be.server.domain.user.User;
+import lombok.Builder;
+
+@Builder
+public record PaymentResult(
+	Payment payment,
+	Seat seat,
+	Reservation reservation,
+	User user
+) {
+}

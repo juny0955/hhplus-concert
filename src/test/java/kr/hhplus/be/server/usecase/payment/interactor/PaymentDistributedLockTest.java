@@ -20,20 +20,20 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import kr.hhplus.be.server.payment.domain.PaymentSuccessEvent;
-import kr.hhplus.be.server.payment.domain.Payment;
+import kr.hhplus.be.server.application.payment.domain.PaymentSuccessEvent;
+import kr.hhplus.be.server.application.payment.domain.Payment;
 import kr.hhplus.be.server.queue.adapter.out.persistence.QueueApplicationService;
-import kr.hhplus.be.server.queue.domain.QueueToken;
-import kr.hhplus.be.server.reservation.domain.Reservation;
-import kr.hhplus.be.server.concert.domain.seat.Seat;
-import kr.hhplus.be.server.payment.application.interactor.PaymentInteractor;
-import kr.hhplus.be.server.user.domain.User;
-import kr.hhplus.be.server.common.framework.exception.CustomException;
-import kr.hhplus.be.server.common.framework.exception.ErrorCode;
-import kr.hhplus.be.server.common.infrastructure.persistence.lock.DistributedLockManager;
-import kr.hhplus.be.server.payment.application.service.PaymentApplicationService;
-import kr.hhplus.be.server.payment.ports.in.PaymentCommand;
-import kr.hhplus.be.server.payment.application.dto.PaymentResult;
+import kr.hhplus.be.server.application.queue.domain.QueueToken;
+import kr.hhplus.be.server.application.reservation.domain.Reservation;
+import kr.hhplus.be.server.application.seat.domain.Seat;
+import kr.hhplus.be.server.application.payment.usecase.PaymentInteractor;
+import kr.hhplus.be.server.application.user.domain.User;
+import kr.hhplus.be.server.exception.CustomException;
+import kr.hhplus.be.server.exception.ErrorCode;
+import kr.hhplus.be.server.adapters.out.persistence.lock.DistributedLockManager;
+import kr.hhplus.be.server.application.payment.service.PaymentService;
+import kr.hhplus.be.server.application.payment.port.in.PaymentCommand;
+import kr.hhplus.be.server.application.payment.dto.PaymentResult;
 
 @ExtendWith(MockitoExtension.class)
 public class PaymentDistributedLockTest {
@@ -42,7 +42,7 @@ public class PaymentDistributedLockTest {
 	private PaymentInteractor paymentInteractor;
 
 	@Mock
-	private PaymentApplicationService paymentApplicationService;
+	private PaymentService paymentService;
 
 	@Mock
 	private QueueApplicationService queueApplicationService;
@@ -104,7 +104,7 @@ public class PaymentDistributedLockTest {
 		verify(queueApplicationService, times(1)).getQueueToken(queueTokenId.toString());
 		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(userLockKey), any());
 		verify(distributedLockManager, never()).executeWithLockHasReturn(eq(reservationLockKey), any());
-		verify(paymentApplicationService, never()).processPayment(any(), any());
+		verify(paymentService, never()).processPayment(any(), any());
 		verify(eventPublisher, never()).publish(any());
 		verify(paymentOutput, never()).ok(any());
 	}
@@ -129,7 +129,7 @@ public class PaymentDistributedLockTest {
 		verify(queueApplicationService, times(1)).getQueueToken(queueTokenId.toString());
 		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(userLockKey), any());
 		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(reservationLockKey), any());
-		verify(paymentApplicationService, never()).processPayment(any(), any());
+		verify(paymentService, never()).processPayment(any(), any());
 		verify(eventPublisher, never()).publish(any());
 		verify(paymentOutput, never()).ok(any());
 	}
@@ -149,14 +149,14 @@ public class PaymentDistributedLockTest {
 				Callable<PaymentTransactionResult> reservationLockCallable = invocation.getArgument(1);
 				return reservationLockCallable.call();
 			});
-		when(paymentApplicationService.processPayment(paymentCommand, queueToken)).thenReturn(paymentTransactionResult);
+		when(paymentService.processPayment(paymentCommand, queueToken)).thenReturn(paymentTransactionResult);
 
 		paymentInteractor.payment(paymentCommand);
 
 		verify(queueApplicationService, times(1)).getQueueToken(queueTokenId.toString());
 		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(userLockKey), any());
 		verify(distributedLockManager, times(1)).executeWithLockHasReturn(eq(reservationLockKey), any());
-		verify(paymentApplicationService, times(1)).processPayment(paymentCommand, queueToken);
+		verify(paymentService, times(1)).processPayment(paymentCommand, queueToken);
 		verify(eventPublisher, times(1)).publish(any(PaymentSuccessEvent.class));
 		verify(paymentOutput, times(1)).ok(any(PaymentResult.class));
 	}
@@ -185,7 +185,7 @@ public class PaymentDistributedLockTest {
 				Callable<PaymentTransactionResult> callable = invocation.getArgument(1);
 				return callable.call();
 			});
-		when(paymentApplicationService.processPayment(any(), any())).thenReturn(paymentTransactionResult);
+		when(paymentService.processPayment(any(), any())).thenReturn(paymentTransactionResult);
 
 		List<CompletableFuture<Void>> futures = new ArrayList<>();
 		for (int i = 0; i < threadCount; i++) {

@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -15,15 +16,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import kr.hhplus.be.server.queue.domain.QueueStatus;
-import kr.hhplus.be.server.queue.domain.QueueToken;
-import kr.hhplus.be.server.common.framework.exception.CustomException;
-import kr.hhplus.be.server.common.framework.exception.ErrorCode;
-import kr.hhplus.be.server.common.infrastructure.persistence.lock.DistributedLockManager;
-import kr.hhplus.be.server.queue.adapter.out.persistence.QueueApplicationService;
-import kr.hhplus.be.server.queue.usecase.QueueService;
+import kr.hhplus.be.server.adapters.out.persistence.lock.DistributedLockManager;
+import kr.hhplus.be.server.application.queue.service.QueueService;
+import kr.hhplus.be.server.domain.queue.QueueStatus;
+import kr.hhplus.be.server.domain.queue.QueueToken;
+import kr.hhplus.be.server.exception.CustomException;
+import kr.hhplus.be.server.exception.ErrorCode;
 
-import java.util.concurrent.Callable;
 
 @ExtendWith(MockitoExtension.class)
 class QueueServiceTest {

@@ -18,22 +18,22 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
-import kr.hhplus.be.server.concert.domain.seat.Seat;
-import kr.hhplus.be.server.concert.domain.seat.SeatClass;
-import kr.hhplus.be.server.concert.domain.seat.SeatStatus;
-import kr.hhplus.be.server.common.framework.exception.CustomException;
-import kr.hhplus.be.server.common.framework.exception.ErrorCode;
-import kr.hhplus.be.server.common.infrastructure.persistence.lock.DistributedLockManager;
-import kr.hhplus.be.server.reservation.application.dto.CreateReservationResult;
-import kr.hhplus.be.server.payment.domain.Payment;
-import kr.hhplus.be.server.payment.domain.PaymentStatus;
-import kr.hhplus.be.server.reservation.domain.Reservation;
-import kr.hhplus.be.server.reservation.domain.ReservationCreatedEvent;
-import kr.hhplus.be.server.reservation.domain.ReservationStatus;
-import kr.hhplus.be.server.reservation.ports.in.ReserveSeatCommand;
-import kr.hhplus.be.server.reservation.application.interactor.ReserveInteractor;
+import kr.hhplus.be.server.application.seat.domain.Seat;
+import kr.hhplus.be.server.application.seat.domain.SeatClass;
+import kr.hhplus.be.server.application.seat.domain.SeatStatus;
+import kr.hhplus.be.server.exception.CustomException;
+import kr.hhplus.be.server.exception.ErrorCode;
+import kr.hhplus.be.server.adapters.out.persistence.lock.DistributedLockManager;
+import kr.hhplus.be.server.application.reservation.dto.CreateReservationResult;
+import kr.hhplus.be.server.application.payment.domain.Payment;
+import kr.hhplus.be.server.application.payment.domain.PaymentStatus;
+import kr.hhplus.be.server.application.reservation.domain.Reservation;
+import kr.hhplus.be.server.application.reservation.domain.ReservationCreatedEvent;
+import kr.hhplus.be.server.application.reservation.domain.ReservationStatus;
+import kr.hhplus.be.server.application.reservation.port.in.ReserveSeatCommand;
+import kr.hhplus.be.server.application.reservation.usecase.ReserveInteractor;
 import kr.hhplus.be.server.reservation.usecase.output.ReservationOutput;
-import kr.hhplus.be.server.reservation.application.dto.ReserveSeatResult;
+import kr.hhplus.be.server.application.reservation.dto.ReserveSeatResult;
 
 @ExtendWith(MockitoExtension.class)
 class ReserveInteractorTest {

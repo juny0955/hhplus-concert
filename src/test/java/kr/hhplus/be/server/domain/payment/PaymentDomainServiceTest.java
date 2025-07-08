@@ -15,17 +15,17 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import kr.hhplus.be.server.concert.domain.seat.Seat;
-import kr.hhplus.be.server.concert.domain.seat.SeatClass;
-import kr.hhplus.be.server.concert.domain.seat.SeatStatus;
-import kr.hhplus.be.server.reservation.domain.Reservation;
-import kr.hhplus.be.server.reservation.domain.ReservationStatus;
-import kr.hhplus.be.server.payment.domain.Payment;
+import kr.hhplus.be.server.application.seat.domain.Seat;
+import kr.hhplus.be.server.application.seat.domain.SeatClass;
+import kr.hhplus.be.server.application.seat.domain.SeatStatus;
+import kr.hhplus.be.server.application.reservation.domain.Reservation;
+import kr.hhplus.be.server.application.reservation.domain.ReservationStatus;
+import kr.hhplus.be.server.application.payment.domain.Payment;
 import kr.hhplus.be.server.payment.domain.service.PaymentDomainResult;
-import kr.hhplus.be.server.payment.domain.PaymentStatus;
-import kr.hhplus.be.server.user.domain.User;
-import kr.hhplus.be.server.common.framework.exception.CustomException;
-import kr.hhplus.be.server.common.framework.exception.ErrorCode;
+import kr.hhplus.be.server.application.payment.domain.PaymentStatus;
+import kr.hhplus.be.server.application.user.domain.User;
+import kr.hhplus.be.server.exception.CustomException;
+import kr.hhplus.be.server.exception.ErrorCode;
 
 @ExtendWith(MockitoExtension.class)
 class PaymentDomainServiceTest {
