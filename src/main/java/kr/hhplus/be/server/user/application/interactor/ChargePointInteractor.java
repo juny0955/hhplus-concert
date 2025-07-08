@@ -5,9 +5,9 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Component;
 
-import kr.hhplus.be.server.framework.exception.CustomException;
-import kr.hhplus.be.server.framework.exception.ErrorCode;
-import kr.hhplus.be.server.infrastructure.persistence.lock.DistributedLockManager;
+import kr.hhplus.be.server.common.framework.exception.CustomException;
+import kr.hhplus.be.server.common.framework.exception.ErrorCode;
+import kr.hhplus.be.server.common.infrastructure.persistence.lock.DistributedLockManager;
 import kr.hhplus.be.server.user.application.service.UserApplicationService;
 import kr.hhplus.be.server.user.domain.User;
 import kr.hhplus.be.server.user.ports.in.ChargePointInput;

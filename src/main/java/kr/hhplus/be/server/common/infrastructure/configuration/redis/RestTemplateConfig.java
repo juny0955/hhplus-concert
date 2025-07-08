@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.infrastructure.configuration;
+package kr.hhplus.be.server.common.infrastructure.configuration.redis;
 
 import java.time.Duration;
 

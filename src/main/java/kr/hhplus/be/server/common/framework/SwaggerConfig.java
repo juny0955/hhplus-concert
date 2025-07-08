@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.framework;
+package kr.hhplus.be.server.common.framework;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

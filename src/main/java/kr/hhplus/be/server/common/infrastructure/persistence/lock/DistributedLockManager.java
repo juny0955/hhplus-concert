@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.infrastructure.persistence.lock;
+package kr.hhplus.be.server.common.infrastructure.persistence.lock;
 
 import java.time.Duration;
 import java.util.concurrent.Callable;
@@ -9,8 +9,8 @@ import org.redisson.api.RedissonClient;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
-import kr.hhplus.be.server.framework.exception.CustomException;
-import kr.hhplus.be.server.framework.exception.ErrorCode;
+import kr.hhplus.be.server.common.framework.exception.CustomException;
+import kr.hhplus.be.server.common.framework.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 

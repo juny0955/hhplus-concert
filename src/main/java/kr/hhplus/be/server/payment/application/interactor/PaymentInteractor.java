@@ -4,10 +4,10 @@ import kr.hhplus.be.server.concert.ports.in.seatHold.CheckSeatHoldInput;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
-import kr.hhplus.be.server.infrastructure.persistence.lock.DistributedLockManager;
+import kr.hhplus.be.server.common.infrastructure.persistence.lock.DistributedLockManager;
 import kr.hhplus.be.server.payment.application.dto.PaymentResult;
 import kr.hhplus.be.server.payment.application.service.PaymentApplicationService;
-import kr.hhplus.be.server.payment.domain.PaymentSuccessEvent;
+import kr.hhplus.be.server.payment.domain.UpdateRankEvent;
 import kr.hhplus.be.server.payment.domain.PaymentTransactionResult;
 import kr.hhplus.be.server.payment.ports.in.PaymentCommand;
 import kr.hhplus.be.server.payment.ports.in.PaymentInput;
@@ -42,7 +42,7 @@ public class PaymentInteractor implements PaymentInput {
 			() -> paymentApplicationService.processPayment(command, queueToken)
 		);
 
-		eventPublisher.publishEvent(PaymentSuccessEvent.from(paymentTransactionResult));
+		eventPublisher.publishEvent(UpdateRankEvent.from(paymentTransactionResult));
 		return PaymentResult.from(paymentTransactionResult);
 	}
 }

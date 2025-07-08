@@ -1,10 +1,11 @@
-package kr.hhplus.be.server.infrastructure.persistence.rank;
+package kr.hhplus.be.server.concert.application.service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.UUID;
 
+import kr.hhplus.be.server.concert.ports.out.RedisSoldOutRankRepository;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,32 +13,31 @@ import kr.hhplus.be.server.concert.domain.concert.Concert;
 import kr.hhplus.be.server.concert.ports.out.ConcertRepository;
 import kr.hhplus.be.server.concert.domain.concert.SoldOutRank;
 import kr.hhplus.be.server.concert.ports.out.SoldOutRankRepository;
-import kr.hhplus.be.server.payment.domain.PaymentSuccessEvent;
-import kr.hhplus.be.server.framework.exception.CustomException;
-import kr.hhplus.be.server.framework.exception.ErrorCode;
+import kr.hhplus.be.server.payment.domain.UpdateRankEvent;
+import kr.hhplus.be.server.common.framework.exception.CustomException;
+import kr.hhplus.be.server.common.framework.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class ConcertSoldOutManager {
+public class SoldOutApplicationService {
 
 	private static final int MAX_SEAT_COUNT = 50;
 
 	private final ConcertRepository concertRepository;
-	private final ConcertSoldOutRankRepository concertSoldOutRankRepository;
+	private final RedisSoldOutRankRepository redisSoldOutRankRepository;
 	private final SoldOutRankRepository soldOutRankRepository;
 
 	@Transactional
-	public void processUpdateRanking(PaymentSuccessEvent event, UUID concertId, int seatSize) throws CustomException {
+	public void processUpdateRanking(UpdateRankEvent event, UUID concertId, int seatSize) throws CustomException {
 		Concert concert = getConcert(concertId);
 
 		long soldOutTime = Duration.between(concert.openTime(), event.payment().updatedAt()).getSeconds();
-
 		long score = calcScore(soldOutTime, concert.openTime(), seatSize);
 
-		Long rank = concertSoldOutRankRepository.updateRank(concertId, score);
+		Long rank = redisSoldOutRankRepository.updateRank(concertId, score);
 		concertRepository.save(concert.soldOut(event.payment().updatedAt()));
 		soldOutRankRepository.save(SoldOutRank.of(concertId, score, soldOutTime));
 

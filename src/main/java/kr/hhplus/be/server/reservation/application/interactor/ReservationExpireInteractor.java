@@ -6,7 +6,7 @@ import kr.hhplus.be.server.concert.ports.in.seatHold.CheckSeatHoldInput;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
-import kr.hhplus.be.server.infrastructure.persistence.lock.DistributedLockManager;
+import kr.hhplus.be.server.common.infrastructure.persistence.lock.DistributedLockManager;
 import kr.hhplus.be.server.reservation.application.dto.ExpiredReservationResult;
 import kr.hhplus.be.server.reservation.application.service.ReservationApplicationService;
 import kr.hhplus.be.server.reservation.domain.Reservation;

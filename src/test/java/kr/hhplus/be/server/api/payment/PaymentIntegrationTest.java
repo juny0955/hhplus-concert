@@ -41,7 +41,7 @@ import kr.hhplus.be.server.concert.ports.out.SeatRepository;
 import kr.hhplus.be.server.concert.domain.seat.SeatStatus;
 import kr.hhplus.be.server.user.domain.User;
 import kr.hhplus.be.server.user.ports.out.UserRepository;
-import kr.hhplus.be.server.framework.exception.ErrorCode;
+import kr.hhplus.be.server.common.framework.exception.ErrorCode;
 
 @SpringBootTest(properties = {
 	"spring.jpa.hibernate.ddl-auto=create-drop"

@@ -29,8 +29,8 @@ import kr.hhplus.be.server.concert.ports.out.SeatRepository;
 import kr.hhplus.be.server.concert.domain.seat.SeatStatus;
 import kr.hhplus.be.server.concert.domain.seat.Seats;
 import kr.hhplus.be.server.concert.application.service.ConcertApplicationService;
-import kr.hhplus.be.server.framework.exception.CustomException;
-import kr.hhplus.be.server.framework.exception.ErrorCode;
+import kr.hhplus.be.server.common.framework.exception.CustomException;
+import kr.hhplus.be.server.common.framework.exception.ErrorCode;
 
 @ExtendWith(MockitoExtension.class)
 class ConcertApplicationServiceTest {

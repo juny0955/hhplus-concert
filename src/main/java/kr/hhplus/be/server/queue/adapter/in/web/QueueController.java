@@ -19,7 +19,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.hhplus.be.server.queue.adapter.in.web.response.QueueTokenResponse;
 import kr.hhplus.be.server.queue.domain.QueueToken;
-import kr.hhplus.be.server.framework.exception.CustomException;
+import kr.hhplus.be.server.common.framework.exception.CustomException;
 import kr.hhplus.be.server.queue.ports.in.GetQueueTokenInput;
 import kr.hhplus.be.server.queue.ports.in.IssueQueueTokenInput;
 import lombok.RequiredArgsConstructor;

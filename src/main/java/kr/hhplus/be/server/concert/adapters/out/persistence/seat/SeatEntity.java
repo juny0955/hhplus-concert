@@ -18,7 +18,7 @@ import jakarta.persistence.Table;
 import kr.hhplus.be.server.concert.domain.seat.Seat;
 import kr.hhplus.be.server.concert.domain.seat.SeatClass;
 import kr.hhplus.be.server.concert.domain.seat.SeatStatus;
-import kr.hhplus.be.server.infrastructure.persistence.BaseTimeEntity;
+import kr.hhplus.be.server.common.infrastructure.persistence.BaseTimeEntity;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

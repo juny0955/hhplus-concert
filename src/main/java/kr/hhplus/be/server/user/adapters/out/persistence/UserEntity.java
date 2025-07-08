@@ -14,7 +14,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import kr.hhplus.be.server.user.domain.User;
-import kr.hhplus.be.server.infrastructure.persistence.BaseTimeEntity;
+import kr.hhplus.be.server.common.infrastructure.persistence.BaseTimeEntity;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

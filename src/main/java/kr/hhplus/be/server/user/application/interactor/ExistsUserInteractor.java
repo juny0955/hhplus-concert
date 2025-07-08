@@ -1,6 +1,6 @@
 package kr.hhplus.be.server.user.application.interactor;
 
-import kr.hhplus.be.server.framework.exception.CustomException;
+import kr.hhplus.be.server.common.framework.exception.CustomException;
 import kr.hhplus.be.server.user.application.service.UserApplicationService;
 import kr.hhplus.be.server.user.ports.in.ExistsUserInput;
 import lombok.RequiredArgsConstructor;

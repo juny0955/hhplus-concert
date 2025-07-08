@@ -23,9 +23,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import kr.hhplus.be.server.user.domain.User;
-import kr.hhplus.be.server.framework.exception.CustomException;
-import kr.hhplus.be.server.framework.exception.ErrorCode;
-import kr.hhplus.be.server.infrastructure.persistence.lock.DistributedLockManager;
+import kr.hhplus.be.server.common.framework.exception.CustomException;
+import kr.hhplus.be.server.common.framework.exception.ErrorCode;
+import kr.hhplus.be.server.common.infrastructure.persistence.lock.DistributedLockManager;
 import kr.hhplus.be.server.user.application.service.UserManager;
 import kr.hhplus.be.server.user.application.service.UserApplicationService;
 

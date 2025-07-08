@@ -1,8 +1,8 @@
 package kr.hhplus.be.server.queue.application.service;
 
 import kr.hhplus.be.server.concert.domain.concert.Concert;
-import kr.hhplus.be.server.framework.exception.CustomException;
-import kr.hhplus.be.server.framework.exception.ErrorCode;
+import kr.hhplus.be.server.common.framework.exception.CustomException;
+import kr.hhplus.be.server.common.framework.exception.ErrorCode;
 import kr.hhplus.be.server.queue.domain.QueueToken;
 import kr.hhplus.be.server.queue.ports.out.QueueTokenRepository;
 import lombok.RequiredArgsConstructor;

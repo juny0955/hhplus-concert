@@ -16,7 +16,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import kr.hhplus.be.server.framework.exception.CustomException;
+import kr.hhplus.be.server.common.framework.exception.CustomException;
 import kr.hhplus.be.server.user.adapters.in.web.dto.request.ChargePointRequest;
 import kr.hhplus.be.server.user.adapters.in.web.dto.response.UserPointResponse;
 import kr.hhplus.be.server.user.domain.User;

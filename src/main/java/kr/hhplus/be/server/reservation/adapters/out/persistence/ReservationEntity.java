@@ -16,7 +16,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import kr.hhplus.be.server.reservation.domain.Reservation;
 import kr.hhplus.be.server.reservation.domain.ReservationStatus;
-import kr.hhplus.be.server.infrastructure.persistence.BaseTimeEntity;
+import kr.hhplus.be.server.common.infrastructure.persistence.BaseTimeEntity;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

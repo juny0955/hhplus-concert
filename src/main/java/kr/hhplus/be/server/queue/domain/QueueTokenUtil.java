@@ -4,8 +4,8 @@ import java.util.UUID;
 
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 
-import kr.hhplus.be.server.framework.exception.CustomException;
-import kr.hhplus.be.server.framework.exception.ErrorCode;
+import kr.hhplus.be.server.common.framework.exception.CustomException;
+import kr.hhplus.be.server.common.framework.exception.ErrorCode;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 

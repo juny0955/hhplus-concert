@@ -6,7 +6,7 @@ import kr.hhplus.be.server.concert.ports.in.concert.ExistsConcertInput;
 import kr.hhplus.be.server.user.ports.in.ExistsUserInput;
 import org.springframework.stereotype.Component;
 
-import kr.hhplus.be.server.infrastructure.persistence.lock.DistributedLockManager;
+import kr.hhplus.be.server.common.infrastructure.persistence.lock.DistributedLockManager;
 
 import kr.hhplus.be.server.queue.application.service.QueueApplicationService;
 import kr.hhplus.be.server.queue.domain.QueueToken;

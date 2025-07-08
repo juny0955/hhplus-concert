@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.reservation.adapters.scheduler;
+package kr.hhplus.be.server.reservation.adapters.in.scheduler;
 
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;

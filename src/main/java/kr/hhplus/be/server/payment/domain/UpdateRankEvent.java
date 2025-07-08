@@ -8,7 +8,7 @@ import kr.hhplus.be.server.user.domain.User;
 import lombok.Builder;
 
 @Builder
-public record PaymentSuccessEvent (
+public record UpdateRankEvent(
 	Payment payment,
 	Reservation reservation,
 	Seat seat,
@@ -16,8 +16,8 @@ public record PaymentSuccessEvent (
 	LocalDateTime occurredAt
 ) {
 
-	public static PaymentSuccessEvent from(PaymentTransactionResult paymentTransactionResult) {
-		return PaymentSuccessEvent.builder()
+	public static UpdateRankEvent from(PaymentTransactionResult paymentTransactionResult) {
+		return UpdateRankEvent.builder()
 			.payment(paymentTransactionResult.payment())
 			.reservation(paymentTransactionResult.reservation())
 			.seat(paymentTransactionResult.seat())

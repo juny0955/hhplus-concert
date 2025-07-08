@@ -12,8 +12,8 @@ import kr.hhplus.be.server.concert.domain.seat.Seats;
 import kr.hhplus.be.server.concert.ports.in.concert.ExistsConcertInput;
 import kr.hhplus.be.server.concert.ports.in.concertDate.ExistsConcertDateInput;
 import kr.hhplus.be.server.concert.ports.out.SeatRepository;
-import kr.hhplus.be.server.framework.exception.CustomException;
-import kr.hhplus.be.server.framework.exception.ErrorCode;
+import kr.hhplus.be.server.common.framework.exception.CustomException;
+import kr.hhplus.be.server.common.framework.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 

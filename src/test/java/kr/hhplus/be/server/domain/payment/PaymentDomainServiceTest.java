@@ -24,8 +24,8 @@ import kr.hhplus.be.server.payment.domain.Payment;
 import kr.hhplus.be.server.payment.domain.service.PaymentDomainResult;
 import kr.hhplus.be.server.payment.domain.PaymentStatus;
 import kr.hhplus.be.server.user.domain.User;
-import kr.hhplus.be.server.framework.exception.CustomException;
-import kr.hhplus.be.server.framework.exception.ErrorCode;
+import kr.hhplus.be.server.common.framework.exception.CustomException;
+import kr.hhplus.be.server.common.framework.exception.ErrorCode;
 
 @ExtendWith(MockitoExtension.class)
 class PaymentDomainServiceTest {

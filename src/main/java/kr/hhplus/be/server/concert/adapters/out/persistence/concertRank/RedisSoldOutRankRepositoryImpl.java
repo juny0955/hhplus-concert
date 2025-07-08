@@ -1,8 +1,9 @@
-package kr.hhplus.be.server.infrastructure.persistence.rank;
+package kr.hhplus.be.server.concert.adapters.out.persistence.concertRank;
 
 import java.util.List;
 import java.util.UUID;
 
+import kr.hhplus.be.server.concert.ports.out.RedisSoldOutRankRepository;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Component;
@@ -11,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
-public class ConcertSoldOutRankRepository {
+public class RedisSoldOutRankRepositoryImpl implements RedisSoldOutRankRepository {
 
 	private static final String SOLD_OUT_RANK_KEY = "concert:ranking:soldout";
 	private static final String UPDATE_RANK_SCRIPT = """

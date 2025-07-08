@@ -25,9 +25,9 @@ import org.springframework.context.ApplicationEventPublisher;
 import kr.hhplus.be.server.reservation.domain.ReservationExpiredEvent;
 import kr.hhplus.be.server.reservation.domain.Reservation;
 import kr.hhplus.be.server.reservation.domain.ReservationStatus;
-import kr.hhplus.be.server.framework.exception.CustomException;
-import kr.hhplus.be.server.framework.exception.ErrorCode;
-import kr.hhplus.be.server.infrastructure.persistence.lock.DistributedLockManager;
+import kr.hhplus.be.server.common.framework.exception.CustomException;
+import kr.hhplus.be.server.common.framework.exception.ErrorCode;
+import kr.hhplus.be.server.common.infrastructure.persistence.lock.DistributedLockManager;
 import kr.hhplus.be.server.reservation.application.dto.ExpiredReservationResult;
 import kr.hhplus.be.server.reservation.application.interactor.ReservationExpireInteractor;
 

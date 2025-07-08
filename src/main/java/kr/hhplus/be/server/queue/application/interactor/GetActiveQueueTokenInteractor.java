@@ -2,7 +2,7 @@ package kr.hhplus.be.server.queue.application.interactor;
 
 import org.springframework.stereotype.Component;
 
-import kr.hhplus.be.server.framework.exception.CustomException;
+import kr.hhplus.be.server.common.framework.exception.CustomException;
 import kr.hhplus.be.server.queue.application.service.QueueApplicationService;
 import kr.hhplus.be.server.queue.domain.QueueToken;
 import kr.hhplus.be.server.queue.domain.QueueTokenUtil;

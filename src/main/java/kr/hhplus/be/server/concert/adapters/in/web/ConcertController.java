@@ -21,7 +21,7 @@ import kr.hhplus.be.server.concert.domain.concertDate.ConcertDate;
 import kr.hhplus.be.server.concert.domain.seat.Seat;
 import kr.hhplus.be.server.concert.ports.in.concertDate.GetAvailableConcertDatesInput;
 import kr.hhplus.be.server.concert.ports.in.seat.GetAvailableSeatsInput;
-import kr.hhplus.be.server.framework.exception.CustomException;
+import kr.hhplus.be.server.common.framework.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 
 @RestController

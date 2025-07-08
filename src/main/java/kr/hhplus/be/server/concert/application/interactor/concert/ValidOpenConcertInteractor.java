@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 import kr.hhplus.be.server.concert.application.service.ConcertApplicationService;
 import kr.hhplus.be.server.concert.ports.in.concert.ValidOpenConcertInput;
-import kr.hhplus.be.server.framework.exception.CustomException;
+import kr.hhplus.be.server.common.framework.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 
 @Component

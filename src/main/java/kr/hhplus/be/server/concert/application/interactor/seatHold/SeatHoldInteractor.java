@@ -2,7 +2,7 @@ package kr.hhplus.be.server.concert.application.interactor.seatHold;
 
 import kr.hhplus.be.server.concert.application.service.SeatHoldApplicationService;
 import kr.hhplus.be.server.concert.ports.in.seatHold.SeatHoldInput;
-import kr.hhplus.be.server.framework.exception.CustomException;
+import kr.hhplus.be.server.common.framework.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

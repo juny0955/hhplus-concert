@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import kr.hhplus.be.server.concert.application.service.SeatApplicationService;
 import kr.hhplus.be.server.concert.domain.seat.Seat;
 import kr.hhplus.be.server.concert.ports.in.seat.GetAvailableSeatsInput;
-import kr.hhplus.be.server.framework.exception.CustomException;
+import kr.hhplus.be.server.common.framework.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 
 @Component

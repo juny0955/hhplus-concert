@@ -34,7 +34,7 @@ import kr.hhplus.be.server.queue.domain.QueueToken;
 import kr.hhplus.be.server.queue.ports.out.QueueTokenRepository;
 import kr.hhplus.be.server.user.domain.User;
 import kr.hhplus.be.server.user.ports.out.UserRepository;
-import kr.hhplus.be.server.framework.exception.ErrorCode;
+import kr.hhplus.be.server.common.framework.exception.ErrorCode;
 
 @SpringBootTest(properties = {
 	"spring.jpa.hibernate.ddl-auto=create-drop"

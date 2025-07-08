@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import kr.hhplus.be.server.concert.application.service.ConcertDateApplicationService;
 import kr.hhplus.be.server.concert.domain.concertDate.ConcertDate;
 import kr.hhplus.be.server.concert.ports.in.concertDate.GetAvailableConcertDatesInput;
-import kr.hhplus.be.server.framework.exception.CustomException;
+import kr.hhplus.be.server.common.framework.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 
 @Component

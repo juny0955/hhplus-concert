@@ -7,7 +7,7 @@ import kr.hhplus.be.server.queue.ports.in.GetActiveQueueTokenInput;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
-import kr.hhplus.be.server.infrastructure.persistence.lock.DistributedLockManager;
+import kr.hhplus.be.server.common.infrastructure.persistence.lock.DistributedLockManager;
 import kr.hhplus.be.server.reservation.application.dto.CreateReservationResult;
 import kr.hhplus.be.server.reservation.application.dto.ReserveSeatResult;
 import kr.hhplus.be.server.reservation.application.service.ReservationApplicationService;

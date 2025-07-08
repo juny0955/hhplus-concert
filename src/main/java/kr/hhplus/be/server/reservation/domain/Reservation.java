@@ -3,8 +3,8 @@ package kr.hhplus.be.server.reservation.domain;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import kr.hhplus.be.server.framework.exception.CustomException;
-import kr.hhplus.be.server.framework.exception.ErrorCode;
+import kr.hhplus.be.server.common.framework.exception.CustomException;
+import kr.hhplus.be.server.common.framework.exception.ErrorCode;
 import lombok.Builder;
 
 @Builder
