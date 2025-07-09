@@ -1,17 +1,5 @@
 package kr.hhplus.be.server.domain.reservation.adapter.in.web;
 
-import java.util.UUID;
-
-import kr.hhplus.be.server.domain.reservation.domain.Reservation;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.context.annotation.RequestScope;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -20,10 +8,15 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.hhplus.be.server.domain.reservation.adapter.in.web.request.ReservationRequest;
 import kr.hhplus.be.server.domain.reservation.adapter.in.web.response.ReservationResponse;
-import kr.hhplus.be.server.domain.reservation.dto.ReserveSeatResult;
+import kr.hhplus.be.server.domain.reservation.domain.Reservation;
 import kr.hhplus.be.server.domain.reservation.port.in.CreateReservationUseCase;
 import kr.hhplus.be.server.domain.reservation.port.in.ReserveSeatCommand;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.annotation.RequestScope;
+
+import java.util.UUID;
 
 @RestController
 @RequestScope

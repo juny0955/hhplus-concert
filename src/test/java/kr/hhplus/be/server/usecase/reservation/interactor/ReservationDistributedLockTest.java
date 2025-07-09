@@ -27,11 +27,10 @@ import kr.hhplus.be.server.domain.reservation.domain.Reservation;
 import kr.hhplus.be.server.domain.seat.domain.Seat;
 import kr.hhplus.be.server.common.exception.CustomException;
 import kr.hhplus.be.server.common.exception.ErrorCode;
-import kr.hhplus.be.server.domain.reservation.dto.CreateReservationResult;
+import kr.hhplus.be.server.domain.reservation.domain.CreateReservationResult;
 import kr.hhplus.be.server.domain.reservation.usecase.CreateReservationService;
 import kr.hhplus.be.server.domain.reservation.port.in.ReserveSeatCommand;
 import kr.hhplus.be.server.reservation.usecase.output.ReservationOutput;
-import kr.hhplus.be.server.domain.reservation.dto.ReserveSeatResult;
 
 @ExtendWith(MockitoExtension.class)
 public class ReservationDistributedLockTest {

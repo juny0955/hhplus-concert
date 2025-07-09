@@ -4,27 +4,26 @@ import kr.hhplus.be.server.domain.payment.domain.Payment;
 import kr.hhplus.be.server.domain.seat.domain.Seat;
 import lombok.Builder;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Builder
 public record ReservationCreatedEvent(
-	UUID reservationId,
+	Reservation reservation,
+	Payment payment,
+	Seat seat,
 	UUID userId,
-	UUID paymentId,
-	UUID seatId,
-	BigDecimal amount,
+	UUID concertId,
 	LocalDateTime occurredAt
 ) {
 
-	public static ReservationCreatedEvent from(Reservation reservation, Payment payment, Seat seat, UUID userId) {
+	public static ReservationCreatedEvent from(Reservation reservation, Payment payment, Seat seat, UUID userId, UUID concertId) {
 		return ReservationCreatedEvent.builder()
-			.reservationId(reservation.id())
+			.reservation(reservation)
+			.payment(payment)
+			.seat(seat)
 			.userId(userId)
-			.paymentId(payment.id())
-			.seatId(seat.id())
-			.amount(seat.price())
+			.concertId(concertId)
 			.occurredAt(reservation.createdAt())
 			.build();
 	}

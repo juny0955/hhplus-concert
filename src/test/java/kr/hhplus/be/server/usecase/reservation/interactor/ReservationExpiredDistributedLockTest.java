@@ -28,7 +28,6 @@ import kr.hhplus.be.server.domain.reservation.domain.Reservation;
 import kr.hhplus.be.server.domain.reservation.domain.ReservationStatus;
 import kr.hhplus.be.server.common.exception.CustomException;
 import kr.hhplus.be.server.common.exception.ErrorCode;
-import kr.hhplus.be.server.domain.reservation.dto.ExpiredReservationResult;
 import kr.hhplus.be.server.domain.reservation.usecase.ExpireReservationService;
 
 @ExtendWith(MockitoExtension.class)

@@ -44,7 +44,7 @@ public class CreateReservationService implements CreateReservationUseCase {
 
 		holdSeatPort.holdSeat(seat.id(), queueToken.userId());
 
-		eventPublisher.publishEvent(ReservationCreatedEvent.from(reservation, payment, seat, queueToken.userId()));
+		eventPublisher.publishEvent(ReservationCreatedEvent.from(reservation, payment, seat, queueToken.userId(), command.concertId()));
 		return reservation;
 	}
 }

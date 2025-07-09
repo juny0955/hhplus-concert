@@ -27,7 +27,7 @@ import kr.hhplus.be.server.domain.payment.port.out.PaymentRepository;
 import kr.hhplus.be.server.domain.payment.domain.PaymentStatus;
 import kr.hhplus.be.server.domain.queue.domain.QueueToken;
 import kr.hhplus.be.server.domain.queue.port.out.QueueTokenRepository;
-import kr.hhplus.be.server.domain.reservation.dto.CreateReservationResult;
+import kr.hhplus.be.server.domain.reservation.domain.CreateReservationResult;
 import kr.hhplus.be.server.domain.reservation.domain.Reservation;
 import kr.hhplus.be.server.reservation.domain.service.ReservationDomainResult;
 import kr.hhplus.be.server.domain.reservation.port.out.ReservationRepository;

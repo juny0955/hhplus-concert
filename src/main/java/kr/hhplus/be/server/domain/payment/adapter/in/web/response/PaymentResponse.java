@@ -1,13 +1,13 @@
 package kr.hhplus.be.server.domain.payment.adapter.in.web.response;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+import kr.hhplus.be.server.domain.payment.domain.Payment;
+import kr.hhplus.be.server.domain.payment.domain.PaymentStatus;
+import lombok.Builder;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
-
-import io.swagger.v3.oas.annotations.media.Schema;
-import kr.hhplus.be.server.domain.payment.dto.PaymentResult;
-import kr.hhplus.be.server.domain.payment.domain.PaymentStatus;
-import lombok.Builder;
 
 @Builder
 public record PaymentResponse(
@@ -22,13 +22,13 @@ public record PaymentResponse(
 	@Schema(description = "결제 시간")
 	LocalDateTime createdAt
 ) {
-	public static PaymentResponse from(PaymentResult paymentResult) {
+	public static PaymentResponse from(Payment payment) {
 		return PaymentResponse.builder()
-			.paymentId(paymentResult.payment().id())
-			.reservationId(paymentResult.reservation().id())
-			.amount(paymentResult.payment().amount())
-			.status(paymentResult.payment().status())
-			.createdAt(paymentResult.payment().updatedAt())
+			.paymentId(payment.id())
+			.reservationId(payment.reservationId())
+			.amount(payment.amount())
+			.status(payment.status())
+			.createdAt(payment.updatedAt())
 			.build();
 	}
 }

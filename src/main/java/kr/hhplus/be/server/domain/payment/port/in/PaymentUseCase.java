@@ -1,7 +1,7 @@
 package kr.hhplus.be.server.domain.payment.port.in;
 
-import kr.hhplus.be.server.domain.payment.dto.PaymentResult;
+import kr.hhplus.be.server.domain.payment.domain.Payment;
 
 public interface PaymentUseCase {
-	PaymentResult payment(PaymentCommand commend) throws Exception;
+	Payment payment(PaymentCommand commend) throws Exception;
 }

@@ -1,23 +1,22 @@
 package kr.hhplus.be.server.domain.payment.adapter.in.web;
 
-import java.util.UUID;
-
-import kr.hhplus.be.server.domain.payment.adapter.in.web.request.PayReservationRequest;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.context.annotation.RequestScope;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import kr.hhplus.be.server.domain.payment.adapter.in.web.request.PayReservationRequest;
 import kr.hhplus.be.server.domain.payment.adapter.in.web.response.PaymentResponse;
+import kr.hhplus.be.server.domain.payment.domain.Payment;
 import kr.hhplus.be.server.domain.payment.port.in.PaymentCommand;
 import kr.hhplus.be.server.domain.payment.port.in.PaymentUseCase;
-import kr.hhplus.be.server.domain.payment.dto.PaymentResult;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.annotation.RequestScope;
+
+import java.util.UUID;
 
 @RestController
 @RequestScope
@@ -61,7 +60,7 @@ public class PaymentController {
 		@RequestBody PayReservationRequest request,
 		@RequestHeader(value = "Authorization") String queueToken
 	) throws Exception {
-		PaymentResult result = paymentUseCase.payment(PaymentCommand.of(reservationId, request.seatId(), queueToken));
+		Payment result = paymentUseCase.payment(PaymentCommand.of(reservationId, request.seatId(), queueToken));
 
 		return ResponseEntity.ok(PaymentResponse.from(result));
 	}
