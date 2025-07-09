@@ -24,7 +24,6 @@ import kr.hhplus.be.server.domain.concert.port.out.ConcertRepository;
 import kr.hhplus.be.server.domain.concertDate.domain.ConcertDate;
 import kr.hhplus.be.server.domain.concertDate.port.out.ConcertDateRepository;
 import kr.hhplus.be.server.domain.seat.domain.Seat;
-import kr.hhplus.be.server.domain.seat.port.out.SeatRepository;
 import kr.hhplus.be.server.domain.seat.domain.SeatStatus;
 import kr.hhplus.be.server.common.exception.ErrorCode;
 

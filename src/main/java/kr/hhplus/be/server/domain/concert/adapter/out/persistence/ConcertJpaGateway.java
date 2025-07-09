@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import kr.hhplus.be.server.domain.concert.port.out.SaveConcertPort;
 import org.springframework.stereotype.Component;
 
 import kr.hhplus.be.server.domain.concert.port.out.ConcertRepository;
@@ -15,7 +16,7 @@ import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
-public class ConcertJpaGateway implements ConcertRepository, GetConcertPort {
+public class ConcertJpaGateway implements ConcertRepository, GetConcertPort, SaveConcertPort {
 
 	private final JpaConcertRepository jpaConcertRepository;
 
@@ -30,6 +31,12 @@ public class ConcertJpaGateway implements ConcertRepository, GetConcertPort {
 	public void existsConcert(UUID concertId) throws CustomException {
 		if (!jpaConcertRepository.existsById(concertId.toString()))
 			throw new CustomException(ErrorCode.CONCERT_NOT_FOUND);
+	}
+
+	@Override
+	public Concert saveConcert(Concert concert) {
+		ConcertEntity concertEntity = jpaConcertRepository.save(ConcertEntity.from(concert));
+		return concertEntity.toDomain();
 	}
 
 	@Override

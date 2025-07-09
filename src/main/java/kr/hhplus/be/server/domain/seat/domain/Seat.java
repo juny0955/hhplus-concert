@@ -20,7 +20,7 @@ public record Seat(
 	LocalDateTime updatedAt
 ) {
 
-	public Seat expired() throws CustomException {
+	public Seat expire() throws CustomException {
 		if (!status.equals(SeatStatus.RESERVED))
 			throw new CustomException(ErrorCode.SEAT_STATUS_NOT_RESERVED);
 

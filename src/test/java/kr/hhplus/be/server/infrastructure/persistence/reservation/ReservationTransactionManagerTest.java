@@ -34,8 +34,6 @@ import kr.hhplus.be.server.domain.reservation.port.out.ReservationRepository;
 import kr.hhplus.be.server.domain.reservation.domain.ReservationStatus;
 import kr.hhplus.be.server.domain.seat.domain.Seat;
 import kr.hhplus.be.server.domain.seat.domain.SeatClass;
-import kr.hhplus.be.server.domain.seatHold.port.out.SeatHoldRepository;
-import kr.hhplus.be.server.domain.seat.port.out.SeatRepository;
 import kr.hhplus.be.server.domain.seat.domain.SeatStatus;
 import kr.hhplus.be.server.common.exception.CustomException;
 import kr.hhplus.be.server.common.exception.ErrorCode;

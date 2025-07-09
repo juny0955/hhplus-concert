@@ -36,8 +36,6 @@ import kr.hhplus.be.server.domain.reservation.domain.Reservation;
 import kr.hhplus.be.server.domain.reservation.port.out.ReservationRepository;
 import kr.hhplus.be.server.domain.reservation.domain.ReservationStatus;
 import kr.hhplus.be.server.domain.seat.domain.Seat;
-import kr.hhplus.be.server.domain.seatHold.port.out.SeatHoldRepository;
-import kr.hhplus.be.server.domain.seat.port.out.SeatRepository;
 import kr.hhplus.be.server.domain.seat.domain.SeatStatus;
 import kr.hhplus.be.server.domain.user.domain.User;
 import kr.hhplus.be.server.common.exception.ErrorCode;
@@ -321,7 +319,7 @@ class PaymentIntegrationTest {
 
 	@Test
 	@DisplayName("결제_실패_만료된토큰")
-	void payment_Failure_ExpiredToken() throws Exception {
+	void payment_Failure_cancelToken() throws Exception {
 		UUID expiredTokenId = UUID.randomUUID();
 		QueueToken expiredToken = QueueToken.builder()
 			.tokenId(expiredTokenId)

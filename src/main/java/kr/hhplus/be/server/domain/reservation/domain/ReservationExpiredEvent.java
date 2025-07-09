@@ -1,27 +1,24 @@
 package kr.hhplus.be.server.domain.reservation.domain;
 
-import kr.hhplus.be.server.domain.reservation.dto.ExpiredReservationResult;
+import kr.hhplus.be.server.domain.payment.domain.Payment;
+import kr.hhplus.be.server.domain.seat.domain.Seat;
 import lombok.Builder;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Builder
 public record ReservationExpiredEvent (
-    UUID reservationId,
-    UUID paymentId,
-    UUID seatId,
-    UUID userId,
-    LocalDateTime occurredAt
+        Reservation reservation,
+        Payment payment,
+        Seat seat,
+        LocalDateTime occurredAt
 ) {
-
-    public static ReservationExpiredEvent from(ExpiredReservationResult expiredReservationResult) {
+    public static ReservationExpiredEvent from(Reservation reservation, Payment payment, Seat seat) {
         return ReservationExpiredEvent.builder()
-                .reservationId(expiredReservationResult.reservationId())
-                .paymentId(expiredReservationResult.paymentId())
-                .seatId(expiredReservationResult.seatId())
-                .userId(expiredReservationResult.userId())
-                .occurredAt(LocalDateTime.now())
+                .reservation(reservation)
+                .payment(payment)
+                .seat(seat)
+                .occurredAt(reservation.updatedAt())
                 .build();
     }
 }

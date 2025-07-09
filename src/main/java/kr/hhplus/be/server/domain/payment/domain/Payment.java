@@ -43,7 +43,7 @@ public record Payment(
 			.build();
 	}
 
-	public Payment expired() throws CustomException {
+	public Payment cancel() throws CustomException {
 		if (!status.equals(PaymentStatus.PENDING))
 			throw new CustomException(ErrorCode.PAYMENT_STATUS_NOT_PENDING);
 

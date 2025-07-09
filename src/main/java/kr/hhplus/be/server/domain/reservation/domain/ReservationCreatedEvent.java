@@ -1,11 +1,12 @@
 package kr.hhplus.be.server.domain.reservation.domain;
 
+import kr.hhplus.be.server.domain.payment.domain.Payment;
+import kr.hhplus.be.server.domain.seat.domain.Seat;
+import lombok.Builder;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
-
-import kr.hhplus.be.server.domain.reservation.dto.CreateReservationResult;
-import lombok.Builder;
 
 @Builder
 public record ReservationCreatedEvent(
@@ -17,16 +18,14 @@ public record ReservationCreatedEvent(
 	LocalDateTime occurredAt
 ) {
 
-	public static ReservationCreatedEvent from(CreateReservationResult result) {
-		LocalDateTime now = LocalDateTime.now();
-
+	public static ReservationCreatedEvent from(Reservation reservation, Payment payment, Seat seat, UUID userId) {
 		return ReservationCreatedEvent.builder()
-			.reservationId(result.reservation().id())
-			.userId(result.userId())
-			.paymentId(result.payment().id())
-			.seatId(result.payment().id())
-			.amount(result.payment().amount())
-			.occurredAt(now)
+			.reservationId(reservation.id())
+			.userId(userId)
+			.paymentId(payment.id())
+			.seatId(seat.id())
+			.amount(seat.price())
+			.occurredAt(reservation.createdAt())
 			.build();
 	}
 }

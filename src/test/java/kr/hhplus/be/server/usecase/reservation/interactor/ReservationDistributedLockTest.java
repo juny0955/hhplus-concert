@@ -28,7 +28,7 @@ import kr.hhplus.be.server.domain.seat.domain.Seat;
 import kr.hhplus.be.server.common.exception.CustomException;
 import kr.hhplus.be.server.common.exception.ErrorCode;
 import kr.hhplus.be.server.domain.reservation.dto.CreateReservationResult;
-import kr.hhplus.be.server.domain.reservation.usecase.ReserveInteractor;
+import kr.hhplus.be.server.domain.reservation.usecase.CreateReservationService;
 import kr.hhplus.be.server.domain.reservation.port.in.ReserveSeatCommand;
 import kr.hhplus.be.server.reservation.usecase.output.ReservationOutput;
 import kr.hhplus.be.server.domain.reservation.dto.ReserveSeatResult;
@@ -37,7 +37,7 @@ import kr.hhplus.be.server.domain.reservation.dto.ReserveSeatResult;
 public class ReservationDistributedLockTest {
 
 	@InjectMocks
-	private ReserveInteractor reserveInteractor;
+	private CreateReservationService createReservationService;
 
 	@Mock
 	private CreateReservationManager createReservationManager;
@@ -86,7 +86,7 @@ public class ReservationDistributedLockTest {
 			.thenThrow(new CustomException(ErrorCode.LOCK_CONFLICT));
 
 		CustomException exception = assertThrows(CustomException.class,
-			() -> reserveInteractor.reserveSeat(reserveSeatCommand));
+			() -> createReservationService.createReservation(reserveSeatCommand));
 
 		assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.LOCK_CONFLICT);
 
@@ -106,7 +106,7 @@ public class ReservationDistributedLockTest {
 			});
 		when(createReservationManager.processCreateReservation(reserveSeatCommand)).thenReturn(createReservationResult);
 
-		reserveInteractor.reserveSeat(reserveSeatCommand);
+		createReservationService.createReservation(reserveSeatCommand);
 
 		verify(distributedLockAspect, times(1)).executeWithSimpleLockHasReturn(eq(seatLockKey), any());
 		verify(createReservationManager, times(1)).processCreateReservation(reserveSeatCommand);
@@ -138,7 +138,7 @@ public class ReservationDistributedLockTest {
 		for (int i = 0; i < threadCount; i++) {
 			CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
 				try {
-					reserveInteractor.reserveSeat(reserveSeatCommand);
+					createReservationService.createReservation(reserveSeatCommand);
 				} catch (CustomException e) {
 					if (e.getErrorCode() == ErrorCode.LOCK_CONFLICT) {
 						lockConflictCount.incrementAndGet();
@@ -192,7 +192,7 @@ public class ReservationDistributedLockTest {
 			final int index = i;
 			CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
 				try {
-					reserveInteractor.reserveSeat(commands.get(index));
+					createReservationService.createReservation(commands.get(index));
 				} catch (Exception e) {
 
 				} finally {

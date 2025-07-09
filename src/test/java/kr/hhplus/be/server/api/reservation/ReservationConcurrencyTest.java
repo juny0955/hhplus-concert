@@ -36,7 +36,6 @@ import kr.hhplus.be.server.domain.queue.port.out.QueueTokenRepository;
 import kr.hhplus.be.server.domain.reservation.domain.Reservation;
 import kr.hhplus.be.server.domain.reservation.port.out.ReservationRepository;
 import kr.hhplus.be.server.domain.seat.domain.Seat;
-import kr.hhplus.be.server.domain.seat.port.out.SeatRepository;
 import kr.hhplus.be.server.domain.seat.domain.SeatStatus;
 import kr.hhplus.be.server.domain.user.domain.User;
 

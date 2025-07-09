@@ -2,6 +2,7 @@ package kr.hhplus.be.server.domain.reservation.adapter.in.web;
 
 import java.util.UUID;
 
+import kr.hhplus.be.server.domain.reservation.domain.Reservation;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,7 +21,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.hhplus.be.server.domain.reservation.adapter.in.web.request.ReservationRequest;
 import kr.hhplus.be.server.domain.reservation.adapter.in.web.response.ReservationResponse;
 import kr.hhplus.be.server.domain.reservation.dto.ReserveSeatResult;
-import kr.hhplus.be.server.domain.reservation.port.in.ReservationCreateUseCase;
+import kr.hhplus.be.server.domain.reservation.port.in.CreateReservationUseCase;
 import kr.hhplus.be.server.domain.reservation.port.in.ReserveSeatCommand;
 import lombok.RequiredArgsConstructor;
 
@@ -31,7 +32,7 @@ import lombok.RequiredArgsConstructor;
 @Tag(name = "Reservation API", description = "예약 관련 API")
 public class ReservationController {
 
-	private final ReservationCreateUseCase reservationCreateUseCase;
+	private final CreateReservationUseCase createReservationUseCase;
 
 	@Operation(
 		summary = "콘서트 좌석 예약 API",
@@ -74,8 +75,8 @@ public class ReservationController {
 		@RequestBody ReservationRequest request,
 		@RequestHeader(value = "Authorization") String queueToken
 	) throws Exception {
-		ReserveSeatResult reserveSeatResult = reservationCreateUseCase.reserveSeat(ReserveSeatCommand.of(request, seatId, queueToken));
+		Reservation reservation = createReservationUseCase.createReservation(ReserveSeatCommand.of(request, seatId, queueToken));
 
-		return ResponseEntity.ok(ReservationResponse.from(reserveSeatResult));
+		return ResponseEntity.ok(ReservationResponse.from(reservation));
 	}
 }

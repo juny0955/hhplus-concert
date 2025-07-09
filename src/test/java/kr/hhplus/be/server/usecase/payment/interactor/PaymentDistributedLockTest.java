@@ -26,12 +26,11 @@ import kr.hhplus.be.server.queue.adapter.out.persistence.QueueApplicationService
 import kr.hhplus.be.server.domain.queue.domain.QueueToken;
 import kr.hhplus.be.server.domain.reservation.domain.Reservation;
 import kr.hhplus.be.server.domain.seat.domain.Seat;
-import kr.hhplus.be.server.domain.payment.usecase.PaymentInteractor;
+import kr.hhplus.be.server.domain.payment.usecase.PaymentService;
 import kr.hhplus.be.server.domain.user.domain.User;
 import kr.hhplus.be.server.common.exception.CustomException;
 import kr.hhplus.be.server.common.exception.ErrorCode;
 import kr.hhplus.be.server.common.aop.DistributedLockAspect;
-import kr.hhplus.be.server.domain.payment.service.PaymentService;
 import kr.hhplus.be.server.domain.payment.port.in.PaymentCommand;
 import kr.hhplus.be.server.domain.payment.dto.PaymentResult;
 
@@ -39,10 +38,10 @@ import kr.hhplus.be.server.domain.payment.dto.PaymentResult;
 public class PaymentDistributedLockTest {
 
 	@InjectMocks
-	private PaymentInteractor paymentInteractor;
+	private PaymentService paymentService;
 
 	@Mock
-	private PaymentService paymentService;
+	private kr.hhplus.be.server.domain.payment.service.PaymentService paymentService;
 
 	@Mock
 	private QueueApplicationService queueApplicationService;
@@ -97,7 +96,7 @@ public class PaymentDistributedLockTest {
 			.thenThrow(new CustomException(ErrorCode.LOCK_CONFLICT));
 
 		CustomException exception = assertThrows(CustomException.class,
-			() -> paymentInteractor.payment(paymentCommand));
+			() -> paymentService.payment(paymentCommand));
 
 		assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.LOCK_CONFLICT);
 
@@ -122,7 +121,7 @@ public class PaymentDistributedLockTest {
 			.thenThrow(new CustomException(ErrorCode.LOCK_CONFLICT));
 
 		CustomException exception = assertThrows(CustomException.class,
-			() -> paymentInteractor.payment(paymentCommand));
+			() -> paymentService.payment(paymentCommand));
 
 		assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.LOCK_CONFLICT);
 
@@ -151,7 +150,7 @@ public class PaymentDistributedLockTest {
 			});
 		when(paymentService.processPayment(paymentCommand, queueToken)).thenReturn(paymentTransactionResult);
 
-		paymentInteractor.payment(paymentCommand);
+		paymentService.payment(paymentCommand);
 
 		verify(queueApplicationService, times(1)).getQueueToken(queueTokenId.toString());
 		verify(distributedLockAspect, times(1)).executeWithLockHasReturn(eq(userLockKey), any());
@@ -191,7 +190,7 @@ public class PaymentDistributedLockTest {
 		for (int i = 0; i < threadCount; i++) {
 			CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
 				try {
-					paymentInteractor.payment(paymentCommand);
+					paymentService.payment(paymentCommand);
 				} catch (CustomException e) {
 					if (e.getErrorCode() == ErrorCode.LOCK_CONFLICT) {
 						lockConflictCount.incrementAndGet();
