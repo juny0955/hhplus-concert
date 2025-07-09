@@ -1,22 +1,20 @@
 package kr.hhplus.be.server.domain.concert.adapter.out.persistence;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
-import kr.hhplus.be.server.domain.concert.port.out.SaveConcertPort;
 import org.springframework.stereotype.Component;
 
-import kr.hhplus.be.server.domain.concert.port.out.ConcertRepository;
-import kr.hhplus.be.server.domain.concert.port.out.GetConcertPort;
-import kr.hhplus.be.server.domain.concert.domain.Concert;
 import kr.hhplus.be.server.common.exception.CustomException;
 import kr.hhplus.be.server.common.exception.ErrorCode;
+import kr.hhplus.be.server.domain.concert.domain.Concert;
+import kr.hhplus.be.server.domain.concert.port.out.GetConcertPort;
+import kr.hhplus.be.server.domain.concert.port.out.SaveConcertPort;
 import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
-public class ConcertJpaGateway implements ConcertRepository, GetConcertPort, SaveConcertPort {
+public class ConcertJpaGateway implements GetConcertPort, SaveConcertPort {
 
 	private final JpaConcertRepository jpaConcertRepository;
 
@@ -25,6 +23,13 @@ public class ConcertJpaGateway implements ConcertRepository, GetConcertPort, Sav
 		return jpaConcertRepository.findById(concertId.toString())
 			.map(ConcertEntity::toDomain)
 			.orElseThrow(() -> new CustomException(ErrorCode.CONCERT_NOT_FOUND));
+	}
+
+	@Override
+	public List<Concert> getOpenConcerts() {
+		return jpaConcertRepository.findByOpenConcerts().stream()
+			.map(ConcertEntity::toDomain)
+			.toList();
 	}
 
 	@Override
@@ -40,31 +45,9 @@ public class ConcertJpaGateway implements ConcertRepository, GetConcertPort, Sav
 	}
 
 	@Override
-	public Concert save(Concert concert) {
-		ConcertEntity concertEntity = jpaConcertRepository.save(ConcertEntity.from(concert));
-		return concertEntity.toDomain();
-	}
-
-	@Override
-	public Optional<Concert> findById(UUID concertId) {
-		return jpaConcertRepository.findById(concertId.toString())
-			.map(ConcertEntity::toDomain);
-	}
-
-	@Override
-	public boolean existsById(UUID concertId) {
-		return jpaConcertRepository.existsById(concertId.toString());
-	}
-
-	@Override
-	public void deleteAll() {
-		jpaConcertRepository.deleteAll();
-	}
-
-	@Override
-	public List<Concert> findByOpenConcerts() {
-		return jpaConcertRepository.findByOpenConcerts().stream()
+	public Concert getConcertByConcertDateId(UUID concertDateId) throws CustomException {
+		return jpaConcertRepository.findByConcertDateId(concertDateId.toString())
 			.map(ConcertEntity::toDomain)
-			.toList();
+			.orElseThrow(() -> new CustomException(ErrorCode.CONCERT_NOT_FOUND));
 	}
 }

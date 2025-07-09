@@ -27,7 +27,6 @@ import kr.hhplus.be.server.api.TestDataFactory;
 import kr.hhplus.be.server.domain.queue.domain.QueueStatus;
 import kr.hhplus.be.server.domain.reservation.adapter.in.web.request.ReservationRequest;
 import kr.hhplus.be.server.domain.concert.domain.Concert;
-import kr.hhplus.be.server.domain.concert.port.out.ConcertRepository;
 import kr.hhplus.be.server.domain.concertDate.domain.ConcertDate;
 import kr.hhplus.be.server.domain.concertDate.port.out.ConcertDateRepository;
 import kr.hhplus.be.server.domain.queue.domain.QueueToken;

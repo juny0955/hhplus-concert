@@ -19,7 +19,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import kr.hhplus.be.server.domain.concert.domain.Concert;
-import kr.hhplus.be.server.domain.concert.port.out.ConcertRepository;
 import kr.hhplus.be.server.domain.concertDate.domain.ConcertDate;
 import kr.hhplus.be.server.domain.concertDate.port.out.ConcertDateRepository;
 import kr.hhplus.be.server.domain.concertDate.domain.ConcertDates;
