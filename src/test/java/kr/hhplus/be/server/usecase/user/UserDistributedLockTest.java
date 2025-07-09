@@ -22,12 +22,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import kr.hhplus.be.server.adapters.out.persistence.lock.DistributedLockAspect;
-import kr.hhplus.be.server.application.user.domain.User;
-import kr.hhplus.be.server.exception.CustomException;
-import kr.hhplus.be.server.exception.ErrorCode;
+import kr.hhplus.be.server.common.aop.DistributedLockAspect;
+import kr.hhplus.be.server.domain.user.domain.User;
+import kr.hhplus.be.server.common.exception.CustomException;
+import kr.hhplus.be.server.common.exception.ErrorCode;
 import kr.hhplus.be.server.user.application.service.UserManager;
-import kr.hhplus.be.server.application.user.service.UserService;
+import kr.hhplus.be.server.domain.user.service.UserService;
 
 @ExtendWith(MockitoExtension.class)
 public class UserDistributedLockTest {

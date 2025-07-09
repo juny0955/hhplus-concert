@@ -4,16 +4,16 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import kr.hhplus.be.server.domain.concert.Concert;
-import kr.hhplus.be.server.domain.concertDate.ConcertDate;
-import kr.hhplus.be.server.domain.payment.Payment;
-import kr.hhplus.be.server.domain.payment.PaymentStatus;
-import kr.hhplus.be.server.domain.reservation.Reservation;
-import kr.hhplus.be.server.domain.reservation.ReservationStatus;
-import kr.hhplus.be.server.domain.seat.Seat;
-import kr.hhplus.be.server.domain.seat.SeatClass;
-import kr.hhplus.be.server.domain.seat.SeatStatus;
-import kr.hhplus.be.server.domain.user.User;
+import kr.hhplus.be.server.domain.concert.domain.Concert;
+import kr.hhplus.be.server.domain.concertDate.domain.ConcertDate;
+import kr.hhplus.be.server.domain.payment.domain.Payment;
+import kr.hhplus.be.server.domain.payment.domain.PaymentStatus;
+import kr.hhplus.be.server.domain.reservation.domain.Reservation;
+import kr.hhplus.be.server.domain.reservation.domain.ReservationStatus;
+import kr.hhplus.be.server.domain.seat.domain.Seat;
+import kr.hhplus.be.server.domain.seat.domain.SeatClass;
+import kr.hhplus.be.server.domain.seat.domain.SeatStatus;
+import kr.hhplus.be.server.domain.user.domain.User;
 
 public class TestDataFactory {
 

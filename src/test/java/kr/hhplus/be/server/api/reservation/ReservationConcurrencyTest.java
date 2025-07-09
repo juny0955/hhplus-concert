@@ -25,20 +25,20 @@ import org.testcontainers.utility.TestcontainersConfiguration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import kr.hhplus.be.server.api.TestDataFactory;
-import kr.hhplus.be.server.adapters.in.web.reservation.request.ReservationRequest;
-import kr.hhplus.be.server.domain.concert.Concert;
-import kr.hhplus.be.server.application.concert.port.out.ConcertRepository;
-import kr.hhplus.be.server.application.concertDate.domain.ConcertDate;
-import kr.hhplus.be.server.application.concertDate.port.out.ConcertDateRepository;
-import kr.hhplus.be.server.application.payment.port.out.PaymentRepository;
-import kr.hhplus.be.server.application.queue.domain.QueueToken;
-import kr.hhplus.be.server.application.queue.port.out.QueueTokenRepository;
-import kr.hhplus.be.server.application.reservation.domain.Reservation;
-import kr.hhplus.be.server.application.reservation.port.out.ReservationRepository;
-import kr.hhplus.be.server.application.seat.domain.Seat;
-import kr.hhplus.be.server.application.seat.port.out.SeatRepository;
-import kr.hhplus.be.server.application.seat.domain.SeatStatus;
-import kr.hhplus.be.server.application.user.domain.User;
+import kr.hhplus.be.server.domain.reservation.adapter.in.web.request.ReservationRequest;
+import kr.hhplus.be.server.domain.concert.domain.Concert;
+import kr.hhplus.be.server.domain.concert.port.out.ConcertRepository;
+import kr.hhplus.be.server.domain.concertDate.domain.ConcertDate;
+import kr.hhplus.be.server.domain.concertDate.port.out.ConcertDateRepository;
+import kr.hhplus.be.server.domain.payment.port.out.PaymentRepository;
+import kr.hhplus.be.server.domain.queue.domain.QueueToken;
+import kr.hhplus.be.server.domain.queue.port.out.QueueTokenRepository;
+import kr.hhplus.be.server.domain.reservation.domain.Reservation;
+import kr.hhplus.be.server.domain.reservation.port.out.ReservationRepository;
+import kr.hhplus.be.server.domain.seat.domain.Seat;
+import kr.hhplus.be.server.domain.seat.port.out.SeatRepository;
+import kr.hhplus.be.server.domain.seat.domain.SeatStatus;
+import kr.hhplus.be.server.domain.user.domain.User;
 
 @SpringBootTest(properties = {
 	"spring.jpa.hibernate.ddl-auto=create-drop"

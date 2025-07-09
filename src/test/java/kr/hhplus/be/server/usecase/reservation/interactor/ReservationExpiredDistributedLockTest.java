@@ -22,14 +22,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
-import kr.hhplus.be.server.adapters.out.persistence.lock.DistributedLockAspect;
-import kr.hhplus.be.server.application.reservation.domain.ReservationExpiredEvent;
-import kr.hhplus.be.server.application.reservation.domain.Reservation;
-import kr.hhplus.be.server.application.reservation.domain.ReservationStatus;
-import kr.hhplus.be.server.exception.CustomException;
-import kr.hhplus.be.server.exception.ErrorCode;
-import kr.hhplus.be.server.application.reservation.dto.ExpiredReservationResult;
-import kr.hhplus.be.server.application.reservation.usecase.ReservationExpireService;
+import kr.hhplus.be.server.common.aop.DistributedLockAspect;
+import kr.hhplus.be.server.domain.reservation.domain.ReservationExpiredEvent;
+import kr.hhplus.be.server.domain.reservation.domain.Reservation;
+import kr.hhplus.be.server.domain.reservation.domain.ReservationStatus;
+import kr.hhplus.be.server.common.exception.CustomException;
+import kr.hhplus.be.server.common.exception.ErrorCode;
+import kr.hhplus.be.server.domain.reservation.dto.ExpiredReservationResult;
+import kr.hhplus.be.server.domain.reservation.usecase.ReservationExpireService;
 
 @ExtendWith(MockitoExtension.class)
 public class ReservationExpiredDistributedLockTest {

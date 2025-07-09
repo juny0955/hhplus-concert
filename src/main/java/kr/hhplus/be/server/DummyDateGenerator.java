@@ -10,15 +10,15 @@ import org.springframework.stereotype.Component;
 
 import net.datafaker.Faker;
 
-import kr.hhplus.be.server.domain.concert.Concert;
-import kr.hhplus.be.server.application.concert.port.out.ConcertRepository;
-import kr.hhplus.be.server.application.concertDate.port.out.ConcertDateRepository;
-import kr.hhplus.be.server.application.seat.port.out.SeatRepository;
-import kr.hhplus.be.server.domain.concertDate.ConcertDate;
-import kr.hhplus.be.server.domain.seat.Seat;
-import kr.hhplus.be.server.domain.seat.SeatClass;
-import kr.hhplus.be.server.domain.seat.SeatStatus;
-import kr.hhplus.be.server.domain.user.User;
+import kr.hhplus.be.server.domain.concert.domain.Concert;
+import kr.hhplus.be.server.domain.concert.port.out.ConcertRepository;
+import kr.hhplus.be.server.domain.concertDate.port.out.ConcertDateRepository;
+import kr.hhplus.be.server.domain.seat.port.out.SeatRepository;
+import kr.hhplus.be.server.domain.concertDate.domain.ConcertDate;
+import kr.hhplus.be.server.domain.seat.domain.Seat;
+import kr.hhplus.be.server.domain.seat.domain.SeatClass;
+import kr.hhplus.be.server.domain.seat.domain.SeatStatus;
+import kr.hhplus.be.server.domain.user.domain.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
