@@ -3,15 +3,15 @@ package kr.hhplus.be.server.reservation.adapter.out.persistence.seathold;
 import java.time.Duration;
 import java.util.UUID;
 
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Component;
+
 import kr.hhplus.be.server.common.exception.CustomException;
 import kr.hhplus.be.server.common.exception.ErrorCode;
 import kr.hhplus.be.server.reservation.port.out.seathold.CheckHoldSeatPort;
 import kr.hhplus.be.server.reservation.port.out.seathold.HasHoldSeatPort;
 import kr.hhplus.be.server.reservation.port.out.seathold.HoldSeatPort;
 import kr.hhplus.be.server.reservation.port.out.seathold.ReleaseSeatHoldPort;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.stereotype.Component;
-
 import lombok.RequiredArgsConstructor;
 
 @Component
@@ -32,9 +32,10 @@ public class RedisSeatHoldRepository implements HoldSeatPort, CheckHoldSeatPort,
 	}
 
 	@Override
-	public boolean checkHoldSeat(UUID seatId) {
+	public void checkHoldSeat(UUID seatId) throws CustomException {
 		String key = SEAT_HOLD_PREFIX + seatId;
-		return seatHoldRedisTemplate.hasKey(key);
+		if (seatHoldRedisTemplate.hasKey(key))
+			throw new CustomException(ErrorCode.ALREADY_RESERVED_SEAT);
 	}
 
 	@Override

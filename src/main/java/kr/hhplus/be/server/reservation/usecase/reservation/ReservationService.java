@@ -29,6 +29,7 @@ import kr.hhplus.be.server.reservation.port.out.SeatQueryPort;
 import kr.hhplus.be.server.reservation.port.out.SendDataPlatformPort;
 import kr.hhplus.be.server.reservation.port.out.reservation.GetReservationPort;
 import kr.hhplus.be.server.reservation.port.out.reservation.SaveReservationPort;
+import kr.hhplus.be.server.reservation.port.out.seathold.CheckHoldSeatPort;
 import kr.hhplus.be.server.reservation.port.out.seathold.HoldSeatPort;
 import kr.hhplus.be.server.reservation.usecase.reservation.manager.ReservationTransactionManager;
 import lombok.RequiredArgsConstructor;
@@ -48,6 +49,7 @@ public class ReservationService implements
     private final SeatQueryPort seatQueryPort;
     private final PaymentQueryPort paymentQueryPort;
     private final HoldSeatPort holdSeatPort;
+    private final CheckHoldSeatPort checkHoldSeatPort;
     private final GetReservationPort getReservationPort;
     private final SaveReservationPort saveReservationPort;
     private final SendDataPlatformPort sendDataPlatformPort;
@@ -58,7 +60,7 @@ public class ReservationService implements
     @Transactional
     public Reservation createReservation(ReserveSeatCommand command) throws Exception {
         QueueToken queueToken = queueTokenQueryPort.getActiveToken(command.queueTokenId());
-
+        checkHoldSeatPort.checkHoldSeat(command.seatId());
         concertQueryPort.validOpenConcert(command.concertId());
         concertQueryPort.validDeadLine(command.concertDateId());
 
@@ -86,6 +88,8 @@ public class ReservationService implements
 
         for (Reservation pendingReservation : reservations) {
             try {
+                checkHoldSeatPort.checkHoldSeat(pendingReservation.seatId());
+
                 reservationTransactionManager.process(pendingReservation);
             } catch (Exception e) {
                 log.warn("예약 만료 처리 스케줄러 처리 중 예외발생", e);
