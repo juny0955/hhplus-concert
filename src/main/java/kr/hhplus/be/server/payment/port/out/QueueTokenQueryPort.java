@@ -5,5 +5,4 @@ import kr.hhplus.be.server.concert.domain.queue.QueueToken;
 
 public interface QueueTokenQueryPort {
     QueueToken getActiveToken(String tokenId) throws CustomException;
-    void expireQueueToken(String tokenId);
 }

@@ -30,6 +30,7 @@ import kr.hhplus.be.server.reservation.port.out.reservation.GetReservationPort;
 import kr.hhplus.be.server.reservation.port.out.reservation.SaveReservationPort;
 import kr.hhplus.be.server.reservation.port.out.seathold.CheckHoldSeatPort;
 import kr.hhplus.be.server.reservation.port.out.seathold.HoldSeatPort;
+import kr.hhplus.be.server.reservation.port.out.seathold.ReleaseSeatHoldPort;
 import kr.hhplus.be.server.reservation.usecase.reservation.manager.ReservationTransactionManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,6 +48,7 @@ public class ReservationService implements
     private final SeatQueryPort seatQueryPort;
     private final PaymentQueryPort paymentQueryPort;
     private final HoldSeatPort holdSeatPort;
+    private final ReleaseSeatHoldPort releaseSeatHoldPort;
     private final CheckHoldSeatPort checkHoldSeatPort;
     private final GetReservationPort getReservationPort;
     private final SaveReservationPort saveReservationPort;
@@ -75,7 +77,9 @@ public class ReservationService implements
     @Transactional
     public Reservation paidReservation(UUID reservationId) throws CustomException {
         Reservation reservation = getReservationPort.getReservation(reservationId);
-        return saveReservationPort.saveReservation(reservation.paid());
+        Reservation paidReservation = saveReservationPort.saveReservation(reservation.paid());
+        releaseSeatHoldPort.releaseSeatHold(paidReservation.seatId());
+        return paidReservation;
     }
 
     @Override

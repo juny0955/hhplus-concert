@@ -19,6 +19,7 @@ import kr.hhplus.be.server.concert.port.in.seat.PaidSeatUseCase;
 import kr.hhplus.be.server.concert.port.in.seat.ReserveSeatUseCase;
 import kr.hhplus.be.server.concert.port.out.concert.GetConcertPort;
 import kr.hhplus.be.server.concert.port.out.concertDate.GetConcertDatePort;
+import kr.hhplus.be.server.concert.port.out.queue.QueueTokenRepository;
 import kr.hhplus.be.server.concert.port.out.seat.GetSeatPort;
 import kr.hhplus.be.server.concert.port.out.seat.SaveSeatPort;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +38,7 @@ public class SeatService implements
     private final SaveSeatPort saveSeatPort;
     private final GetConcertPort getConcertPort;
     private final GetConcertDatePort getConcertDatePort;
+    private final QueueTokenRepository queueTokenRepository;
 
     @Override
     @Transactional
@@ -63,9 +65,11 @@ public class SeatService implements
 
     @Override
     @Transactional
-    public Seat paidSeat(UUID seatId) throws CustomException {
+    public Seat paidSeat(UUID seatId, UUID tokenId) throws CustomException {
         Seat seat = getSeatPort.getSeat(seatId);
-        return saveSeatPort.saveSeat(seat.payment());
+        Seat paidSeat = saveSeatPort.saveSeat(seat.payment());
+        queueTokenRepository.expiresQueueToken(tokenId.toString());
+        return paidSeat;
     }
 
     @Override

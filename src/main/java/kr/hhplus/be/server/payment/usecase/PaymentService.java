@@ -1,26 +1,33 @@
 package kr.hhplus.be.server.payment.usecase;
 
+import java.math.BigDecimal;
+import java.util.UUID;
+
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import kr.hhplus.be.server.common.aop.DistributedLock;
 import kr.hhplus.be.server.common.exception.CustomException;
+import kr.hhplus.be.server.concert.domain.queue.QueueToken;
+import kr.hhplus.be.server.concert.domain.seat.Seat;
 import kr.hhplus.be.server.payment.domain.Payment;
 import kr.hhplus.be.server.payment.domain.PaymentSuccessEvent;
 import kr.hhplus.be.server.payment.port.in.CancelPaymentUseCase;
 import kr.hhplus.be.server.payment.port.in.CreatePaymentUseCase;
 import kr.hhplus.be.server.payment.port.in.PaymentCommand;
 import kr.hhplus.be.server.payment.port.in.PaymentUseCase;
-import kr.hhplus.be.server.payment.port.out.*;
-import kr.hhplus.be.server.concert.domain.queue.QueueToken;
+import kr.hhplus.be.server.payment.port.out.GetPaymentPort;
+import kr.hhplus.be.server.payment.port.out.QueueTokenQueryPort;
+import kr.hhplus.be.server.payment.port.out.ReservationQueryPort;
+import kr.hhplus.be.server.payment.port.out.SavePaymentPort;
+import kr.hhplus.be.server.payment.port.out.SeatHoldQueryPort;
+import kr.hhplus.be.server.payment.port.out.SeatQueryPort;
+import kr.hhplus.be.server.payment.port.out.UserQueryPort;
 import kr.hhplus.be.server.reservation.domain.Reservation;
-import kr.hhplus.be.server.concert.domain.seat.Seat;
 import kr.hhplus.be.server.user.domain.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -51,10 +58,7 @@ public class PaymentService implements
 		Payment savedPayment = savePaymentPort.save(payment.success());
 		User savedUser = userQueryPort.usePoint(queueToken.userId(), payment.amount());
 		Reservation savedReservation = reservationQueryPort.paidReservation(command.reservationId());
-		Seat savedSeat = seatQueryPort.paidSeat(savedReservation.seatId());
-
-		seatHoldQueryPort.releaseSeatHold(savedSeat.id());
-		queueTokenQueryPort.expireQueueToken(queueToken.tokenId().toString());
+		Seat savedSeat = seatQueryPort.paidSeat(savedReservation.seatId(), queueToken.tokenId());
 
 		eventPublisher.publishEvent(PaymentSuccessEvent.from(savedPayment, savedSeat, savedReservation, savedUser));
 		return payment;

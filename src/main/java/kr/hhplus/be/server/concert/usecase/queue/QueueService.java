@@ -11,7 +11,6 @@ import kr.hhplus.be.server.common.exception.ErrorCode;
 import kr.hhplus.be.server.concert.domain.concert.Concert;
 import kr.hhplus.be.server.concert.domain.queue.QueueToken;
 import kr.hhplus.be.server.concert.domain.queue.QueueTokenUtil;
-import kr.hhplus.be.server.concert.port.in.queue.ExpireQueueTokenUseCase;
 import kr.hhplus.be.server.concert.port.in.queue.GetActiveQueueTokenUseCase;
 import kr.hhplus.be.server.concert.port.in.queue.GetQueueTokenUseCase;
 import kr.hhplus.be.server.concert.port.in.queue.IssueQueueTokenUseCase;
@@ -26,7 +25,6 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 public class QueueService implements
-	ExpireQueueTokenUseCase,
 	GetActiveQueueTokenUseCase,
 	GetQueueTokenUseCase,
 	IssueQueueTokenUseCase,
@@ -84,11 +82,6 @@ public class QueueService implements
 		for (Concert concert : concerts) {
 			queueTokenRepository.promoteQueueToken(concert);
 		}
-	}
-
-	@Override
-	public void expireQueueToken(String tokenId) {
-		queueTokenRepository.expiresQueueToken(tokenId);
 	}
 
 	private QueueToken createQueueToken(Integer activeTokens, UUID userId, UUID concertId) {
