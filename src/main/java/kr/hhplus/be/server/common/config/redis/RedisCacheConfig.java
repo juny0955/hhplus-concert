@@ -15,7 +15,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import kr.hhplus.be.server.domain.concert.domain.seat.Seats;
+import kr.hhplus.be.server.concert.domain.seat.Seats;
 import lombok.RequiredArgsConstructor;
 
 @Configuration

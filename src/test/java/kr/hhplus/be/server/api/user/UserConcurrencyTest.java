@@ -25,8 +25,8 @@ import org.testcontainers.utility.TestcontainersConfiguration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import kr.hhplus.be.server.api.TestDataFactory;
-import kr.hhplus.be.server.domain.user.adapter.in.web.request.ChargePointRequest;
-import kr.hhplus.be.server.domain.user.domain.User;
+import kr.hhplus.be.server.user.adapter.in.web.request.ChargePointRequest;
+import kr.hhplus.be.server.user.domain.User;
 
 @SpringBootTest(properties = {
 	"spring.jpa.hibernate.ddl-auto=create-drop"

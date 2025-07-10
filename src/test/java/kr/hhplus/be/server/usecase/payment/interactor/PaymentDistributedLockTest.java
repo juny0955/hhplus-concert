@@ -20,18 +20,18 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import kr.hhplus.be.server.domain.payment.domain.PaymentSuccessEvent;
-import kr.hhplus.be.server.domain.payment.domain.Payment;
+import kr.hhplus.be.server.payment.domain.PaymentSuccessEvent;
+import kr.hhplus.be.server.payment.domain.Payment;
 import kr.hhplus.be.server.queue.adapter.out.persistence.QueueApplicationService;
-import kr.hhplus.be.server.domain.queue.domain.QueueToken;
-import kr.hhplus.be.server.domain.reservation.domain.Reservation;
-import kr.hhplus.be.server.domain.concert.domain.seat.Seat;
-import kr.hhplus.be.server.domain.payment.usecase.PaymentService;
-import kr.hhplus.be.server.domain.user.domain.User;
+import kr.hhplus.be.server.reservation.domain.queue.QueueToken;
+import kr.hhplus.be.server.reservation.domain.reservation.Reservation;
+import kr.hhplus.be.server.concert.domain.seat.Seat;
+import kr.hhplus.be.server.payment.usecase.PaymentService;
+import kr.hhplus.be.server.user.domain.User;
 import kr.hhplus.be.server.common.exception.CustomException;
 import kr.hhplus.be.server.common.exception.ErrorCode;
 import kr.hhplus.be.server.common.aop.DistributedLockAspect;
-import kr.hhplus.be.server.domain.payment.port.in.PaymentCommand;
+import kr.hhplus.be.server.payment.port.in.PaymentCommand;
 import kr.hhplus.be.server.domain.payment.dto.PaymentResult;
 
 @ExtendWith(MockitoExtension.class)

@@ -18,21 +18,21 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import kr.hhplus.be.server.domain.payment.service.PaymentService;
-import kr.hhplus.be.server.domain.payment.domain.Payment;
+import kr.hhplus.be.server.payment.domain.Payment;
 import kr.hhplus.be.server.payment.domain.service.PaymentDomainResult;
-import kr.hhplus.be.server.domain.payment.port.out.PaymentRepository;
-import kr.hhplus.be.server.domain.payment.domain.PaymentStatus;
-import kr.hhplus.be.server.domain.queue.domain.QueueToken;
-import kr.hhplus.be.server.domain.queue.port.out.QueueTokenRepository;
-import kr.hhplus.be.server.domain.reservation.domain.Reservation;
-import kr.hhplus.be.server.domain.reservation.domain.ReservationStatus;
-import kr.hhplus.be.server.domain.concert.domain.seat.Seat;
-import kr.hhplus.be.server.domain.concert.domain.seat.SeatClass;
-import kr.hhplus.be.server.domain.concert.domain.seat.SeatStatus;
-import kr.hhplus.be.server.domain.user.domain.User;
+import kr.hhplus.be.server.payment.port.out.PaymentRepository;
+import kr.hhplus.be.server.payment.domain.PaymentStatus;
+import kr.hhplus.be.server.reservation.domain.queue.QueueToken;
+import kr.hhplus.be.server.reservation.port.out.queue.QueueTokenRepository;
+import kr.hhplus.be.server.reservation.domain.reservation.Reservation;
+import kr.hhplus.be.server.reservation.domain.reservation.ReservationStatus;
+import kr.hhplus.be.server.concert.domain.seat.Seat;
+import kr.hhplus.be.server.concert.domain.seat.SeatClass;
+import kr.hhplus.be.server.concert.domain.seat.SeatStatus;
+import kr.hhplus.be.server.user.domain.User;
 import kr.hhplus.be.server.common.exception.CustomException;
 import kr.hhplus.be.server.common.exception.ErrorCode;
-import kr.hhplus.be.server.domain.payment.port.in.PaymentCommand;
+import kr.hhplus.be.server.payment.port.in.PaymentCommand;
 
 @ExtendWith(MockitoExtension.class)
 class PaymentServiceTest {
