@@ -26,14 +26,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import kr.hhplus.be.server.api.TestDataFactory;
 import kr.hhplus.be.server.domain.queue.domain.QueueStatus;
 import kr.hhplus.be.server.domain.reservation.adapter.in.web.request.ReservationRequest;
-import kr.hhplus.be.server.domain.concert.domain.Concert;
-import kr.hhplus.be.server.domain.concertDate.domain.ConcertDate;
-import kr.hhplus.be.server.domain.concertDate.port.out.ConcertDateRepository;
+import kr.hhplus.be.server.domain.concert.domain.concert.Concert;
+import kr.hhplus.be.server.domain.concert.domain.concertDate.ConcertDate;
 import kr.hhplus.be.server.domain.queue.domain.QueueToken;
 import kr.hhplus.be.server.domain.queue.port.out.QueueTokenRepository;
 import kr.hhplus.be.server.domain.reservation.domain.ReservationStatus;
-import kr.hhplus.be.server.domain.seat.domain.Seat;
-import kr.hhplus.be.server.domain.seat.domain.SeatStatus;
+import kr.hhplus.be.server.domain.concert.domain.seat.Seat;
+import kr.hhplus.be.server.domain.concert.domain.seat.SeatStatus;
 import kr.hhplus.be.server.domain.user.domain.User;
 import kr.hhplus.be.server.common.exception.ErrorCode;
 

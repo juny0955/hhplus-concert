@@ -18,9 +18,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
-import kr.hhplus.be.server.domain.seat.domain.Seat;
-import kr.hhplus.be.server.domain.seat.domain.SeatClass;
-import kr.hhplus.be.server.domain.seat.domain.SeatStatus;
+import kr.hhplus.be.server.domain.concert.domain.seat.Seat;
+import kr.hhplus.be.server.domain.concert.domain.seat.SeatClass;
+import kr.hhplus.be.server.domain.concert.domain.seat.SeatStatus;
 import kr.hhplus.be.server.common.exception.CustomException;
 import kr.hhplus.be.server.common.exception.ErrorCode;
 import kr.hhplus.be.server.common.aop.DistributedLockAspect;
@@ -88,7 +88,7 @@ class CreateReservationServiceTest {
 	@Test
 	@DisplayName("예약_성공")
 	void createReservation_Success() throws Exception {
-		String expectedLockKey = "seat:" + seatId;
+		String expectedLockKey = "concert:" + seatId;
 
 		// 분산락 Mock 설정
 		when(distributedLockAspect.executeWithLockHasReturn(eq(expectedLockKey), any()))
@@ -110,7 +110,7 @@ class CreateReservationServiceTest {
 	@Test
 	@DisplayName("예약_실패_CustomException")
 	void createReservation_Failure_CustomException() throws Exception {
-		String expectedLockKey = "seat:" + seatId;
+		String expectedLockKey = "concert:" + seatId;
 		CustomException expectedException = new CustomException(ErrorCode.SEAT_NOT_FOUND);
 
 		// 분산락 Mock 설정 - 내부에서 예외 발생
@@ -135,7 +135,7 @@ class CreateReservationServiceTest {
 	@Test
 	@DisplayName("예약_실패_좌석이미예약됨")
 	void createReservation() throws Exception {
-		String expectedLockKey = "seat:" + seatId;
+		String expectedLockKey = "concert:" + seatId;
 
 		// 분산락 Mock 설정 - 내부에서 예외 발생
 		when(distributedLockAspect.executeWithLockHasReturn(eq(expectedLockKey), any()))
@@ -160,7 +160,7 @@ class CreateReservationServiceTest {
 	@Test
 	@DisplayName("예약_실패_대기열토큰유효하지않음")
 	void createReservation_Failure_InvalidQueueToken() throws Exception {
-		String expectedLockKey = "seat:" + seatId;
+		String expectedLockKey = "concert:" + seatId;
 
 		// 분산락 Mock 설정 - 내부에서 예외 발생
 		when(distributedLockAspect.executeWithLockHasReturn(eq(expectedLockKey), any()))
@@ -184,7 +184,7 @@ class CreateReservationServiceTest {
 	@Test
 	@DisplayName("예약_실패_콘서트정보찾지못함")
 	void createReservation_Failure_ConcertNotFound() throws Exception {
-		String expectedLockKey = "seat:" + seatId;
+		String expectedLockKey = "concert:" + seatId;
 
 		// 분산락 Mock 설정 - 내부에서 예외 발생
 		when(distributedLockAspect.executeWithLockHasReturn(eq(expectedLockKey), any()))

@@ -5,8 +5,8 @@ import java.util.List;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import kr.hhplus.be.server.domain.concert.domain.Concert;
-import kr.hhplus.be.server.domain.concert.port.in.GetOpenConcertUseCase;
+import kr.hhplus.be.server.domain.concert.domain.concert.Concert;
+import kr.hhplus.be.server.domain.concert.port.in.concert.GetOpenConcertUseCase;
 import kr.hhplus.be.server.domain.queue.port.in.PromoteQueueTokenInput;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

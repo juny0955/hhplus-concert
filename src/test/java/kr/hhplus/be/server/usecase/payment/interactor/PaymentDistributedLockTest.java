@@ -25,7 +25,7 @@ import kr.hhplus.be.server.domain.payment.domain.Payment;
 import kr.hhplus.be.server.queue.adapter.out.persistence.QueueApplicationService;
 import kr.hhplus.be.server.domain.queue.domain.QueueToken;
 import kr.hhplus.be.server.domain.reservation.domain.Reservation;
-import kr.hhplus.be.server.domain.seat.domain.Seat;
+import kr.hhplus.be.server.domain.concert.domain.seat.Seat;
 import kr.hhplus.be.server.domain.payment.usecase.PaymentService;
 import kr.hhplus.be.server.domain.user.domain.User;
 import kr.hhplus.be.server.common.exception.CustomException;
@@ -96,7 +96,7 @@ public class PaymentDistributedLockTest {
 			.thenThrow(new CustomException(ErrorCode.LOCK_CONFLICT));
 
 		CustomException exception = assertThrows(CustomException.class,
-			() -> paymentService.payment(paymentCommand));
+			() -> paymentService.pay(paymentCommand));
 
 		assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.LOCK_CONFLICT);
 
@@ -121,7 +121,7 @@ public class PaymentDistributedLockTest {
 			.thenThrow(new CustomException(ErrorCode.LOCK_CONFLICT));
 
 		CustomException exception = assertThrows(CustomException.class,
-			() -> paymentService.payment(paymentCommand));
+			() -> paymentService.pay(paymentCommand));
 
 		assertThat(exception.getErrorCode()).isEqualTo(ErrorCode.LOCK_CONFLICT);
 
@@ -150,7 +150,7 @@ public class PaymentDistributedLockTest {
 			});
 		when(paymentService.processPayment(paymentCommand, queueToken)).thenReturn(paymentTransactionResult);
 
-		paymentService.payment(paymentCommand);
+		paymentService.pay(paymentCommand);
 
 		verify(queueApplicationService, times(1)).getQueueToken(queueTokenId.toString());
 		verify(distributedLockAspect, times(1)).executeWithLockHasReturn(eq(userLockKey), any());
@@ -190,7 +190,7 @@ public class PaymentDistributedLockTest {
 		for (int i = 0; i < threadCount; i++) {
 			CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
 				try {
-					paymentService.payment(paymentCommand);
+					paymentService.pay(paymentCommand);
 				} catch (CustomException e) {
 					if (e.getErrorCode() == ErrorCode.LOCK_CONFLICT) {
 						lockConflictCount.incrementAndGet();

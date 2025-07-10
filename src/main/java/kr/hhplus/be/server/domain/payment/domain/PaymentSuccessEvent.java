@@ -3,7 +3,7 @@ package kr.hhplus.be.server.domain.payment.domain;
 import java.time.LocalDateTime;
 
 import kr.hhplus.be.server.domain.reservation.domain.Reservation;
-import kr.hhplus.be.server.domain.seat.domain.Seat;
+import kr.hhplus.be.server.domain.concert.domain.seat.Seat;
 import kr.hhplus.be.server.domain.user.domain.User;
 import lombok.Builder;
 

@@ -1,22 +1,20 @@
 package kr.hhplus.be.server.domain.reservation.adapter.out.persistence;
 
+import kr.hhplus.be.server.common.exception.CustomException;
+import kr.hhplus.be.server.common.exception.ErrorCode;
+import kr.hhplus.be.server.domain.reservation.domain.Reservation;
+import kr.hhplus.be.server.domain.reservation.port.out.GetReservationPort;
+import kr.hhplus.be.server.domain.reservation.port.out.SaveReservationPort;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import kr.hhplus.be.server.common.exception.ErrorCode;
-import kr.hhplus.be.server.domain.reservation.port.out.GetReservationPort;
-import kr.hhplus.be.server.domain.reservation.port.out.SaveReservationPort;
-import org.springframework.stereotype.Component;
-
-import kr.hhplus.be.server.domain.reservation.port.out.ReservationRepository;
-import kr.hhplus.be.server.domain.reservation.domain.Reservation;
-import kr.hhplus.be.server.common.exception.CustomException;
-import lombok.RequiredArgsConstructor;
-
 @Component
 @RequiredArgsConstructor
-public class ReservationJpaGateway implements ReservationRepository, SaveReservationPort, GetReservationPort {
+public class ReservationJpaGateway implements SaveReservationPort, GetReservationPort {
 
 	private final JpaReservationRepository jpaReservationRepository;
 

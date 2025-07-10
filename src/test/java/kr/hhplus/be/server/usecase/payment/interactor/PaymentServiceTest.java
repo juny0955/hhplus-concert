@@ -24,9 +24,9 @@ import kr.hhplus.be.server.queue.adapter.out.persistence.QueueApplicationService
 import kr.hhplus.be.server.domain.queue.domain.QueueToken;
 import kr.hhplus.be.server.domain.reservation.domain.Reservation;
 import kr.hhplus.be.server.domain.reservation.domain.ReservationStatus;
-import kr.hhplus.be.server.domain.seat.domain.Seat;
-import kr.hhplus.be.server.domain.seat.domain.SeatClass;
-import kr.hhplus.be.server.domain.seat.domain.SeatStatus;
+import kr.hhplus.be.server.domain.concert.domain.seat.Seat;
+import kr.hhplus.be.server.domain.concert.domain.seat.SeatClass;
+import kr.hhplus.be.server.domain.concert.domain.seat.SeatStatus;
 import kr.hhplus.be.server.domain.payment.usecase.PaymentService;
 import kr.hhplus.be.server.domain.user.domain.User;
 import kr.hhplus.be.server.common.exception.CustomException;
@@ -105,7 +105,7 @@ class PaymentServiceTest {
 		when(paymentService.processPayment(paymentCommand, queueToken))
 			.thenReturn(paymentTransactionResult);
 		
-		paymentService.payment(paymentCommand);
+		paymentService.pay(paymentCommand);
 
 		verify(queueApplicationService, times(1)).getQueueToken(queueTokenId.toString());
 		verify(distributedLockAspect, times(2)).executeWithLockHasReturn(anyString(), any());
@@ -127,7 +127,7 @@ class PaymentServiceTest {
 			.thenThrow(new CustomException(ErrorCode.USER_NOT_FOUND));
 		
 		CustomException customException = assertThrows(CustomException.class,
-			() -> paymentService.payment(paymentCommand));
+			() -> paymentService.pay(paymentCommand));
 
 		assertThat(customException.getErrorCode()).isEqualTo(ErrorCode.USER_NOT_FOUND);
 
@@ -151,7 +151,7 @@ class PaymentServiceTest {
 			.thenThrow(new CustomException(ErrorCode.INSUFFICIENT_BALANCE));
 		
 		CustomException customException = assertThrows(CustomException.class,
-			() -> paymentService.payment(paymentCommand));
+			() -> paymentService.pay(paymentCommand));
 
 		assertThat(customException.getErrorCode()).isEqualTo(ErrorCode.INSUFFICIENT_BALANCE);
 
@@ -175,7 +175,7 @@ class PaymentServiceTest {
 			.thenThrow(new CustomException(ErrorCode.ALREADY_PAID));
 		
 		CustomException customException = assertThrows(CustomException.class,
-			() -> paymentService.payment(paymentCommand));
+			() -> paymentService.pay(paymentCommand));
 
 		assertThat(customException.getErrorCode()).isEqualTo(ErrorCode.ALREADY_PAID);
 

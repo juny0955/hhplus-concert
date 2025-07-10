@@ -10,7 +10,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
 import kr.hhplus.be.server.domain.queue.port.out.QueueTokenRepository;
-import kr.hhplus.be.server.domain.concert.domain.Concert;
+import kr.hhplus.be.server.domain.concert.domain.concert.Concert;
 import kr.hhplus.be.server.domain.queue.domain.QueueStatus;
 import kr.hhplus.be.server.domain.queue.domain.QueueToken;
 import kr.hhplus.be.server.domain.queue.domain.QueueTokenUtil;

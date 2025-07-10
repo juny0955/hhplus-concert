@@ -60,7 +60,7 @@ public class PaymentController {
 		@RequestBody PayReservationRequest request,
 		@RequestHeader(value = "Authorization") String queueToken
 	) throws Exception {
-		Payment result = paymentUseCase.payment(PaymentCommand.of(reservationId, request.seatId(), queueToken));
+		Payment result = paymentUseCase.pay(PaymentCommand.of(reservationId, request.seatId(), queueToken));
 
 		return ResponseEntity.ok(PaymentResponse.from(result));
 	}

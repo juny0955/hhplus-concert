@@ -19,11 +19,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.utility.TestcontainersConfiguration;
 
 import kr.hhplus.be.server.api.TestDataFactory;
-import kr.hhplus.be.server.domain.concert.domain.Concert;
-import kr.hhplus.be.server.domain.concertDate.domain.ConcertDate;
-import kr.hhplus.be.server.domain.concertDate.port.out.ConcertDateRepository;
-import kr.hhplus.be.server.domain.seat.domain.Seat;
-import kr.hhplus.be.server.domain.seat.domain.SeatStatus;
+import kr.hhplus.be.server.domain.concert.domain.concert.Concert;
+import kr.hhplus.be.server.domain.concert.domain.concertDate.ConcertDate;
+import kr.hhplus.be.server.domain.concert.domain.seat.Seat;
+import kr.hhplus.be.server.domain.concert.domain.seat.SeatStatus;
 import kr.hhplus.be.server.common.exception.ErrorCode;
 
 @SpringBootTest(properties = {

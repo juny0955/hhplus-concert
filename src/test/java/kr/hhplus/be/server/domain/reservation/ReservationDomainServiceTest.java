@@ -15,11 +15,11 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import kr.hhplus.be.server.api.TestDataFactory;
-import kr.hhplus.be.server.domain.concert.domain.Concert;
-import kr.hhplus.be.server.domain.concertDate.domain.ConcertDate;
-import kr.hhplus.be.server.domain.seat.domain.Seat;
-import kr.hhplus.be.server.domain.seat.domain.SeatClass;
-import kr.hhplus.be.server.domain.seat.domain.SeatStatus;
+import kr.hhplus.be.server.domain.concert.domain.concert.Concert;
+import kr.hhplus.be.server.domain.concert.domain.concertDate.ConcertDate;
+import kr.hhplus.be.server.domain.concert.domain.seat.Seat;
+import kr.hhplus.be.server.domain.concert.domain.seat.SeatClass;
+import kr.hhplus.be.server.domain.concert.domain.seat.SeatStatus;
 import kr.hhplus.be.server.common.exception.CustomException;
 import kr.hhplus.be.server.common.exception.ErrorCode;
 import kr.hhplus.be.server.reservation.domain.service.ReservationDomainResult;

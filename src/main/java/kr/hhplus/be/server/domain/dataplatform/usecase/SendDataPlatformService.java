@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
-import kr.hhplus.be.server.domain.concert.domain.Concert;
+import kr.hhplus.be.server.domain.concert.domain.concert.Concert;
 import kr.hhplus.be.server.domain.dataplatform.port.out.GetConcertPort;
 import kr.hhplus.be.server.domain.dataplatform.port.out.SendReservationDataPort;
 import kr.hhplus.be.server.domain.payment.domain.PaymentSuccessEvent;

@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import kr.hhplus.be.server.domain.queue.port.out.QueueTokenRepository;
-import kr.hhplus.be.server.domain.concert.domain.Concert;
+import kr.hhplus.be.server.domain.concert.domain.concert.Concert;
 import kr.hhplus.be.server.domain.queue.domain.QueueToken;
 import kr.hhplus.be.server.common.exception.CustomException;
 import kr.hhplus.be.server.common.exception.ErrorCode;

@@ -24,7 +24,7 @@ import kr.hhplus.be.server.common.aop.DistributedLockAspect;
 import kr.hhplus.be.server.domain.reservation.domain.ReservationCreatedEvent;
 import kr.hhplus.be.server.domain.payment.domain.Payment;
 import kr.hhplus.be.server.domain.reservation.domain.Reservation;
-import kr.hhplus.be.server.domain.seat.domain.Seat;
+import kr.hhplus.be.server.domain.concert.domain.seat.Seat;
 import kr.hhplus.be.server.common.exception.CustomException;
 import kr.hhplus.be.server.common.exception.ErrorCode;
 import kr.hhplus.be.server.domain.reservation.domain.CreateReservationResult;
@@ -68,7 +68,7 @@ public class ReservationDistributedLockTest {
 		userId = UUID.randomUUID();
 		queueTokenId = UUID.randomUUID().toString();
 
-		seatLockKey = "reserve:seat:" + seatId;
+		seatLockKey = "reserve:concert:" + seatId;
 
 		reserveSeatCommand = new ReserveSeatCommand(concertId, concertDateId, seatId, queueTokenId);
 		
@@ -171,7 +171,7 @@ public class ReservationDistributedLockTest {
 		for (int i = 0; i < threadCount; i++) {
 			UUID differentSeatId = UUID.randomUUID();
 			ReserveSeatCommand command = new ReserveSeatCommand(concertId, concertDateId, differentSeatId, queueTokenId);
-			String lockKey = "reserve:seat:" + differentSeatId;
+			String lockKey = "reserve:concert:" + differentSeatId;
 			
 			commands.add(command);
 			lockKeys.add(lockKey);

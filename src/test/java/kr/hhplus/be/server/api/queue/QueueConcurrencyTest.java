@@ -28,9 +28,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import kr.hhplus.be.server.api.TestDataFactory;
-import kr.hhplus.be.server.domain.concert.domain.Concert;
-import kr.hhplus.be.server.domain.concertDate.domain.ConcertDate;
-import kr.hhplus.be.server.domain.concertDate.port.out.ConcertDateRepository;
+import kr.hhplus.be.server.domain.concert.domain.concert.Concert;
+import kr.hhplus.be.server.domain.concert.domain.concertDate.ConcertDate;
 import kr.hhplus.be.server.domain.user.domain.User;
 
 @SpringBootTest(properties = {

@@ -15,7 +15,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import kr.hhplus.be.server.domain.seat.domain.Seats;
+import kr.hhplus.be.server.domain.concert.domain.seat.Seats;
 import lombok.RequiredArgsConstructor;
 
 @Configuration
@@ -45,7 +45,7 @@ public class RedisCacheConfig {
 
 		return RedisCacheManager.builder(redisConnectionFactory)
 			.cacheDefaults(defaultConfig)
-			.withCacheConfiguration("cache:seat:available", availableSeatCacheConfig)
+			.withCacheConfiguration("cache:concert:available", availableSeatCacheConfig)
 			.build();
 	}
 

@@ -2,7 +2,7 @@ package kr.hhplus.be.server.domain.dataplatform.adapter.out.dataplatform;
 
 import org.springframework.stereotype.Component;
 
-import kr.hhplus.be.server.domain.concert.domain.Concert;
+import kr.hhplus.be.server.domain.concert.domain.concert.Concert;
 import kr.hhplus.be.server.domain.dataplatform.adapter.out.dataplatform.request.ReservationDataRequest;
 import kr.hhplus.be.server.domain.dataplatform.port.out.SendReservationDataPort;
 import kr.hhplus.be.server.domain.payment.domain.PaymentSuccessEvent;

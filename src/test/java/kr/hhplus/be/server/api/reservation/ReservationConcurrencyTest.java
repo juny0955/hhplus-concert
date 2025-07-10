@@ -26,16 +26,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import kr.hhplus.be.server.api.TestDataFactory;
 import kr.hhplus.be.server.domain.reservation.adapter.in.web.request.ReservationRequest;
-import kr.hhplus.be.server.domain.concert.domain.Concert;
-import kr.hhplus.be.server.domain.concertDate.domain.ConcertDate;
-import kr.hhplus.be.server.domain.concertDate.port.out.ConcertDateRepository;
+import kr.hhplus.be.server.domain.concert.domain.concert.Concert;
+import kr.hhplus.be.server.domain.concert.domain.concertDate.ConcertDate;
 import kr.hhplus.be.server.domain.payment.port.out.PaymentRepository;
 import kr.hhplus.be.server.domain.queue.domain.QueueToken;
 import kr.hhplus.be.server.domain.queue.port.out.QueueTokenRepository;
 import kr.hhplus.be.server.domain.reservation.domain.Reservation;
-import kr.hhplus.be.server.domain.reservation.port.out.ReservationRepository;
-import kr.hhplus.be.server.domain.seat.domain.Seat;
-import kr.hhplus.be.server.domain.seat.domain.SeatStatus;
+import kr.hhplus.be.server.domain.concert.domain.seat.Seat;
+import kr.hhplus.be.server.domain.concert.domain.seat.SeatStatus;
 import kr.hhplus.be.server.domain.user.domain.User;
 
 @SpringBootTest(properties = {

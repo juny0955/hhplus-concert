@@ -17,10 +17,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.hhplus.be.server.domain.concert.adapter.in.web.response.ConcertDateResponse;
 import kr.hhplus.be.server.domain.concert.adapter.in.web.response.SeatResponse;
-import kr.hhplus.be.server.domain.concertDate.port.in.GetAvailableConcertDatesUseCase;
-import kr.hhplus.be.server.domain.seat.port.in.GetAvailableSeatsUseCase;
-import kr.hhplus.be.server.domain.concertDate.domain.ConcertDate;
-import kr.hhplus.be.server.domain.seat.domain.Seat;
+import kr.hhplus.be.server.domain.concert.port.in.concertDate.GetAvailableConcertDatesUseCase;
+import kr.hhplus.be.server.domain.concert.port.in.seat.GetAvailableSeatsUseCase;
+import kr.hhplus.be.server.domain.concert.domain.concertDate.ConcertDate;
+import kr.hhplus.be.server.domain.concert.domain.seat.Seat;
 import kr.hhplus.be.server.common.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 

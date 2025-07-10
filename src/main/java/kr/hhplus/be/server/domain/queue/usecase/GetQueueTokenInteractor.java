@@ -4,7 +4,7 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Component;
 
-import kr.hhplus.be.server.domain.concert.port.out.GetConcertPort;
+import kr.hhplus.be.server.domain.concert.port.out.concert.GetConcertPort;
 import kr.hhplus.be.server.domain.queue.port.in.GetQueueTokenInput;
 import kr.hhplus.be.server.domain.queue.service.QueueService;
 import kr.hhplus.be.server.domain.queue.domain.QueueToken;

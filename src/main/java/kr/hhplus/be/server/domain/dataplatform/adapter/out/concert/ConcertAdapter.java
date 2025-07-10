@@ -5,8 +5,8 @@ import java.util.UUID;
 import org.springframework.stereotype.Component;
 
 import kr.hhplus.be.server.common.exception.CustomException;
-import kr.hhplus.be.server.domain.concert.domain.Concert;
-import kr.hhplus.be.server.domain.concert.port.in.GetConcertByConcertDateIdUseCase;
+import kr.hhplus.be.server.domain.concert.domain.concert.Concert;
+import kr.hhplus.be.server.domain.concert.port.in.concert.GetConcertByConcertDateIdUseCase;
 import kr.hhplus.be.server.domain.dataplatform.port.out.GetConcertPort;
 import lombok.RequiredArgsConstructor;
 

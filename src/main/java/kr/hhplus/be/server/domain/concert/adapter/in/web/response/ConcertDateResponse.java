@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import kr.hhplus.be.server.domain.concertDate.domain.ConcertDate;
+import kr.hhplus.be.server.domain.concert.domain.concertDate.ConcertDate;
 import lombok.Builder;
 
 @Builder
