@@ -18,9 +18,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.hhplus.be.server.reservation.adapter.in.web.queue.response.QueueTokenResponse;
-import kr.hhplus.be.server.reservation.port.in.queue.GetQueueTokenUseCase;
-import kr.hhplus.be.server.reservation.port.in.queue.IssueQueueTokenUseCase;
-import kr.hhplus.be.server.reservation.domain.queue.QueueToken;
+import kr.hhplus.be.server.concert.port.in.queue.GetQueueTokenUseCase;
+import kr.hhplus.be.server.concert.port.in.queue.IssueQueueTokenUseCase;
+import kr.hhplus.be.server.concert.domain.queue.QueueToken;
 import kr.hhplus.be.server.common.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 

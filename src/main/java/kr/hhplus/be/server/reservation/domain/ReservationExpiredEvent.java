@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.reservation.domain.reservation;
+package kr.hhplus.be.server.reservation.domain;
 
 import kr.hhplus.be.server.payment.domain.Payment;
 import kr.hhplus.be.server.concert.domain.seat.Seat;

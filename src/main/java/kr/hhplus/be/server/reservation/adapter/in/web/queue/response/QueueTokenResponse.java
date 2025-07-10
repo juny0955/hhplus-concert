@@ -4,8 +4,8 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import kr.hhplus.be.server.reservation.domain.queue.QueueStatus;
-import kr.hhplus.be.server.reservation.domain.queue.QueueToken;
+import kr.hhplus.be.server.concert.domain.queue.QueueStatus;
+import kr.hhplus.be.server.concert.domain.queue.QueueToken;
 import lombok.Builder;
 
 @Builder

@@ -1,20 +1,24 @@
-package kr.hhplus.be.server.reservation.usecase.queue;
+package kr.hhplus.be.server.concert.usecase.queue;
 
 import java.util.List;
 import java.util.UUID;
 
-import kr.hhplus.be.server.reservation.domain.queue.QueueTokenUtil;
-import kr.hhplus.be.server.reservation.port.in.queue.*;
-import kr.hhplus.be.server.reservation.port.out.ConcertQueryPort;
-import kr.hhplus.be.server.reservation.port.out.UserQueryPort;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import kr.hhplus.be.server.reservation.port.out.queue.QueueTokenRepository;
-import kr.hhplus.be.server.concert.domain.concert.Concert;
-import kr.hhplus.be.server.reservation.domain.queue.QueueToken;
 import kr.hhplus.be.server.common.exception.CustomException;
 import kr.hhplus.be.server.common.exception.ErrorCode;
+import kr.hhplus.be.server.concert.domain.concert.Concert;
+import kr.hhplus.be.server.concert.domain.queue.QueueToken;
+import kr.hhplus.be.server.concert.domain.queue.QueueTokenUtil;
+import kr.hhplus.be.server.concert.port.in.queue.ExpireQueueTokenUseCase;
+import kr.hhplus.be.server.concert.port.in.queue.GetActiveQueueTokenUseCase;
+import kr.hhplus.be.server.concert.port.in.queue.GetQueueTokenUseCase;
+import kr.hhplus.be.server.concert.port.in.queue.IssueQueueTokenUseCase;
+import kr.hhplus.be.server.concert.port.in.queue.PromoteQueueTokenUseCase;
+import kr.hhplus.be.server.concert.port.out.queue.QueueTokenRepository;
+import kr.hhplus.be.server.reservation.port.out.ConcertQueryPort;
+import kr.hhplus.be.server.reservation.port.out.UserQueryPort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -22,11 +26,11 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 public class QueueService implements
-		ExpireQueueTokenUseCase,
-		GetActiveQueueTokenUseCase,
-		GetQueueTokenUseCase,
-		IssueQueueTokenUseCase,
-		PromoteQueueTokenUseCase {
+	ExpireQueueTokenUseCase,
+	GetActiveQueueTokenUseCase,
+	GetQueueTokenUseCase,
+	IssueQueueTokenUseCase,
+	PromoteQueueTokenUseCase {
 
 	private static final int MAX_ACTIVE_TOKEN_SIZE = 50;
 	private static final long QUEUE_EXPIRES_TIME = 30L;

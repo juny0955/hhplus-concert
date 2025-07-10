@@ -23,7 +23,7 @@ import kr.hhplus.be.server.concert.domain.seat.SeatStatus;
 import kr.hhplus.be.server.common.exception.CustomException;
 import kr.hhplus.be.server.common.exception.ErrorCode;
 import kr.hhplus.be.server.reservation.domain.service.ReservationDomainResult;
-import kr.hhplus.be.server.reservation.domain.reservation.ReservationStatus;
+import kr.hhplus.be.server.reservation.domain.ReservationStatus;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationDomainServiceTest {

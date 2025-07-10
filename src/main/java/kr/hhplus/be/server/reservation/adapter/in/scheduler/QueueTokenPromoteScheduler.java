@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 import kr.hhplus.be.server.concert.domain.concert.Concert;
 import kr.hhplus.be.server.concert.port.in.concert.GetOpenConcertUseCase;
-import kr.hhplus.be.server.reservation.port.in.queue.PromoteQueueTokenUseCase;
+import kr.hhplus.be.server.concert.port.in.queue.PromoteQueueTokenUseCase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 

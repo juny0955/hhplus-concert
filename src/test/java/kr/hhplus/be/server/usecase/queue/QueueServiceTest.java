@@ -17,9 +17,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import kr.hhplus.be.server.common.aop.DistributedLockAspect;
-import kr.hhplus.be.server.reservation.usecase.queue.QueueService;
-import kr.hhplus.be.server.reservation.domain.queue.QueueStatus;
-import kr.hhplus.be.server.reservation.domain.queue.QueueToken;
+import kr.hhplus.be.server.concert.usecase.queue.QueueService;
+import kr.hhplus.be.server.concert.domain.queue.QueueStatus;
+import kr.hhplus.be.server.concert.domain.queue.QueueToken;
 import kr.hhplus.be.server.common.exception.CustomException;
 import kr.hhplus.be.server.common.exception.ErrorCode;
 

@@ -1,8 +1,8 @@
 package kr.hhplus.be.server.reservation.adapter.in.web.reservation.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import kr.hhplus.be.server.reservation.domain.reservation.Reservation;
-import kr.hhplus.be.server.reservation.domain.reservation.ReservationStatus;
+import kr.hhplus.be.server.reservation.domain.Reservation;
+import kr.hhplus.be.server.reservation.domain.ReservationStatus;
 import lombok.Builder;
 
 import java.time.LocalDateTime;

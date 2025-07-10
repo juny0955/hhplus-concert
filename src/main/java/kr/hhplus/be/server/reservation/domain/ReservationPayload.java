@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.reservation.domain.reservation;
+package kr.hhplus.be.server.reservation.domain;
 
 import lombok.Builder;
 

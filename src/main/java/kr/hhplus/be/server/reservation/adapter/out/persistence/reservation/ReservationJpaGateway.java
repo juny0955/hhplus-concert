@@ -2,7 +2,7 @@ package kr.hhplus.be.server.reservation.adapter.out.persistence.reservation;
 
 import kr.hhplus.be.server.common.exception.CustomException;
 import kr.hhplus.be.server.common.exception.ErrorCode;
-import kr.hhplus.be.server.reservation.domain.reservation.Reservation;
+import kr.hhplus.be.server.reservation.domain.Reservation;
 import kr.hhplus.be.server.reservation.port.out.reservation.GetReservationPort;
 import kr.hhplus.be.server.reservation.port.out.reservation.SaveReservationPort;
 import lombok.RequiredArgsConstructor;

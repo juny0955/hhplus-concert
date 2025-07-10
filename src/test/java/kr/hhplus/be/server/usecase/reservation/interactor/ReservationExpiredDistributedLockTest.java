@@ -23,9 +23,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
 import kr.hhplus.be.server.common.aop.DistributedLockAspect;
-import kr.hhplus.be.server.reservation.domain.reservation.ReservationExpiredEvent;
-import kr.hhplus.be.server.reservation.domain.reservation.Reservation;
-import kr.hhplus.be.server.reservation.domain.reservation.ReservationStatus;
+import kr.hhplus.be.server.reservation.domain.ReservationExpiredEvent;
+import kr.hhplus.be.server.reservation.domain.Reservation;
+import kr.hhplus.be.server.reservation.domain.ReservationStatus;
 import kr.hhplus.be.server.common.exception.CustomException;
 import kr.hhplus.be.server.common.exception.ErrorCode;
 

@@ -2,8 +2,8 @@ package kr.hhplus.be.server.payment.adapter.out.internal.reservation;
 
 import kr.hhplus.be.server.common.exception.CustomException;
 import kr.hhplus.be.server.payment.port.out.ReservationQueryPort;
-import kr.hhplus.be.server.reservation.domain.reservation.Reservation;
-import kr.hhplus.be.server.reservation.port.in.PaidReservationUseCase;
+import kr.hhplus.be.server.reservation.domain.Reservation;
+import kr.hhplus.be.server.reservation.port.in.reservation.PaidReservationUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

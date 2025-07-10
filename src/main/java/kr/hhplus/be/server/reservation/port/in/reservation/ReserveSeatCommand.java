@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.reservation.port.in;
+package kr.hhplus.be.server.reservation.port.in.reservation;
 
 import java.util.UUID;
 

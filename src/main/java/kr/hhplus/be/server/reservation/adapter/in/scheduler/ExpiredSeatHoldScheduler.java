@@ -3,7 +3,7 @@ package kr.hhplus.be.server.reservation.adapter.in.scheduler;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import kr.hhplus.be.server.reservation.port.in.ExpireReservationUseCase;
+import kr.hhplus.be.server.reservation.port.in.reservation.ExpireReservationUseCase;
 import kr.hhplus.be.server.common.aop.DistributedLock;
 import lombok.RequiredArgsConstructor;
 

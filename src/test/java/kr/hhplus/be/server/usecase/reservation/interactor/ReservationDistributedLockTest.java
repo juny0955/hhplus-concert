@@ -21,14 +21,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import kr.hhplus.be.server.common.aop.DistributedLockAspect;
-import kr.hhplus.be.server.reservation.domain.reservation.ReservationCreatedEvent;
+import kr.hhplus.be.server.reservation.domain.ReservationCreatedEvent;
 import kr.hhplus.be.server.payment.domain.Payment;
-import kr.hhplus.be.server.reservation.domain.reservation.Reservation;
+import kr.hhplus.be.server.reservation.domain.Reservation;
 import kr.hhplus.be.server.concert.domain.seat.Seat;
 import kr.hhplus.be.server.common.exception.CustomException;
 import kr.hhplus.be.server.common.exception.ErrorCode;
 import kr.hhplus.be.server.domain.reservation.domain.CreateReservationResult;
-import kr.hhplus.be.server.reservation.port.in.ReserveSeatCommand;
+import kr.hhplus.be.server.reservation.port.in.reservation.ReserveSeatCommand;
 import kr.hhplus.be.server.reservation.usecase.output.ReservationOutput;
 
 @ExtendWith(MockitoExtension.class)

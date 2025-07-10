@@ -1,6 +1,6 @@
-package kr.hhplus.be.server.reservation.port.in.queue;
+package kr.hhplus.be.server.concert.port.in.queue;
 
-import kr.hhplus.be.server.reservation.domain.queue.QueueToken;
+import kr.hhplus.be.server.concert.domain.queue.QueueToken;
 import kr.hhplus.be.server.common.exception.CustomException;
 
 
