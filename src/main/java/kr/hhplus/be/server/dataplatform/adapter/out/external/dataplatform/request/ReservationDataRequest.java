@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.dataplatform.adapter.out.dataplatform.request;
+package kr.hhplus.be.server.dataplatform.adapter.out.external.dataplatform.request;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

@@ -1,9 +1,9 @@
-package kr.hhplus.be.server.dataplatform.adapter.out.dataplatform;
+package kr.hhplus.be.server.dataplatform.adapter.out.external.dataplatform;
 
 import org.springframework.stereotype.Component;
 
 import kr.hhplus.be.server.concert.domain.concert.Concert;
-import kr.hhplus.be.server.dataplatform.adapter.out.dataplatform.request.ReservationDataRequest;
+import kr.hhplus.be.server.dataplatform.adapter.out.external.dataplatform.request.ReservationDataRequest;
 import kr.hhplus.be.server.dataplatform.port.out.SendReservationDataPort;
 import kr.hhplus.be.server.payment.domain.PaymentSuccessEvent;
 import lombok.RequiredArgsConstructor;

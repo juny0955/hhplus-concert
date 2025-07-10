@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.dataplatform.adapter.out.concert;
+package kr.hhplus.be.server.dataplatform.adapter.out.internal.concert;
 
 import java.util.UUID;
 
