@@ -1,21 +1,28 @@
 package kr.hhplus.be.server.concert.usecase.seat;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import kr.hhplus.be.server.common.exception.CustomException;
+import kr.hhplus.be.server.common.exception.ErrorCode;
+import kr.hhplus.be.server.concert.domain.concert.Concert;
+import kr.hhplus.be.server.concert.domain.concertDate.ConcertDate;
 import kr.hhplus.be.server.concert.domain.seat.Seat;
 import kr.hhplus.be.server.concert.domain.seat.Seats;
-import kr.hhplus.be.server.concert.port.in.seat.*;
+import kr.hhplus.be.server.concert.port.in.seat.ExpireSeatUseCase;
+import kr.hhplus.be.server.concert.port.in.seat.GetAvailableSeatsUseCase;
+import kr.hhplus.be.server.concert.port.in.seat.PaidSeatUseCase;
+import kr.hhplus.be.server.concert.port.in.seat.ReserveSeatUseCase;
 import kr.hhplus.be.server.concert.port.out.concert.GetConcertPort;
 import kr.hhplus.be.server.concert.port.out.concertDate.GetConcertDatePort;
 import kr.hhplus.be.server.concert.port.out.seat.GetSeatPort;
 import kr.hhplus.be.server.concert.port.out.seat.SaveSeatPort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -63,7 +70,15 @@ public class SeatService implements
 
     @Override
     @Transactional
-    public Seat reserveSeat(UUID seatId) throws CustomException {
+    public Seat reserveSeat(UUID seatId, UUID concertId, UUID concertDateId) throws CustomException {
+        Concert concert = getConcertPort.getConcert(concertId);
+        if (!concert.isOpen())
+            throw new CustomException(ErrorCode.CONCERT_NOT_OPEN);
+
+        ConcertDate concertDate = getConcertDatePort.getConcertDate(concertDateId);
+        if (concertDate.checkDeadline())
+            throw new CustomException(ErrorCode.OVER_DEADLINE);
+
         Seat seat = getSeatPort.getSeat(seatId);
         return saveSeatPort.saveSeat(seat.reserve());
     }

@@ -6,5 +6,5 @@ import kr.hhplus.be.server.concert.domain.seat.Seat;
 import kr.hhplus.be.server.common.exception.CustomException;
 
 public interface ReserveSeatUseCase {
-	Seat reserveSeat(UUID seatId) throws CustomException;
+	Seat reserveSeat(UUID seatId, UUID concertId, UUID concertDateId) throws CustomException;
 }

@@ -22,7 +22,6 @@ import kr.hhplus.be.server.reservation.port.in.reservation.CreateReservationUseC
 import kr.hhplus.be.server.reservation.port.in.reservation.ExpireReservationUseCase;
 import kr.hhplus.be.server.reservation.port.in.reservation.PaidReservationUseCase;
 import kr.hhplus.be.server.reservation.port.in.reservation.ReserveSeatCommand;
-import kr.hhplus.be.server.reservation.port.out.ConcertQueryPort;
 import kr.hhplus.be.server.reservation.port.out.PaymentQueryPort;
 import kr.hhplus.be.server.reservation.port.out.QueueTokenQueryPort;
 import kr.hhplus.be.server.reservation.port.out.SeatQueryPort;
@@ -45,7 +44,6 @@ public class ReservationService implements
 
     private final ApplicationEventPublisher eventPublisher;
     private final QueueTokenQueryPort queueTokenQueryPort;
-    private final ConcertQueryPort concertQueryPort;
     private final SeatQueryPort seatQueryPort;
     private final PaymentQueryPort paymentQueryPort;
     private final HoldSeatPort holdSeatPort;
@@ -61,10 +59,8 @@ public class ReservationService implements
     public Reservation createReservation(ReserveSeatCommand command) throws Exception {
         QueueToken queueToken = queueTokenQueryPort.getActiveToken(command.queueTokenId());
         checkHoldSeatPort.checkHoldSeat(command.seatId());
-        concertQueryPort.validOpenConcert(command.concertId());
-        concertQueryPort.validDeadLine(command.concertDateId());
 
-        Seat seat = seatQueryPort.reserveSeat(command.seatId());
+        Seat seat = seatQueryPort.reserveSeat(command.seatId(), command.concertId(), command.concertId());
         Reservation reservation = saveReservationPort.saveReservation(Reservation.of(queueToken.userId(), seat.id()));
         Payment payment = paymentQueryPort.createPayment(queueToken.userId(), reservation.id(), seat.price());
 

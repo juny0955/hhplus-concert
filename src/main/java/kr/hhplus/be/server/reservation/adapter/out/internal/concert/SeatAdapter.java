@@ -1,14 +1,15 @@
 package kr.hhplus.be.server.reservation.adapter.out.internal.concert;
 
+import java.util.UUID;
+
+import org.springframework.stereotype.Component;
+
 import kr.hhplus.be.server.common.exception.CustomException;
-import kr.hhplus.be.server.reservation.port.out.SeatQueryPort;
 import kr.hhplus.be.server.concert.domain.seat.Seat;
 import kr.hhplus.be.server.concert.port.in.seat.ExpireSeatUseCase;
 import kr.hhplus.be.server.concert.port.in.seat.ReserveSeatUseCase;
+import kr.hhplus.be.server.reservation.port.out.SeatQueryPort;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
-
-import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -18,8 +19,8 @@ public class SeatAdapter implements SeatQueryPort {
     private final ExpireSeatUseCase expireSeatUseCase;
 
     @Override
-    public Seat reserveSeat(UUID seatId) throws CustomException {
-        return reserveSeatUseCase.reserveSeat(seatId);
+    public Seat reserveSeat(UUID seatId, UUID concertId, UUID concertDateId) throws CustomException {
+        return reserveSeatUseCase.reserveSeat(seatId, concertId, concertDateId);
     }
 
     @Override

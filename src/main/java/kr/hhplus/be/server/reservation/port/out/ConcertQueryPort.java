@@ -1,11 +1,9 @@
 package kr.hhplus.be.server.reservation.port.out;
 
-import kr.hhplus.be.server.common.exception.CustomException;
-
 import java.util.UUID;
 
+import kr.hhplus.be.server.common.exception.CustomException;
+
 public interface ConcertQueryPort {
-    void validDeadLine(UUID concertDateId) throws CustomException;
-    void validOpenConcert(UUID concertId) throws CustomException;
     void existsConcert(UUID concertId) throws CustomException;
 }
