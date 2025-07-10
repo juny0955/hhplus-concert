@@ -62,8 +62,8 @@ public class ReservationService implements
         QueueToken queueToken = queueTokenQueryPort.getActiveToken(command.queueTokenId());
         checkHoldSeatPort.checkHoldSeat(command.seatId());
 
+        Reservation reservation = saveReservationPort.saveReservation(Reservation.of(queueToken.userId(), command.seatId()));
         Seat seat = seatQueryPort.reserveSeat(command.seatId(), command.concertId(), command.concertId());
-        Reservation reservation = saveReservationPort.saveReservation(Reservation.of(queueToken.userId(), seat.id()));
         Payment payment = paymentQueryPort.createPayment(queueToken.userId(), reservation.id(), seat.price());
 
         holdSeatPort.holdSeat(seat.id(), queueToken.userId());

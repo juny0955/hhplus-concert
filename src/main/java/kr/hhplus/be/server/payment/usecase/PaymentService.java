@@ -55,10 +55,10 @@ public class PaymentService implements
 
 		Payment payment = getPaymentPort.getPaymentByReservationId(command.reservationId());
 
-		Payment savedPayment = savePaymentPort.save(payment.success());
 		User savedUser = userQueryPort.usePoint(queueToken.userId(), payment.amount());
 		Reservation savedReservation = reservationQueryPort.paidReservation(command.reservationId());
 		Seat savedSeat = seatQueryPort.paidSeat(savedReservation.seatId(), queueToken.tokenId());
+		Payment savedPayment = savePaymentPort.save(payment.success());
 
 		eventPublisher.publishEvent(PaymentSuccessEvent.from(savedPayment, savedSeat, savedReservation, savedUser));
 		return payment;
