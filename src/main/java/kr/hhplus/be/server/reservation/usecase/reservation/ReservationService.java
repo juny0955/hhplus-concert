@@ -4,11 +4,8 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.event.TransactionPhase;
-import org.springframework.transaction.event.TransactionalEventListener;
 
 import kr.hhplus.be.server.common.aop.DistributedLock;
 import kr.hhplus.be.server.common.exception.CustomException;
@@ -17,7 +14,6 @@ import kr.hhplus.be.server.concert.domain.seat.Seat;
 import kr.hhplus.be.server.payment.domain.Payment;
 import kr.hhplus.be.server.reservation.domain.Reservation;
 import kr.hhplus.be.server.reservation.domain.ReservationCreatedEvent;
-import kr.hhplus.be.server.reservation.domain.ReservationPayload;
 import kr.hhplus.be.server.reservation.port.in.reservation.CreateReservationUseCase;
 import kr.hhplus.be.server.reservation.port.in.reservation.ExpireReservationUseCase;
 import kr.hhplus.be.server.reservation.port.in.reservation.PaidReservationUseCase;
@@ -25,7 +21,6 @@ import kr.hhplus.be.server.reservation.port.in.reservation.ReserveSeatCommand;
 import kr.hhplus.be.server.reservation.port.out.PaymentQueryPort;
 import kr.hhplus.be.server.reservation.port.out.QueueTokenQueryPort;
 import kr.hhplus.be.server.reservation.port.out.SeatQueryPort;
-import kr.hhplus.be.server.reservation.port.out.SendDataPlatformPort;
 import kr.hhplus.be.server.reservation.port.out.reservation.GetReservationPort;
 import kr.hhplus.be.server.reservation.port.out.reservation.SaveReservationPort;
 import kr.hhplus.be.server.reservation.port.out.seathold.CheckHoldSeatPort;
@@ -52,7 +47,6 @@ public class ReservationService implements
     private final CheckHoldSeatPort checkHoldSeatPort;
     private final GetReservationPort getReservationPort;
     private final SaveReservationPort saveReservationPort;
-    private final SendDataPlatformPort sendDataPlatformPort;
     private final ReservationTransactionManager reservationTransactionManager;
 
     @Override
@@ -94,16 +88,6 @@ public class ReservationService implements
             } catch (Exception e) {
                 log.warn("예약 만료 처리 스케줄러 처리 중 예외발생", e);
             }
-        }
-    }
-
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    @Async
-    public void sendDataPlatform(ReservationCreatedEvent event) {
-        try {
-            sendDataPlatformPort.send(ReservationPayload.from(event));
-        } catch (Exception e) {
-            log.warn("데이터 플랫폼 전송 실패");
         }
     }
 }
