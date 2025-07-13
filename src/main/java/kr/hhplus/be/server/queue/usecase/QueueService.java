@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.concert.usecase.queue;
+package kr.hhplus.be.server.queue.usecase;
 
 import java.util.List;
 import java.util.UUID;
@@ -9,13 +9,13 @@ import org.springframework.transaction.annotation.Transactional;
 import kr.hhplus.be.server.common.exception.CustomException;
 import kr.hhplus.be.server.common.exception.ErrorCode;
 import kr.hhplus.be.server.concert.domain.concert.Concert;
-import kr.hhplus.be.server.concert.domain.queue.QueueToken;
-import kr.hhplus.be.server.concert.domain.queue.QueueTokenUtil;
-import kr.hhplus.be.server.concert.port.in.queue.GetActiveQueueTokenUseCase;
-import kr.hhplus.be.server.concert.port.in.queue.GetQueueTokenUseCase;
-import kr.hhplus.be.server.concert.port.in.queue.IssueQueueTokenUseCase;
-import kr.hhplus.be.server.concert.port.in.queue.PromoteQueueTokenUseCase;
-import kr.hhplus.be.server.concert.port.out.queue.QueueTokenRepository;
+import kr.hhplus.be.server.queue.domain.QueueToken;
+import kr.hhplus.be.server.queue.domain.QueueTokenUtil;
+import kr.hhplus.be.server.queue.port.in.GetActiveQueueTokenUseCase;
+import kr.hhplus.be.server.queue.port.in.GetQueueTokenUseCase;
+import kr.hhplus.be.server.queue.port.in.IssueQueueTokenUseCase;
+import kr.hhplus.be.server.queue.port.in.PromoteQueueTokenUseCase;
+import kr.hhplus.be.server.queue.port.out.QueueTokenRepository;
 import kr.hhplus.be.server.reservation.port.out.ConcertQueryPort;
 import kr.hhplus.be.server.reservation.port.out.UserQueryPort;
 import lombok.RequiredArgsConstructor;

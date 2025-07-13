@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.reservation.adapter.in.web.queue;
+package kr.hhplus.be.server.queue.adapter.in.web;
 
 import java.util.UUID;
 
@@ -17,10 +17,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import kr.hhplus.be.server.reservation.adapter.in.web.queue.response.QueueTokenResponse;
-import kr.hhplus.be.server.concert.port.in.queue.GetQueueTokenUseCase;
-import kr.hhplus.be.server.concert.port.in.queue.IssueQueueTokenUseCase;
-import kr.hhplus.be.server.concert.domain.queue.QueueToken;
+import kr.hhplus.be.server.queue.adapter.in.web.response.QueueTokenResponse;
+import kr.hhplus.be.server.queue.port.in.GetQueueTokenUseCase;
+import kr.hhplus.be.server.queue.port.in.IssueQueueTokenUseCase;
+import kr.hhplus.be.server.queue.domain.QueueToken;
 import kr.hhplus.be.server.common.exception.CustomException;
 import lombok.RequiredArgsConstructor;
 

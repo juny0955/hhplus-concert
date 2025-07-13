@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.concert.adapter.out.persistence.queue;
+package kr.hhplus.be.server.queue.adapter.out.persistence;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -9,11 +9,11 @@ import java.util.UUID;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 
-import kr.hhplus.be.server.concert.port.out.queue.QueueTokenRepository;
+import kr.hhplus.be.server.queue.port.out.QueueTokenRepository;
 import kr.hhplus.be.server.concert.domain.concert.Concert;
-import kr.hhplus.be.server.concert.domain.queue.QueueStatus;
-import kr.hhplus.be.server.concert.domain.queue.QueueToken;
-import kr.hhplus.be.server.concert.domain.queue.QueueTokenUtil;
+import kr.hhplus.be.server.queue.domain.QueueStatus;
+import kr.hhplus.be.server.queue.domain.QueueToken;
+import kr.hhplus.be.server.queue.domain.QueueTokenUtil;
 import lombok.RequiredArgsConstructor;
 
 @Repository

@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.concert.domain.queue;
+package kr.hhplus.be.server.queue.domain;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

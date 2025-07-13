@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import kr.hhplus.be.server.common.aop.DistributedLock;
 import kr.hhplus.be.server.common.exception.CustomException;
-import kr.hhplus.be.server.concert.domain.queue.QueueToken;
+import kr.hhplus.be.server.queue.domain.QueueToken;
 import kr.hhplus.be.server.concert.domain.seat.Seat;
 import kr.hhplus.be.server.payment.domain.Payment;
 import kr.hhplus.be.server.payment.domain.PaymentSuccessEvent;

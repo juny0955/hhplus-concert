@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.reservation.adapter.in.scheduler;
+package kr.hhplus.be.server.queue.adapter.in.scheduler;
 
 import java.util.List;
 
@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 import kr.hhplus.be.server.concert.domain.concert.Concert;
 import kr.hhplus.be.server.concert.port.in.concert.GetOpenConcertUseCase;
-import kr.hhplus.be.server.concert.port.in.queue.PromoteQueueTokenUseCase;
+import kr.hhplus.be.server.queue.port.in.PromoteQueueTokenUseCase;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 

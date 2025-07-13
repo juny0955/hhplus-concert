@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.concert.port.in.queue;
+package kr.hhplus.be.server.queue.port.in;
 
 import java.util.List;
 

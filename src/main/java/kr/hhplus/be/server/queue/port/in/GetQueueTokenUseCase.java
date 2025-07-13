@@ -1,8 +1,8 @@
-package kr.hhplus.be.server.concert.port.in.queue;
+package kr.hhplus.be.server.queue.port.in;
 
 import java.util.UUID;
 
-import kr.hhplus.be.server.concert.domain.queue.QueueToken;
+import kr.hhplus.be.server.queue.domain.QueueToken;
 import kr.hhplus.be.server.common.exception.CustomException;
 
 

@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.concert.domain.queue;
+package kr.hhplus.be.server.queue.domain;
 
 import java.util.UUID;
 

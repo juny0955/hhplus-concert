@@ -19,7 +19,7 @@ import kr.hhplus.be.server.concert.port.in.seat.PaidSeatUseCase;
 import kr.hhplus.be.server.concert.port.in.seat.ReserveSeatUseCase;
 import kr.hhplus.be.server.concert.port.out.concert.GetConcertPort;
 import kr.hhplus.be.server.concert.port.out.concertDate.GetConcertDatePort;
-import kr.hhplus.be.server.concert.port.out.queue.QueueTokenRepository;
+import kr.hhplus.be.server.queue.port.out.QueueTokenRepository;
 import kr.hhplus.be.server.concert.port.out.seat.GetSeatPort;
 import kr.hhplus.be.server.concert.port.out.seat.SaveSeatPort;
 import lombok.RequiredArgsConstructor;

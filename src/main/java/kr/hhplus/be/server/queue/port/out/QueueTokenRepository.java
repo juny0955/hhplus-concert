@@ -1,9 +1,9 @@
-package kr.hhplus.be.server.concert.port.out.queue;
+package kr.hhplus.be.server.queue.port.out;
 
 import java.util.UUID;
 
 import kr.hhplus.be.server.concert.domain.concert.Concert;
-import kr.hhplus.be.server.concert.domain.queue.QueueToken;
+import kr.hhplus.be.server.queue.domain.QueueToken;
 
 public interface QueueTokenRepository {
 	/**
