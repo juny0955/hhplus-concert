@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.reservation.adapter.out.internal.concert;
+package kr.hhplus.be.server.queue.adapter.out.internal;
 
 import java.util.UUID;
 
@@ -6,12 +6,12 @@ import org.springframework.stereotype.Component;
 
 import kr.hhplus.be.server.common.exception.CustomException;
 import kr.hhplus.be.server.concert.port.in.concert.ExistsConcertUseCase;
-import kr.hhplus.be.server.reservation.port.out.ConcertQueryPort;
+import kr.hhplus.be.server.queue.port.out.ConcertQueryPort;
 import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
-public class ConcertAdapter implements ConcertQueryPort {
+public class QueueConcertAdapter implements ConcertQueryPort {
 
 	private final ExistsConcertUseCase existsConcertUseCase;
 

@@ -15,9 +15,9 @@ import kr.hhplus.be.server.queue.port.in.GetActiveQueueTokenUseCase;
 import kr.hhplus.be.server.queue.port.in.GetQueueTokenUseCase;
 import kr.hhplus.be.server.queue.port.in.IssueQueueTokenUseCase;
 import kr.hhplus.be.server.queue.port.in.PromoteQueueTokenUseCase;
+import kr.hhplus.be.server.queue.port.out.ConcertQueryPort;
 import kr.hhplus.be.server.queue.port.out.QueueTokenRepository;
-import kr.hhplus.be.server.reservation.port.out.ConcertQueryPort;
-import kr.hhplus.be.server.reservation.port.out.UserQueryPort;
+import kr.hhplus.be.server.queue.port.out.UserQueryPort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 

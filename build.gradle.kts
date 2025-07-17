@@ -44,6 +44,9 @@ dependencies {
 
 	// lombok
 	implementation("org.projectlombok:lombok")
+	implementation("org.springframework.kafka:spring-kafka")
+	testImplementation("org.springframework.kafka:spring-kafka-test")
+	testImplementation("org.testcontainers:kafka")
 	annotationProcessor ("org.projectlombok:lombok")
 
 	// DB

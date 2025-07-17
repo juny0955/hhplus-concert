@@ -1,19 +1,20 @@
 package kr.hhplus.be.server.reservation.adapter.out.internal.payment;
 
+import java.math.BigDecimal;
+import java.util.UUID;
+
+import org.springframework.stereotype.Component;
+
 import kr.hhplus.be.server.common.exception.CustomException;
 import kr.hhplus.be.server.payment.domain.Payment;
 import kr.hhplus.be.server.payment.port.in.CancelPaymentUseCase;
 import kr.hhplus.be.server.payment.port.in.CreatePaymentUseCase;
 import kr.hhplus.be.server.reservation.port.out.PaymentQueryPort;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
-
-import java.math.BigDecimal;
-import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
-public class PaymentAdapter implements PaymentQueryPort {
+public class ReservationPaymentAdapter implements PaymentQueryPort {
 
     private final CreatePaymentUseCase createPaymentUseCase;
     private final CancelPaymentUseCase cancelPaymentUseCase;

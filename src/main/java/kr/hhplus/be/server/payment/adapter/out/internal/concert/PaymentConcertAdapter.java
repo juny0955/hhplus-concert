@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
-public class ConcertAdapter implements ConcertQueryPort {
+public class PaymentConcertAdapter implements ConcertQueryPort {
 
 	private final GetConcertByConcertDateIdUseCase getConcertByConcertDateIdUseCase;
 

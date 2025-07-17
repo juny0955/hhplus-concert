@@ -1,8 +1,8 @@
-package kr.hhplus.be.server.payment.adapter.out.external.dataplatform;
+package kr.hhplus.be.server.dataplatform.adapter.out.dataplatform;
 
 import org.springframework.stereotype.Component;
 
-import kr.hhplus.be.server.payment.adapter.out.external.dataplatform.request.ReservationDataRequest;
+import kr.hhplus.be.server.dataplatform.adapter.out.dataplatform.request.ReservationDataRequest;
 import lombok.extern.slf4j.Slf4j;
 
 @Component

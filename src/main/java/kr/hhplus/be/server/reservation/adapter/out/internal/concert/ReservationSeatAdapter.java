@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
-public class SeatAdapter implements SeatQueryPort {
+public class ReservationSeatAdapter implements SeatQueryPort {
 
     private final ReserveSeatUseCase reserveSeatUseCase;
     private final ExpireSeatUseCase expireSeatUseCase;

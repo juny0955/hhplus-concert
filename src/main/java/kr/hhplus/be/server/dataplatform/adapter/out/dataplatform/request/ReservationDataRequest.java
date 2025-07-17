@@ -1,6 +1,5 @@
-package kr.hhplus.be.server.payment.adapter.out.external.dataplatform.request;
+package kr.hhplus.be.server.dataplatform.adapter.out.dataplatform.request;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 import kr.hhplus.be.server.concert.domain.concert.Concert;
@@ -12,18 +11,14 @@ public record ReservationDataRequest (
 	UUID reservationId,
 	UUID paymentId,
 	UUID concertId,
-	UUID userId,
-	UUID seatId,
-	LocalDateTime paidAt
+	UUID seatId
 ) {
 	public static ReservationDataRequest of(PaymentSuccessEvent event, Concert concert) {
 		return ReservationDataRequest.builder()
-			.reservationId(event.reservation().id())
-			.paymentId(event.payment().id())
+			.reservationId(event.reservationId())
+			.paymentId(event.paymentId())
 			.concertId(concert.id())
-			.userId(event.user().id())
-			.seatId(event.seat().id())
-			.paidAt(event.payment().updatedAt())
+			.seatId(event.seatId())
 			.build();
 	}
 }

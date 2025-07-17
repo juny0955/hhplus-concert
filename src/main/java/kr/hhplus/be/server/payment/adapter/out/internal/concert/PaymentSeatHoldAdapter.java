@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
-public class SeatHoldSeatAdapter implements SeatHoldQueryPort {
+public class PaymentSeatHoldAdapter implements SeatHoldQueryPort {
 
 	private final HasHoldSeatUseCase hasHoldSeatUseCase;
 

@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
-public class QueueTokenAdapter implements QueueTokenQueryPort {
+public class ReservationQueueTokenAdapter implements QueueTokenQueryPort {
 
 	private final GetActiveQueueTokenUseCase getActiveQueueTokenUseCase;
 
