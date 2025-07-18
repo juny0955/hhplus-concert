@@ -9,8 +9,10 @@ import org.springframework.transaction.annotation.Transactional;
 import kr.hhplus.be.server.common.exception.CustomException;
 import kr.hhplus.be.server.common.exception.ErrorCode;
 import kr.hhplus.be.server.concert.domain.concert.Concert;
+import kr.hhplus.be.server.payment.domain.PaymentSuccessEvent;
 import kr.hhplus.be.server.queue.domain.QueueToken;
 import kr.hhplus.be.server.queue.domain.QueueTokenUtil;
+import kr.hhplus.be.server.queue.port.in.ExpireQueueTokenUseCase;
 import kr.hhplus.be.server.queue.port.in.GetActiveQueueTokenUseCase;
 import kr.hhplus.be.server.queue.port.in.GetQueueTokenUseCase;
 import kr.hhplus.be.server.queue.port.in.IssueQueueTokenUseCase;
@@ -28,7 +30,8 @@ public class QueueService implements
 	GetActiveQueueTokenUseCase,
 	GetQueueTokenUseCase,
 	IssueQueueTokenUseCase,
-	PromoteQueueTokenUseCase {
+	PromoteQueueTokenUseCase,
+	ExpireQueueTokenUseCase {
 
 	private static final int MAX_ACTIVE_TOKEN_SIZE = 50;
 	private static final long QUEUE_EXPIRES_TIME = 30L;
@@ -94,4 +97,8 @@ public class QueueService implements
 		return QueueToken.waitingTokenOf(tokenId, userId, concertId, waitingTokens);
 	}
 
+	@Override
+	public void expireQueueToken(PaymentSuccessEvent event) {
+		queueTokenRepository.expiresQueueToken(event.tokenId().toString());
+	}
 }

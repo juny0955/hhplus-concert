@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.payment.port.out;
+package kr.hhplus.be.server.dataplatform.port.out;
 
 import java.util.UUID;
 

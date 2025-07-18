@@ -11,17 +11,19 @@ import kr.hhplus.be.server.common.exception.CustomException;
 import kr.hhplus.be.server.common.exception.ErrorCode;
 import kr.hhplus.be.server.concert.domain.concert.Concert;
 import kr.hhplus.be.server.concert.domain.concertDate.ConcertDate;
+import kr.hhplus.be.server.concert.domain.seat.CompletePaymentEvent;
 import kr.hhplus.be.server.concert.domain.seat.Seat;
 import kr.hhplus.be.server.concert.domain.seat.Seats;
 import kr.hhplus.be.server.concert.port.in.seat.ExpireSeatUseCase;
 import kr.hhplus.be.server.concert.port.in.seat.GetAvailableSeatsUseCase;
 import kr.hhplus.be.server.concert.port.in.seat.PaidSeatUseCase;
 import kr.hhplus.be.server.concert.port.in.seat.ReserveSeatUseCase;
+import kr.hhplus.be.server.concert.port.out.ConcertEventPublishPort;
 import kr.hhplus.be.server.concert.port.out.concert.GetConcertPort;
 import kr.hhplus.be.server.concert.port.out.concertDate.GetConcertDatePort;
-import kr.hhplus.be.server.queue.port.out.QueueTokenRepository;
 import kr.hhplus.be.server.concert.port.out.seat.GetSeatPort;
 import kr.hhplus.be.server.concert.port.out.seat.SaveSeatPort;
+import kr.hhplus.be.server.reservation.domain.PaidReservationEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -38,7 +40,7 @@ public class SeatService implements
     private final SaveSeatPort saveSeatPort;
     private final GetConcertPort getConcertPort;
     private final GetConcertDatePort getConcertDatePort;
-    private final QueueTokenRepository queueTokenRepository;
+    private final ConcertEventPublishPort concertEventPublishPort;
 
     @Override
     @Transactional
@@ -65,11 +67,11 @@ public class SeatService implements
 
     @Override
     @Transactional
-    public Seat paidSeat(UUID seatId, UUID tokenId) throws CustomException {
-        Seat seat = getSeatPort.getSeat(seatId);
-        Seat paidSeat = saveSeatPort.saveSeat(seat.payment());
-        queueTokenRepository.expiresQueueToken(tokenId.toString());
-        return paidSeat;
+    public void paidSeat(PaidReservationEvent event) throws CustomException {
+        Seat seat = getSeatPort.getSeat(event.seatId());
+        saveSeatPort.saveSeat(seat.payment());
+
+        concertEventPublishPort.publishCompletePaymentEvent(CompletePaymentEvent.from(event));
     }
 
     @Override

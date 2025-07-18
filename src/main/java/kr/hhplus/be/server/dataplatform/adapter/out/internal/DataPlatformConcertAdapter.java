@@ -1,4 +1,4 @@
-package kr.hhplus.be.server.payment.adapter.out.internal.concert;
+package kr.hhplus.be.server.dataplatform.adapter.out.internal;
 
 import java.util.UUID;
 
@@ -7,12 +7,12 @@ import org.springframework.stereotype.Component;
 import kr.hhplus.be.server.common.exception.CustomException;
 import kr.hhplus.be.server.concert.domain.concert.Concert;
 import kr.hhplus.be.server.concert.port.in.concert.GetConcertByConcertDateIdUseCase;
-import kr.hhplus.be.server.payment.port.out.ConcertQueryPort;
+import kr.hhplus.be.server.dataplatform.port.out.ConcertQueryPort;
 import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
-public class PaymentConcertAdapter implements ConcertQueryPort {
+public class DataPlatformConcertAdapter implements ConcertQueryPort {
 
 	private final GetConcertByConcertDateIdUseCase getConcertByConcertDateIdUseCase;
 

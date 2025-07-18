@@ -6,7 +6,7 @@ import kr.hhplus.be.server.concert.domain.concert.Concert;
 import kr.hhplus.be.server.dataplatform.port.in.PaymentSuccessUseCase;
 import kr.hhplus.be.server.dataplatform.port.out.DataPlatformOutPort;
 import kr.hhplus.be.server.payment.domain.PaymentSuccessEvent;
-import kr.hhplus.be.server.payment.port.out.ConcertQueryPort;
+import kr.hhplus.be.server.dataplatform.port.out.ConcertQueryPort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 

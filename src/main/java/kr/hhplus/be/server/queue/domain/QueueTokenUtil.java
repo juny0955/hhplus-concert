@@ -69,6 +69,6 @@ public final class QueueTokenUtil {
 			    redis.call('SADD', activeTokenKey, tokenId)
 			    redis.call('ZREM', waitingTokenKey, tokenId)
 			end
-			return #waitingTokens
+			return 1
 			""";
 }

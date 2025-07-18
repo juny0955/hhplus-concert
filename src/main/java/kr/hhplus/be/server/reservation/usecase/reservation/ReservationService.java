@@ -1,7 +1,6 @@
 package kr.hhplus.be.server.reservation.usecase.reservation;
 
 import java.util.List;
-import java.util.UUID;
 
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -9,9 +8,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import kr.hhplus.be.server.common.aop.DistributedLock;
 import kr.hhplus.be.server.common.exception.CustomException;
-import kr.hhplus.be.server.queue.domain.QueueToken;
 import kr.hhplus.be.server.concert.domain.seat.Seat;
 import kr.hhplus.be.server.payment.domain.Payment;
+import kr.hhplus.be.server.queue.domain.QueueToken;
+import kr.hhplus.be.server.reservation.domain.PaidReservationEvent;
 import kr.hhplus.be.server.reservation.domain.Reservation;
 import kr.hhplus.be.server.reservation.domain.ReservationCreatedEvent;
 import kr.hhplus.be.server.reservation.port.in.reservation.CreateReservationUseCase;
@@ -20,6 +20,7 @@ import kr.hhplus.be.server.reservation.port.in.reservation.PaidReservationUseCas
 import kr.hhplus.be.server.reservation.port.in.reservation.ReserveSeatCommand;
 import kr.hhplus.be.server.reservation.port.out.PaymentQueryPort;
 import kr.hhplus.be.server.reservation.port.out.QueueTokenQueryPort;
+import kr.hhplus.be.server.reservation.port.out.ReservationEventPublishPort;
 import kr.hhplus.be.server.reservation.port.out.SeatQueryPort;
 import kr.hhplus.be.server.reservation.port.out.reservation.GetReservationPort;
 import kr.hhplus.be.server.reservation.port.out.reservation.SaveReservationPort;
@@ -27,6 +28,7 @@ import kr.hhplus.be.server.reservation.port.out.seathold.CheckHoldSeatPort;
 import kr.hhplus.be.server.reservation.port.out.seathold.HoldSeatPort;
 import kr.hhplus.be.server.reservation.port.out.seathold.ReleaseSeatHoldPort;
 import kr.hhplus.be.server.reservation.usecase.reservation.manager.ReservationTransactionManager;
+import kr.hhplus.be.server.user.domain.PaidUserEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -48,6 +50,7 @@ public class ReservationService implements
     private final GetReservationPort getReservationPort;
     private final SaveReservationPort saveReservationPort;
     private final ReservationTransactionManager reservationTransactionManager;
+    private final ReservationEventPublishPort reservationEventPublishPort;
 
     @Override
     @DistributedLock(key = "reserve:concert:#command.seatId()")
@@ -69,11 +72,12 @@ public class ReservationService implements
     @Override
     @DistributedLock(key = "reservation:#reservationId")
     @Transactional
-    public Reservation paidReservation(UUID reservationId) throws CustomException {
-        Reservation reservation = getReservationPort.getReservation(reservationId);
+    public void paidReservation(PaidUserEvent event) throws CustomException {
+        Reservation reservation = getReservationPort.getReservation(event.reservationId());
         Reservation paidReservation = saveReservationPort.saveReservation(reservation.paid());
         releaseSeatHoldPort.releaseSeatHold(paidReservation.seatId());
-        return paidReservation;
+
+        reservationEventPublishPort.publishPaidReservationEvent(PaidReservationEvent.from(event));
     }
 
     @Override

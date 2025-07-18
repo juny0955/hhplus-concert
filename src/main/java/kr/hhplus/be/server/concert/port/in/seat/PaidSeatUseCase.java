@@ -1,10 +1,8 @@
 package kr.hhplus.be.server.concert.port.in.seat;
 
-import java.util.UUID;
-
-import kr.hhplus.be.server.concert.domain.seat.Seat;
 import kr.hhplus.be.server.common.exception.CustomException;
+import kr.hhplus.be.server.reservation.domain.PaidReservationEvent;
 
 public interface PaidSeatUseCase {
-	Seat paidSeat(UUID seatId, UUID tokenId) throws CustomException;
+	void paidSeat(PaidReservationEvent event) throws CustomException;
 }

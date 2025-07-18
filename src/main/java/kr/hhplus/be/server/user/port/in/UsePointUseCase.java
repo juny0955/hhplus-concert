@@ -1,10 +1,7 @@
 package kr.hhplus.be.server.user.port.in;
 
-import java.math.BigDecimal;
-import java.util.UUID;
-
-import kr.hhplus.be.server.user.domain.User;
+import kr.hhplus.be.server.payment.domain.PaymentEvent;
 
 public interface UsePointUseCase {
-	User usePoint(UUID userId, BigDecimal point) throws Exception;
+	void usePoint(PaymentEvent event) throws Exception;
 }

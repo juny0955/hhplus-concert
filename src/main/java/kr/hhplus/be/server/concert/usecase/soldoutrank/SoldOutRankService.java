@@ -5,15 +5,13 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.event.TransactionPhase;
-import org.springframework.transaction.event.TransactionalEventListener;
 
 import kr.hhplus.be.server.concert.domain.concert.Concert;
 import kr.hhplus.be.server.concert.domain.seat.Seat;
 import kr.hhplus.be.server.concert.domain.seat.SeatStatus;
 import kr.hhplus.be.server.concert.domain.soldoutrank.SoldOutRank;
+import kr.hhplus.be.server.concert.port.in.soldoutrank.UpdateSoldOutRankUseCase;
 import kr.hhplus.be.server.concert.port.out.concert.GetConcertPort;
 import kr.hhplus.be.server.concert.port.out.concert.SaveConcertPort;
 import kr.hhplus.be.server.concert.port.out.seat.GetSeatPort;
@@ -26,7 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class SoldOutRankService {
+public class SoldOutRankService implements UpdateSoldOutRankUseCase {
 
     private static final int MAX_SEAT_COUNT = 50;
 
@@ -36,9 +34,7 @@ public class SoldOutRankService {
     private final SaveConcertPort saveConcertPort;
     private final RedisSoldOutRankPort redisSoldOutRankPort;
 
-    @Async
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void updateRank(PaymentSuccessEvent event) {
+    public void updateSoldOutRank(PaymentSuccessEvent event) {
         try {
             List<Seat> allSeats = getSeatPort.getSeatsByConcertDateId(event.seatId());
             boolean isAllSeatsAssigned = allSeats.stream()
