@@ -38,6 +38,17 @@ public record Reservation(
 			.build();
 	}
 
+	public Reservation paidFail() {
+		return Reservation.builder()
+			.id(id)
+			.userId(userId)
+			.seatId(seatId)
+			.status(ReservationStatus.PENDING)
+			.createdAt(createdAt)
+			.updatedAt(LocalDateTime.now())
+			.build();
+	}
+
 	public Reservation expired() throws CustomException {
 		if (!status.equals(ReservationStatus.PENDING))
 			throw new CustomException(ErrorCode.RESERVATION_STATUS_NOT_PENDING);

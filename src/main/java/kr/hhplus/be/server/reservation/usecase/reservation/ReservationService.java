@@ -8,10 +8,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import kr.hhplus.be.server.common.aop.DistributedLock;
 import kr.hhplus.be.server.common.exception.CustomException;
+import kr.hhplus.be.server.concert.domain.seat.PaidReservationFailEvent;
 import kr.hhplus.be.server.concert.domain.seat.Seat;
 import kr.hhplus.be.server.payment.domain.Payment;
 import kr.hhplus.be.server.queue.domain.QueueToken;
 import kr.hhplus.be.server.reservation.domain.PaidReservationEvent;
+import kr.hhplus.be.server.reservation.domain.PaidUserFailEvent;
 import kr.hhplus.be.server.reservation.domain.Reservation;
 import kr.hhplus.be.server.reservation.domain.ReservationCreatedEvent;
 import kr.hhplus.be.server.reservation.port.in.reservation.CreateReservationUseCase;
@@ -52,9 +54,9 @@ public class ReservationService implements
     private final ReservationTransactionManager reservationTransactionManager;
     private final ReservationEventPublishPort reservationEventPublishPort;
 
-    @Override
     @DistributedLock(key = "reserve:concert:#command.seatId()")
     @Transactional
+    @Override
     public Reservation createReservation(ReserveSeatCommand command) throws Exception {
         QueueToken queueToken = queueTokenQueryPort.getActiveToken(command.queueTokenId());
         checkHoldSeatPort.checkHoldSeat(command.seatId());
@@ -69,15 +71,29 @@ public class ReservationService implements
         return reservation;
     }
 
-    @Override
     @DistributedLock(key = "reservation:#reservationId")
     @Transactional
-    public void paidReservation(PaidUserEvent event) throws CustomException {
-        Reservation reservation = getReservationPort.getReservation(event.reservationId());
-        Reservation paidReservation = saveReservationPort.saveReservation(reservation.paid());
-        releaseSeatHoldPort.releaseSeatHold(paidReservation.seatId());
+    @Override
+    public void paidReservation(PaidUserEvent event) {
+        try {
+            Reservation reservation = getReservationPort.getReservation(event.reservationId());
+            Reservation paidReservation = saveReservationPort.saveReservation(reservation.paid());
+            releaseSeatHoldPort.releaseSeatHold(paidReservation.seatId());
 
-        reservationEventPublishPort.publishPaidReservationEvent(PaidReservationEvent.from(event));
+            reservationEventPublishPort.publishPaidReservationEvent(PaidReservationEvent.from(event));
+        } catch (Exception e) {
+            reservationEventPublishPort.publishPaidUserFailEvent(PaidUserFailEvent.of(event, e.getMessage()));
+        }
+    }
+
+    @DistributedLock(key = "reservation:#reservationId")
+    @Transactional
+    @Override
+    public void paidReservationFail(PaidReservationFailEvent event) throws CustomException {
+        Reservation reservation = getReservationPort.getReservation(event.reservationId());
+        saveReservationPort.saveReservation(reservation.paidFail());
+
+        reservationEventPublishPort.publishPaidUserFailEvent(PaidUserFailEvent.from(event));
     }
 
     @Override

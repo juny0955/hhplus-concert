@@ -7,11 +7,13 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import kr.hhplus.be.server.common.aop.DistributedLock;
 import kr.hhplus.be.server.common.exception.CustomException;
 import kr.hhplus.be.server.common.exception.ErrorCode;
 import kr.hhplus.be.server.concert.domain.concert.Concert;
 import kr.hhplus.be.server.concert.domain.concertDate.ConcertDate;
 import kr.hhplus.be.server.concert.domain.seat.CompletePaymentEvent;
+import kr.hhplus.be.server.concert.domain.seat.PaidReservationFailEvent;
 import kr.hhplus.be.server.concert.domain.seat.Seat;
 import kr.hhplus.be.server.concert.domain.seat.Seats;
 import kr.hhplus.be.server.concert.port.in.seat.ExpireSeatUseCase;
@@ -49,6 +51,20 @@ public class SeatService implements
         return saveSeatPort.saveSeat(seat.expire());
     }
 
+    @DistributedLock(key = "seat:#event.seatId()")
+    @Transactional
+    @Override
+    public void paidSeat(PaidReservationEvent event) {
+        try {
+            Seat seat = getSeatPort.getSeat(event.seatId());
+            saveSeatPort.saveSeat(seat.payment());
+
+            concertEventPublishPort.publishCompletePaymentEvent(CompletePaymentEvent.from(event));
+        } catch (Exception e) {
+            concertEventPublishPort.publishPaidReservationFailEvent(PaidReservationFailEvent.of(event, e.getMessage()));
+        }
+    }
+
     @Override
     public List<Seat> getAvailableSeats(UUID concertId, UUID concertDateId) throws CustomException {
         getConcertPort.existsConcert(concertId);
@@ -63,15 +79,6 @@ public class SeatService implements
         }
 
         return availableSeats.seats();
-    }
-
-    @Override
-    @Transactional
-    public void paidSeat(PaidReservationEvent event) throws CustomException {
-        Seat seat = getSeatPort.getSeat(event.seatId());
-        saveSeatPort.saveSeat(seat.payment());
-
-        concertEventPublishPort.publishCompletePaymentEvent(CompletePaymentEvent.from(event));
     }
 
     @Override

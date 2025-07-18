@@ -9,7 +9,9 @@ import org.springframework.transaction.annotation.Transactional;
 import kr.hhplus.be.server.common.aop.DistributedLock;
 import kr.hhplus.be.server.common.exception.CustomException;
 import kr.hhplus.be.server.payment.domain.PaymentEvent;
+import kr.hhplus.be.server.reservation.domain.PaidUserFailEvent;
 import kr.hhplus.be.server.user.domain.PaidUserEvent;
+import kr.hhplus.be.server.user.domain.PaymentFailEvent;
 import kr.hhplus.be.server.user.domain.User;
 import kr.hhplus.be.server.user.port.in.ChargePointUseCase;
 import kr.hhplus.be.server.user.port.in.ExistsUserUseCase;
@@ -50,15 +52,30 @@ public class UserService implements
         return getUserPort.getUser(userId);
     }
 
-    @Override
-    @DistributedLock(key = "user:#userId")
+    @DistributedLock(key = "user:#event.userId()")
     @Transactional
-    public void usePoint(PaymentEvent event) throws Exception {
-        User user = getUserPort.getUser(event.userId());
-        User usedUser = saveUserPort.saveUser(user.usePoint(event.amount()));
+    @Override
+    public void usePoint(PaymentEvent event) {
+        try {
+            User user = getUserPort.getUser(event.userId());
+            User usedUser = saveUserPort.saveUser(user.usePoint(event.amount()));
 
-        log.info("유저 포인트 사용: USER_ID - {}, USE_POINT - {}, AFTER_POINT - {}", event.userId(), event.amount(), usedUser.amount());
-        userEventPublishPort.publishPaidUserEvent(PaidUserEvent.of(event));
+            log.info("유저 포인트 사용: USER_ID - {}, USE_POINT - {}, AFTER_POINT - {}", event.userId(), event.amount(), usedUser.amount());
+            userEventPublishPort.publishPaidUserEvent(PaidUserEvent.of(event));
+        } catch (Exception e) {
+            log.error("유저 포인트 사용 실패: {}", e.getMessage());
+            userEventPublishPort.publishPaymentFailEvent(PaymentFailEvent.of(event, e.getMessage()));
+        }
+    }
+
+    @DistributedLock(key = "user:#event.userId()")
+    @Transactional
+    @Override
+    public void failUsePoint(PaidUserFailEvent event) throws CustomException {
+        User user = getUserPort.getUser(event.userId());
+        saveUserPort.saveUser(user.usePointFail(event.amount()));
+
+        userEventPublishPort.publishPaymentFailEvent(PaymentFailEvent.of(event));
     }
 
     @Override
