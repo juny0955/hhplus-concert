@@ -17,6 +17,6 @@ public class PaymentKafkaEventPublisher implements EventPublishPort {
 
 	@Override
 	public void publishPaymentSuccessEvent(PaymentSuccessEvent event) {
-		kafkaTemplate.send(PAYMENT_SUCCESS_TOPIC, event);
+		kafkaTemplate.send(PAYMENT_SUCCESS_TOPIC, event.reservationId().toString(), event);
 	}
 }
