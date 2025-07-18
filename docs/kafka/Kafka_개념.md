@@ -36,6 +36,9 @@
 ### Topic
 > 메세지를 분류하는 논리적인 단위
 
+- 여러 Producer가 같은 Topic에 메세지를 발행하고 
+- 여러 Consumer가 해당 Topic을 구독 가능
+
 ### Partition
 > 토픽을 물리적으로 분할한 단위
 
