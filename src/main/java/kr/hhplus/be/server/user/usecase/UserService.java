@@ -37,7 +37,7 @@ public class UserService implements
     private final UserEventPublishPort userEventPublishPort;
 
     @Override
-    @DistributedLock(key = "user:#userId")
+    @DistributedLock(key = "'user:'+#userId")
     @Transactional
     public User chargePoint(UUID userId, BigDecimal point) throws Exception {
         User user = getUserPort.getUser(userId);
@@ -52,7 +52,7 @@ public class UserService implements
         return getUserPort.getUser(userId);
     }
 
-    @DistributedLock(key = "user:#event.userId()")
+    @DistributedLock(key = "'user:'+#event.userId()")
     @Transactional
     @Override
     public void usePoint(PaymentEvent event) {
@@ -68,7 +68,7 @@ public class UserService implements
         }
     }
 
-    @DistributedLock(key = "user:#event.userId()")
+    @DistributedLock(key = "'user:'+#event.userId()")
     @Transactional
     @Override
     public void failUsePoint(PaidUserFailEvent event) throws CustomException {

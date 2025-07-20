@@ -17,7 +17,7 @@ public record Concert(
 ) {
 
 	public boolean isOpen() {
-		return openTime.isAfter(LocalDateTime.now());
+		return openTime.isBefore(LocalDateTime.now());
 	}
 
 	public Concert soldOut(LocalDateTime soldOutTime) {

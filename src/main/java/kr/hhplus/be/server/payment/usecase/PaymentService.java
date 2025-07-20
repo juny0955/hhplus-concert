@@ -42,7 +42,7 @@ public class PaymentService implements
 	private final EventPublishPort eventPublishPort;
 
 	@Override
-	@DistributedLock(key = "payment:reservation:#command.reservationId()")
+	@DistributedLock(key = "'payment:reservation:'+#command.reservationId()")
 	@Transactional
 	public Payment pay(PaymentCommand command) throws Exception {
 		QueueToken queueToken = queueTokenQueryPort.getActiveToken(command.queueTokenId());
@@ -55,7 +55,7 @@ public class PaymentService implements
 	}
 
 	@Override
-	@DistributedLock(key = "payment:reservation:#event.reservationId()")
+	@DistributedLock(key = "'payment:reservation:'+#event.reservationId()")
 	@Transactional
 	public void completePayment(CompletePaymentEvent event) throws CustomException {
 		Payment payment = getPaymentPort.getPaymentByReservationId(event.reservationId());

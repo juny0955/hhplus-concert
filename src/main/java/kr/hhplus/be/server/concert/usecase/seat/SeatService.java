@@ -51,9 +51,9 @@ public class SeatService implements
         return saveSeatPort.saveSeat(seat.expire());
     }
 
-    @DistributedLock(key = "seat:#event.seatId()")
-    @Transactional
     @Override
+    @Transactional
+    @DistributedLock(key = "'seat:'+#event.seatId()")
     public void paidSeat(PaidReservationEvent event) {
         try {
             Seat seat = getSeatPort.getSeat(event.seatId());

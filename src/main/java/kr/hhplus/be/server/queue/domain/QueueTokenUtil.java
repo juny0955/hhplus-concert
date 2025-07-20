@@ -41,6 +41,7 @@ public final class QueueTokenUtil {
 	public static DefaultRedisScript<Long> promoteWaitingTokenScript() {
 		DefaultRedisScript<Long> script = new DefaultRedisScript<>();
 		script.setScriptText(PROMOTE_WAITING_TOKEN_SCRIPT);
+		script.setResultType(Long.class);
 
 		return script;
 	}

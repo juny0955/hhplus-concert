@@ -54,7 +54,7 @@ public class ReservationService implements
     private final ReservationTransactionManager reservationTransactionManager;
     private final ReservationEventPublishPort reservationEventPublishPort;
 
-    @DistributedLock(key = "reserve:concert:#command.seatId()")
+    @DistributedLock(key = "'reserve:concert:'+#command.seatId()")
     @Transactional
     @Override
     public Reservation createReservation(ReserveSeatCommand command) throws Exception {
@@ -62,7 +62,7 @@ public class ReservationService implements
         checkHoldSeatPort.checkHoldSeat(command.seatId());
 
         Reservation reservation = saveReservationPort.saveReservation(Reservation.of(queueToken.userId(), command.seatId()));
-        Seat seat = seatQueryPort.reserveSeat(command.seatId(), command.concertId(), command.concertId());
+        Seat seat = seatQueryPort.reserveSeat(command.seatId(), command.concertId(), command.concertDateId());
         Payment payment = paymentQueryPort.createPayment(queueToken.userId(), reservation.id(), seat.price());
 
         holdSeatPort.holdSeat(seat.id(), queueToken.userId());
@@ -71,7 +71,7 @@ public class ReservationService implements
         return reservation;
     }
 
-    @DistributedLock(key = "reservation:#reservationId")
+    @DistributedLock(key = "'reservation:'+#reservationId")
     @Transactional
     @Override
     public void paidReservation(PaidUserEvent event) {
@@ -86,7 +86,7 @@ public class ReservationService implements
         }
     }
 
-    @DistributedLock(key = "reservation:#reservationId")
+    @DistributedLock(key = "'reservation:'+#reservationId")
     @Transactional
     @Override
     public void paidReservationFail(PaidReservationFailEvent event) throws CustomException {
