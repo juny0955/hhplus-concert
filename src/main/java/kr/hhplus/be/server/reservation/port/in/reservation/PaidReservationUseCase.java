@@ -1,11 +1,10 @@
 package kr.hhplus.be.server.reservation.port.in.reservation;
 
-import java.util.UUID;
-
-import kr.hhplus.be.server.reservation.domain.Reservation;
 import kr.hhplus.be.server.common.exception.CustomException;
-
+import kr.hhplus.be.server.concert.domain.seat.PaidReservationFailEvent;
+import kr.hhplus.be.server.user.domain.PaidUserEvent;
 
 public interface PaidReservationUseCase {
-	Reservation paidReservation(UUID reservationId) throws CustomException;
+	void paidReservation(PaidUserEvent event) throws CustomException;
+	void paidReservationFail(PaidReservationFailEvent event) throws CustomException;
 }

@@ -1,31 +1,30 @@
 package kr.hhplus.be.server.concert.usecase.soldoutrank;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.List;
+
+import org.springframework.stereotype.Component;
+
 import kr.hhplus.be.server.concert.domain.concert.Concert;
+import kr.hhplus.be.server.concert.domain.seat.Seat;
+import kr.hhplus.be.server.concert.domain.seat.SeatStatus;
+import kr.hhplus.be.server.concert.domain.soldoutrank.SoldOutRank;
+import kr.hhplus.be.server.concert.port.in.soldoutrank.UpdateSoldOutRankUseCase;
 import kr.hhplus.be.server.concert.port.out.concert.GetConcertPort;
 import kr.hhplus.be.server.concert.port.out.concert.SaveConcertPort;
 import kr.hhplus.be.server.concert.port.out.seat.GetSeatPort;
 import kr.hhplus.be.server.concert.port.out.soldoutrank.RedisSoldOutRankPort;
 import kr.hhplus.be.server.concert.port.out.soldoutrank.SaveSoldOutRankPort;
 import kr.hhplus.be.server.payment.domain.PaymentSuccessEvent;
-import kr.hhplus.be.server.concert.domain.seat.Seat;
-import kr.hhplus.be.server.concert.domain.seat.SeatStatus;
-import kr.hhplus.be.server.concert.domain.soldoutrank.SoldOutRank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.event.TransactionPhase;
-import org.springframework.transaction.event.TransactionalEventListener;
-
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.List;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class SoldOutRankService {
+public class SoldOutRankService implements UpdateSoldOutRankUseCase {
 
     private static final int MAX_SEAT_COUNT = 50;
 
@@ -35,25 +34,25 @@ public class SoldOutRankService {
     private final SaveConcertPort saveConcertPort;
     private final RedisSoldOutRankPort redisSoldOutRankPort;
 
-    @Async
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void updateRank(PaymentSuccessEvent event) {
+    public void updateSoldOutRank(PaymentSuccessEvent event) {
         try {
-            List<Seat> allSeats = getSeatPort.getSeatsByConcertDateId(event.seat().concertDateId());
+            List<Seat> allSeats = getSeatPort.getSeatsByConcertDateId(event.seatId());
             boolean isAllSeatsAssigned = allSeats.stream()
                     .allMatch(seatItem -> seatItem.status() == SeatStatus.ASSIGNED);
 
             if (!isAllSeatsAssigned)
                 return;
 
-            Concert concert = getConcertPort.getConcertByConcertDateId(event.seat().concertDateId());
+            Concert concert = getConcertPort.getConcertByConcertDateId(event.seatId());
 
-            long soldOutTime = Duration.between(concert.openTime(), event.payment().updatedAt()).getSeconds();
+            long soldOutTime = Duration.between(concert.openTime(),null).getSeconds();
+            // long soldOutTime = Duration.between(concert.openTime(), event.paymentId().updatedAt()).getSeconds();
             long score = calcScore(soldOutTime, concert.openTime(), allSeats.size());
 
             Long rank = redisSoldOutRankPort.updateRank(concert.id(), score);
             saveSoldOutRankPort.save(SoldOutRank.of(concert.id(), score, soldOutTime));
-            saveConcertPort.saveConcert(concert.soldOut(event.payment().updatedAt()));
+            saveConcertPort.saveConcert(concert.soldOut(null));
+            // saveConcertPort.saveConcert(concert.soldOut(event.payment().updatedAt()));
             log.info("콘서트 매진 랭킹 업데이트 - CONCERT_ID: {}, RANKING: {}", concert.id(), rank);
         } catch (Exception e) {
             // TODO: 실패한 이벤트 재시도 OR 예외 처리?

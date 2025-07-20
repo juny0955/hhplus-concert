@@ -7,21 +7,25 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import kr.hhplus.be.server.common.aop.DistributedLock;
 import kr.hhplus.be.server.common.exception.CustomException;
 import kr.hhplus.be.server.common.exception.ErrorCode;
 import kr.hhplus.be.server.concert.domain.concert.Concert;
 import kr.hhplus.be.server.concert.domain.concertDate.ConcertDate;
+import kr.hhplus.be.server.concert.domain.seat.CompletePaymentEvent;
+import kr.hhplus.be.server.concert.domain.seat.PaidReservationFailEvent;
 import kr.hhplus.be.server.concert.domain.seat.Seat;
 import kr.hhplus.be.server.concert.domain.seat.Seats;
 import kr.hhplus.be.server.concert.port.in.seat.ExpireSeatUseCase;
 import kr.hhplus.be.server.concert.port.in.seat.GetAvailableSeatsUseCase;
 import kr.hhplus.be.server.concert.port.in.seat.PaidSeatUseCase;
 import kr.hhplus.be.server.concert.port.in.seat.ReserveSeatUseCase;
+import kr.hhplus.be.server.concert.port.out.ConcertEventPublishPort;
 import kr.hhplus.be.server.concert.port.out.concert.GetConcertPort;
 import kr.hhplus.be.server.concert.port.out.concertDate.GetConcertDatePort;
-import kr.hhplus.be.server.concert.port.out.queue.QueueTokenRepository;
 import kr.hhplus.be.server.concert.port.out.seat.GetSeatPort;
 import kr.hhplus.be.server.concert.port.out.seat.SaveSeatPort;
+import kr.hhplus.be.server.reservation.domain.PaidReservationEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -38,13 +42,27 @@ public class SeatService implements
     private final SaveSeatPort saveSeatPort;
     private final GetConcertPort getConcertPort;
     private final GetConcertDatePort getConcertDatePort;
-    private final QueueTokenRepository queueTokenRepository;
+    private final ConcertEventPublishPort concertEventPublishPort;
 
     @Override
     @Transactional
     public Seat expireSeat(UUID seatId) throws CustomException {
         Seat seat = getSeatPort.getSeat(seatId);
         return saveSeatPort.saveSeat(seat.expire());
+    }
+
+    @Override
+    @Transactional
+    @DistributedLock(key = "'seat:'+#event.seatId()")
+    public void paidSeat(PaidReservationEvent event) {
+        try {
+            Seat seat = getSeatPort.getSeat(event.seatId());
+            saveSeatPort.saveSeat(seat.payment());
+
+            concertEventPublishPort.publishCompletePaymentEvent(CompletePaymentEvent.from(event));
+        } catch (Exception e) {
+            concertEventPublishPort.publishPaidReservationFailEvent(PaidReservationFailEvent.of(event, e.getMessage()));
+        }
     }
 
     @Override
@@ -61,15 +79,6 @@ public class SeatService implements
         }
 
         return availableSeats.seats();
-    }
-
-    @Override
-    @Transactional
-    public Seat paidSeat(UUID seatId, UUID tokenId) throws CustomException {
-        Seat seat = getSeatPort.getSeat(seatId);
-        Seat paidSeat = saveSeatPort.saveSeat(seat.payment());
-        queueTokenRepository.expiresQueueToken(tokenId.toString());
-        return paidSeat;
     }
 
     @Override

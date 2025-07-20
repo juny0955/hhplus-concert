@@ -17,6 +17,6 @@ public record ConcertDate(
 ) {
 
 	public boolean checkDeadline() {
-		return deadline.isAfter(LocalDateTime.now());
+		return deadline.isBefore(LocalDateTime.now());
 	}
 }

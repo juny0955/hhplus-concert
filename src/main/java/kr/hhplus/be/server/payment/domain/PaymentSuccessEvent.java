@@ -1,27 +1,25 @@
 package kr.hhplus.be.server.payment.domain;
 
-import java.time.LocalDateTime;
+import java.util.UUID;
 
-import kr.hhplus.be.server.reservation.domain.Reservation;
-import kr.hhplus.be.server.concert.domain.seat.Seat;
-import kr.hhplus.be.server.user.domain.User;
+import kr.hhplus.be.server.concert.domain.seat.CompletePaymentEvent;
 import lombok.Builder;
 
 @Builder
 public record PaymentSuccessEvent(
-	Payment payment,
-	Reservation reservation,
-	Seat seat,
-	User user,
-	LocalDateTime occurredAt
+	UUID paymentId,
+	UUID reservationId,
+	UUID seatId,
+	UUID userId,
+	UUID tokenId
 ) {
-	public static PaymentSuccessEvent from(Payment payment, Seat seat, Reservation reservation, User user) {
+	public static PaymentSuccessEvent from(CompletePaymentEvent event) {
 		return PaymentSuccessEvent.builder()
-			.payment(payment)
-			.reservation(reservation)
-			.seat(seat)
-			.user(user)
-			.occurredAt(LocalDateTime.now())
+			.paymentId(event.paymentId())
+			.reservationId(event.reservationId())
+			.seatId(event.seatId())
+			.userId(event.userId())
+			.tokenId(event.tokenId())
 			.build();
 	}
 }

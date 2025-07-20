@@ -17,15 +17,15 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
-import kr.hhplus.be.server.concert.domain.queue.QueueToken;
+import kr.hhplus.be.server.queue.domain.QueueToken;
 
 @Configuration
 public class RedisConfig {
 
-	@Value("${spring.redis.host}")
+	@Value("${spring.data.redis.host}")
 	private String host;
 
-	@Value("${spring.redis.port}")
+	@Value("${spring.data.redis.port}")
 	private int port;
 
 	@Bean

@@ -25,7 +25,7 @@ public class ReservationTransactionManager {
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
-    @DistributedLock(key = "reservation:#pendingReservation.id()")
+    @DistributedLock(key = "'reservation:'+#pendingReservation.id()")
     public void process(Reservation pendingReservation) throws CustomException {
         Seat seat = seatQueryPort.expireSeat(pendingReservation.seatId());
         Reservation reservation = saveReservationPort.saveReservation(pendingReservation.expired());
